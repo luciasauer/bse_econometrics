@@ -21,28 +21,13 @@ Welcome to the repository for the **Teaching Assistant (TA) sessions** of *Found
 -----
 ## 🗂️ Repository Structure
 
-Each TA session has its own folder:
+Each TA session has its own folder that includes:
 
+- `slides/` → PDF or Reveal.js slides.  
+- `code/`   → Stata .do file, Jupyter or R notebooks with code examples.  
+- `datasets/` → Data for exercises.    
 
-Each folder may include:
-
-- `slides/` → PDF or Keynote slides.  
-- `notebooks/` → Jupyter or R notebooks with code examples.  
-- `datasets/` → Data for exercises.  
-- `extra/` → Additional readings or references.  
-
-```
-📦 project-root
-├── 1_matrix/               
-├── 2_regression/              
-├── 3_assimptotic_theroy/          
-├── 4_dashboard/                         
-├── 5_predictive_analysis/        
-│   └── prediction.py             
-└── README.md
-```
 ---
-
 
 
 ## 🛠️ Software & Tools
