@@ -1,0 +1,161 @@
+/*-- scss:defaults --*/
+// Custom academic theme for Quarto Revealjs (Econometrics TA Sessions)
+
+/* ===== Palette ===== */
+$blackish:   #222222;  // main text
+$whiteish:   #F8F9FA;  // slide background
+$blue-acad:  #336699;  // headings / accents
+$gray-muted: #AAAAAA;  // author / institute / date
+$accent-red: #F26B6B;  // callouts, subtitle, horizontal line
+$beige-soft: #F7DFBB;  // code/equation box background
+
+$primary:   $blue-acad !default;
+$secondary: $gray-muted !default;
+$success:   $blue-acad !default;
+$danger:    $accent-red !default;
+$light:     $whiteish !default;
+$dark:      $blackish !default;
+
+/* ===== Fonts ===== */
+$font-family-sans-serif: "Inter", "Helvetica Neue", Arial, sans-serif !default;
+$headings-font-family:   "News Cycle", sans-serif !default;
+$headings-font-weight:   700 !default;
+
+/* Import Google Fonts */
+$web-font-path: "https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=News+Cycle:wght@400;700&display=swap" !default;
+@if $web-font-path {
+  @import url($web-font-path);
+}
+
+/* ===== Title Slide ===== */
+.reveal .title-slide {
+  background-color: $whiteish;
+  color: $blackish;
+  text-align: center;
+  padding: 2rem;
+}
+
+/* Main title */
+.reveal .title-slide h1 {
+  color: $blackish;
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+/* Subtitle - wrapped in HTML <span class='subtitle-text'> */
+.reveal .title-slide .subtitle-text {
+  color: $accent-red;
+  font-size: 2rem;
+  font-weight: 500;
+  display: block;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+/* Horizontal line under subtitle */
+.reveal .title-slide .subtitle-text::after {
+  content: "";
+  display: block;
+  width: 100px;          // line length
+  height: 4px;           // thickness
+  background-color: $accent-red;
+  margin: 0.5rem auto 0; // center under subtitle
+  border-radius: 2px;
+}
+
+/* Author, institute, date */
+.reveal .title-slide p.author,
+.reveal .title-slide p.institute,
+.reveal .title-slide p.date {
+  font-size: 1.2rem;
+  color: $gray-muted;
+  margin-top: 0.6rem;
+  font-style: normal;
+}
+
+/* ===== Headings ===== */
+.reveal h1, .reveal h2, .reveal h3 {
+  font-family: $headings-font-family;
+  font-weight: $headings-font-weight;
+}
+
+.reveal h1 { color: $blackish; }
+.reveal h2, .reveal h3 { color: $blue-acad; }
+
+/* ===== Body text ===== */
+.reveal p, .reveal li {
+  font-family: $font-family-sans-serif;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: $blackish;
+}
+
+/* ===== Inline code ===== */
+.reveal code {
+  background: $beige-soft;
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* ===== Code blocks ===== */
+.reveal pre code {
+  background: $beige-soft;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  font-family: "Fira Code", monospace;
+}
+
+/* ===== Equation boxes ===== */
+.reveal .equation-box {
+  display: table;           // shrink to content
+  background-color: $beige-soft;
+  border-left: 4px solid $accent-red;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem auto;        // centers horizontally
+  font-size: 1.1rem;
+}
+
+/* ===== Callouts ===== */
+.callout-note {
+  border-left: 4px solid $blue-acad;
+  background: lighten($blue-acad, 42%);
+}
+
+.callout-important {
+  border-left: 4px solid $accent-red;
+  background: lighten($accent-red, 40%);
+}
+
+.callout-tip {
+  border-left: 4px solid $beige-soft;
+  background: $beige-soft;
+}
+
+/* ===== Section divider slides ===== */
+.section-slide {
+  background-color: $blue-acad;
+  color: $whiteish;
+  text-align: center;
+}
+
+.section-slide h2 {
+  font-size: 2.5rem;
+  color: $whiteish;
+}
+
+/* ===== Progress / TOC bars ===== */
+.reveal .progress span {
+  background: $accent-red;  // salmon for 3-bar progress indicator
+}
+
+/* Hamburger / toc icon */
+.reveal .menu-toggle svg path {
+  stroke: #F26B6B;   /* match progress bar */
+}
+

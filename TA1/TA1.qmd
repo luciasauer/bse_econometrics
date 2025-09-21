@@ -1,0 +1,440 @@
+---
+title: "Econometrics"
+subtitle: "<span class=\"subtitle-text\">TA Session 1</span>"
+author: "Lucia Sauer"
+institute: "<em>Barcelona School of Economics</em>"
+date: "Fall 2025"
+format:
+  revealjs:
+    #theme: cosmo.scss
+    transition: fade
+    slide-number: true
+    progress: true
+    title-slide-attributes:
+      data-background-position: "95% 90%"
+      data-background-size: "100px"
+editor:
+  render-on-save: true
+---
+
+## TA Materials
+
+All the material for this course — slides, code, and some LaTeX utilities for referencing assignments — will be hosted in the [GitHub repository](https://github.com/luciasauer/bse_econometrics#).
+
+
+
+> <code>git clone HHTPS</code>
+
+Install uv
+
+> <code>uv sync</code>
+
+Pull the repository and get the updated materials for each session.
+
+---
+
+## Overview
+
+- Matrix Algebra with Python
+- Derivatives with vectors
+- Histograms and KDE.
+
+---
+
+## Why These Topics?
+
+::: {.callout-tip title = "Matrix Algebra" icon=false}
+- Compact notation for regression & multivariate models
+- Solve systems efficiently with Python
+:::
+
+::: {.callout-tip title = "Derivatives with Vectors" icon=false}
+
+- Gradients for optimization & ML
+- Key for regression, loss functions
+:::
+
+::: {.callout-tip title = "Histograms & KDE" icon=false}
+
+- Explore data shape: skewness, modality, outliers
+- Nonparametric distribution estimation & model checks
+:::
+
+---
+
+## System of equations in Matrix Form
+Consider the following system of equations:
+$$
+2x_1 + 3x_2 + 10x_3= 5\\
+4x_1 + x_2  + 12 x_3= 6\\
+7x_1 + 2x_2  + x_3= 10\\
+$$
+
+::: {.callout-warning title="Exercises" icon="false"}
+- How can we write this system in matrix form?
+- Solve it using Python.
+:::
+---
+
+## Matrix Operations using Python
+
+```{python}
+#| echo: true
+#| code-line-numbers: "1-2|3-7|8-10|11-13|14-15|16"
+import numpy as np
+
+#Define matrix A and vector b
+A = np . array ([[2, 3, 10],
+                 [4 , 1, 12],
+                 [7 , 2, 1]])
+b = np . array ([5 , 6, 10])
+
+#Transpose A
+A_transpose = np.transpose(A)
+
+#Inverse A
+A_inverse = np.linalg.inv(A)
+
+x = np.dot(A_inverse, b)
+print('Solution: ', x)
+```
+
+---
+
+## Derivatives of a vector
+
+::: {.callout-note title="Gradient with respect to a vector" appearance="default" icon="false"}
+- In single-variable calculus:  
+
+    $\frac{d}{dx} f(x)$ is the slope of a scalar function of one variable.  
+
+- In multivariable calculus: 
+
+    If $f(z_1, z_2)$, we can group the variables into a vector:
+    
+    $$ z = \begin{bmatrix} z_1 \\ z_2 \end{bmatrix} $$
+
+  then the derivative with respect to a vector is the **gradient**:  
+
+    $$
+    \nabla_z f(z) =
+    \begin{bmatrix}
+    \frac{\partial f}{\partial z_1} \\[6pt]
+    \frac{\partial f}{\partial z_2}
+    \end{bmatrix}
+    $$
+
+👉 Take the partial derivative with respect to each coordinate, then stack them in a column vector.
+:::
+
+---
+
+Consider:
+$$
+a = \begin{bmatrix}
+a_1 \\
+a_2
+\end{bmatrix}
+\quad
+z = \begin{bmatrix}
+z_1 \\
+z_2
+\end{bmatrix}
+\quad
+B = \begin{bmatrix}
+b_{12} & b_{12} \\
+b_{22} & b_{22}
+\end{bmatrix}
+$$
+
+::: {.callout-warning title="Exercises" icon=false}
+Verify, by showing all the relevant steps, that:
+
+$$
+\begin{aligned}
+(i) & \quad \frac{\partial z'a}{\partial a} = z \\[6pt]
+(ii) & \quad \frac{\partial a'z}{\partial z} = a \\[6pt]
+(iii)& \quad \frac{\partial z'B z}{\partial z} = 2Bz \quad \text{since B is symmetric}
+\end{aligned}
+$$
+:::
+---
+
+## Density Estimation - Introduction
+Given some observations from some variable $X$, we would like to obtain an estimate of its density.
+
+::: {.callout-note title="*Parametric vs Nonparametric*" icon="false"}
+- **Parametric approach**: we would choose a parametric density function (normal, exponential, uniform, etc) and use data to estimate the parameters of this density.
+
+<span style="color:blue">*Problem: what if $X$ doesn’t follow a normal distribution?*</span>
+
+- **Nonparametric approach** like histograms and KD estimate the distribution of a variable $X$ without strong parametric assumptions.
+:::
+
+---
+
+## Histogram
+> **Key idea:** A histogram is a graphical tool to visualize the distribution of a dataset.
+
+::: columns
+
+::: column
+
+
+- A **nonparametric method** to estimate the probability density function (PDF)  
+- Groups data into **intervals (bins)**  
+- Plots the **frequency** of data points in each bin  
+
+:::
+
+::: column
+```{python}
+#| echo: false
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+sns.set(style="whitegrid", context="talk")
+
+# Example data
+np.random.seed(42)
+x = np.random.normal(0, 1, 500)
+
+# Create figure and axes
+fig, ax = plt.subplots(figsize=(6,5))
+
+# Plot histogram
+sns.histplot(x, bins=15, color='purple', edgecolor='black', stat='density', ax=ax)
+
+# Labels
+ax.set_xlabel('X')
+ax.set_ylabel('Density')
+
+# Hide top and right spines
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+
+# Set bottom and left spines to black
+ax.spines["bottom"].set_color("black")
+ax.spines["left"].set_color("black")
+
+# Set tick color to black
+ax.tick_params(axis="x", colors="black")
+ax.tick_params(axis="y", colors="black")
+
+plt.tight_layout()
+plt.show()
+
+```
+:::
+:::
+
+---
+
+**Concept of Density**
+
+Let's first differenciate between frequency histograms, and density histograms.
+
+| Bins   | Frequency  | Width | Density |
+|--------|------------|-------|---------|
+| 0-5    |      2     | 5     | $2 / (12*5) = 0.033$ |
+| 5-10   |      4     | 5     | $4 / (12*5) = 0.067$ |
+| 10-15  |      5     | 5     | $5 / (12*5) = 0.083$ |
+| 15-20  |      1     | 5     | $1 / (12*5) = 0.017$ |
+
+Mathematically, for bin width $h$ and number of observations $n$:
+
+<div style="text-align: center;">
+  <div style="border:2px solid #9d03c4ff; padding:10px; border-radius:8px; background-color:#f5e6ff; display:inline-block;">
+  $$
+  \hat{f(x)} = \frac{1}{nh} \sum_{i=1}^n \mathbf{1}\{x_i \in \text{bin}(x)\}
+  $$
+  </div>
+</div>
+
+
+---
+
+### Coding Example
+Important parameters <code>bins</code>, <code>stat</code>, <code>binwidth</code>, <code>binrange</code>
+```{python}
+#| echo: true
+#| eval: false
+import seaborn as sns
+x = sns.load_dataset("tips")["total_bill"]
+bins = [15, 30, 70]
+for bin in bins:
+  sns.histplot(x,bins=bin, stat='density', binwidth=None, binrange=None)
+```
+
+```{python}
+#| echo: false
+#| eval: true
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load data
+x = sns.load_dataset("tips")["total_bill"]
+
+# Create 1 row, 3 columns
+fig, axes = plt.subplots(1, 3, figsize=(15, 6), sharey=True)
+
+# Different bin settings
+bin_settings = [15, 30, 70]
+colors = ['purple', 'darkblue', 'orange']
+for ax, bins,color in zip(axes, bin_settings, colors):
+    sns.histplot(x, bins=bins, stat="density", color=color, edgecolor="black", ax=ax)
+    ax.set_title(f"bins = {bins}")
+    ax.set_xlabel("Total Bill")
+    ax.set_ylabel("Density")
+    
+    # Hide top and right spines
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["bottom"].set_color("black")
+    ax.spines["left"].set_color("black")
+
+plt.tight_layout()
+plt.show()
+
+```
+---
+
+## Kernel Density Estimation
+
+> **Key idea:** Smooth, nonparametric estimate of the probability density function
+
+::: columns
+
+::: column
+
+
+- Instead of counting frequencies in bins, KDE places a smooth kernel function (usually Gaussian) centered at each data point, and then averages them.
+
+
+
+:::
+
+::: column
+```{python}
+#| echo: false
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+sns.set(style="whitegrid", context="talk")
+
+# Example data
+np.random.seed(42)
+x = np.random.normal(0, 1, 500)
+
+# Create figure and axes
+fig, ax = plt.subplots(figsize=(6,5))
+
+# Plot histogram with KDE
+sns.histplot(x, bins=15, color='purple', edgecolor='black', stat='density', kde=True, ax=ax)
+
+# Labels
+ax.set_xlabel('X')
+ax.set_ylabel('Density')
+
+# Hide top and right spines
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+
+# Set bottom and left spines to black
+ax.spines["bottom"].set_color("black")
+ax.spines["left"].set_color("black")
+
+# Set tick color to black
+ax.tick_params(axis="x", colors="black")
+ax.tick_params(axis="y", colors="black")
+
+plt.tight_layout()
+
+plt.show()
+```
+:::
+:::
+
+---
+
+**Mathematical formulation:**
+
+<div style="text-align: center;">
+  <div style="border:2px solid #9d03c4ff; padding:10px; border-radius:8px; background-color:#f5e6ff; display:inline-block;">
+  $$\hat{f}_h(x) = \frac{1}{nh} \sum_{i=1}^n K\left(\frac{x - x_i}{h}\right)  $$
+  </div>
+</div>
+
+
+- $N$ is the number of observations
+- $w$ is the bandwidth (controls how
+much the influence of each observation expands)
+- and, $K$ is the Kernel, a function that defines the
+shape and distribution of influence associated with each observation.
+
+---
+
+### Coding Example
+```{python}
+#| echo: true
+#| eval: false
+import seaborn as sns
+x = sns.load_dataset('tips')['total_bill']
+for bw in [0.3, 1, 2]:
+    sns.kdeplot(x, bw_adjust=bw, label=f"Bandwidth = {bw}")
+```
+
+```{python}
+#| echo: false
+#| eval: true
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set(style="whitegrid", context="talk")
+
+# Load data
+x = sns.load_dataset("tips")["total_bill"]
+
+# Create figure and axes
+fig, ax = plt.subplots(figsize=(10,6))
+
+# Different bandwidths (smaller → more wiggly, larger → smoother)
+for color, bw in zip(['purple', 'darkblue', 'darkorange'], [0.3, 2, 10]):
+    sns.kdeplot(x, bw_adjust=bw, label=f"Bandwidth = {bw}", color=color, fill=True, ax=ax)
+
+# Labels and legend
+ax.set_xlabel("Total Bill")
+ax.set_ylabel("Density")
+ax.legend()
+
+# Hide top and right spines
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+
+# Set bottom and left spines to black
+ax.spines["bottom"].set_color("black")
+ax.spines["left"].set_color("black")
+
+# Set tick color to black
+ax.tick_params(axis="x", colors="black")
+ax.tick_params(axis="y", colors="black")
+
+plt.tight_layout()
+plt.show()
+
+```
+
+
+
+
+
+
+
+- Small $h$: very wiggly estimate (low bias, high variance).
+- Large $h$: oversmoothed estimate (high bias, low variance).
+
+---
+
+# Thanks!
