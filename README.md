@@ -46,7 +46,7 @@ We’ll be working with:
 
 1. Clone or download the repository:
    ```bash
-   git clone https://github.com/YOUR-USERNAME/foundations-econometrics-TA.git
+   git clone https://github.com/luciasauer/bse_econometrics.git
 
 2. Make sure you have [uv](https://docs.astral.sh/uv/) installed in your computer and sync the environment by running:
    ```bash
