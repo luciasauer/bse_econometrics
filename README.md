@@ -16,7 +16,7 @@
 
 
 
-Welcome to the repository for the **Teaching Assistant (TA) sessions** of *Foundations of Econometrics*, which contains materials for the **8 sessions** designed as a *practical companion* to the lectures by **Prof. Maite Cabeza** and **Prof. Hanna Wang**.  
+Welcome to the repository for the **Teaching Assistant (TA) sessions** of *Foundations of Econometrics*, which contains materials for the **8 sessions** designed as a *practical companion* to the lectures by **Prof. Maite Cabeza**, **Prof. Joan Llull** and **Prof. Hanna Wang**.  
 
 -----
 ## 🗂️ Repository Structure
