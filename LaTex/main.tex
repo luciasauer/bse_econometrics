@@ -1,0 +1,39 @@
+\documentclass[12pt,a4paper]{article}
+
+\input{Latex/packages.tex}
+\input{Latex/commands.tex}
+
+\begin{document}
+% Title page
+\begin{titlepage}
+\centering
+\includesvg[width=0.75\textwidth]{Latex/imgs/bse_logo}
+\par\vspace{0.75cm}
+	{\huge\bfseries Assignment \par}
+    {\large\bfseries Econometrics\par}
+	\vspace{0.25cm}
+    \noindent\rule{\textwidth}{1pt}
+    {\Large Lucia Sauer \par}
+    \noindent\rule{\textwidth}{1pt}
+	\vfill
+	{\large \today\par}
+\end{titlepage}
+
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+This is a sample LaTeX template for assignments. Its purpose is to help you quickly get started with LaTeX and provide a consistent, professional format for presenting your results throughout the Master program. While using LaTeX is not compulsory, this template includes typical elements you will often need in your assignments.
+% Contents
+
+\include*{Latex/chapters/2math}
+\newpage
+\include*{Latex/chapters/3tables}
+\newpage
+\include*{Latex/chapters/4figures}
+
+\include*{Latex/chapters/5code}
+
+
+\end{document}

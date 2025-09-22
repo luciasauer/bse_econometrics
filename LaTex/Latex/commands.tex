@@ -1,0 +1,44 @@
+% Abbreviations for 'for example', 'among others'
+% etc. In these abbreviations, the space
+% between the letters is smaller than
+% usual. Therefore it is inserted with '\,'
+% instead of a normal space.
+% The definitions are terminated with \xspace
+% so that, if needed, a space is inserted
+% after the macros in the text.
+%\newcommand{\zB}{z.\,B.\xspace} % for example (z. B.)
+%\newcommand{\ua}{u.\,a.\xspace} % among others (u. a.)
+%\newcommand{\uU}{u.\,U.\xspace} % under certain circumstances (u. U.)
+
+% Short forms for existing, long LaTeX commands:
+\newcommand{\tb}{\textbackslash}
+
+% Commands for reference (ref) commands:
+\newcommand{\chapterref}[1]{Chapter~\ref{#1}}
+\newcommand{\sectionref}[1]{Section~\ref{#1}}
+\newcommand{\subsectionref}[1]{Subsection~\ref{#1}}
+\newcommand{\equationref}[1]{Eq.~\ref{#1}}
+\newcommand{\figureref}[1]{Figure~\ref{#1}}
+\newcommand{\tableref}[1]{Table~\ref{#1}}
+\newcommand{\appref}[1]{Appendix~\ref{#1}}
+
+% Commands for mathematical constructs:
+
+% Absolute value bars with correct size around any object:
+\newcommand{\abs}[1]{\left|#1\right|}
+
+% Derivatives with upright printed differential operator:
+\newcommand{\deriv}[2]{\frac{\mathrm{d} #1}{\mathrm{d} #2}}
+
+% Upright printed Euler's number and imaginary unit:
+\newcommand{\euler}{\mathrm{e}}
+\newcommand{\imag}{\mathrm{i}}
+
+% Expected value
+\DeclareMathOperator{\EX}{\mathbb{E}}% expected value
+\newcommand*\mean[1]{\overline{#1}}
+
+% Command for align environment to show transformation steps
+\newcommand{\sh}[2]{&& \quad \vert\ \text{#1} #2\\}
+
+\renewcommand{\thesection}{\Alph{section}}

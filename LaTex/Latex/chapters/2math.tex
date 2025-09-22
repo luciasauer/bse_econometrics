@@ -1,0 +1,61 @@
+
+\section{Mathematical Notation}
+
+% Simple equation
+You can write simple equations:
+\begin{equation}
+y_i = \beta_0 + \beta_1 x_i + \varepsilon_i
+\end{equation}
+
+% Algebra expressions
+Algebraic expressions can be written inline or displayed:
+\[
+(a + b)^2 = a^2 + 2ab + b^2
+\]
+
+% Summation notation
+Summation is easy with \texttt{\textbackslash sum}:
+\[
+\bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i
+\]
+
+% Matrices
+Matrices are displayed with the \texttt{bmatrix} environment:
+\[
+X = 
+\begin{bmatrix}
+1 & x_{11} & x_{12} \\
+1 & x_{21} & x_{22} \\
+\vdots & \vdots & \vdots \\
+1 & x_{n1} & x_{n2}
+\end{bmatrix}, \quad
+\beta =
+\begin{bmatrix}
+\beta_0 \\ \beta_1 \\ \beta_2
+\end{bmatrix}
+\]
+
+% Matrix multiplication example
+Then the linear model in matrix form:
+\[
+Y = X \beta + \varepsilon
+\]
+
+% Vectors
+Vectors can be expressed in bold or with arrow notation:
+\[
+\mathbf{y} =
+\begin{bmatrix}
+y_1 \\ y_2 \\ \vdots \\ y_n
+\end{bmatrix}, \quad
+\vec{x}_i =
+\begin{bmatrix}
+x_{i1} \\ x_{i2}
+\end{bmatrix}
+\]
+
+% Algebraic manipulation example
+Solving for OLS estimator:
+\[
+\hat{\beta} = (X'X)^{-1} X'Y
+\]

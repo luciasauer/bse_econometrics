@@ -1,0 +1,148 @@
+% packages.tex  (limpio, conserva tus paquetes originales)
+
+% --------------------------
+% Encoding & page geometry
+% --------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[
+  a4paper,
+  total={170mm,257mm},
+  left=25mm,
+  right=25mm,
+  top=25mm,
+  bottom=25mm
+]{geometry}
+
+% --------------------------
+% Graphics, images, svg
+% --------------------------
+\usepackage{graphicx}
+\usepackage{svg}                 
+\graphicspath{{Latex/imgs/}}
+
+% --------------------------
+% Math, plots, tikz
+% --------------------------
+\usepackage{amsmath,amssymb}
+\usepackage{mathtools}
+\usepackage{pgfplots}
+\pgfplotsset{width=12cm,compat=newest}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+% --------------------------
+% Figures, captions, tables
+% --------------------------
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{subcaption}          
+\usepackage{booktabs}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{threeparttable}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{transparent}
+
+% --------------------------
+% Code highlighting (conservo ambos: minted y listings)
+% --------------------------
+% minted requiere --shell-escape al compilar (ver nota abajo).
+\usepackage[newfloat]{minted}     % Code highlighting (más potente)
+\newenvironment{code}{\captionsetup{type=listing}}{}
+\SetupFloatingEnvironment{listing}{name=Code}
+
+\usepackage{listings}            
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+  keywordstyle=\color{blue},
+  commentstyle=\color{green!50!black},
+  stringstyle=\color{red!70!black}
+}
+
+\setminted{
+    fontsize=\small,
+    breaklines=true,
+    linenos=true,
+    autogobble=true,
+    mathescape=true,
+    breakanywhere=true,
+    samepage=false
+}
+
+% --------------------------
+% Utilities
+% --------------------------
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{enumitem}
+\usepackage{xspace}
+\usepackage{multicol}
+
+% --------------------------
+% Header / footer
+% --------------------------
+\usepackage{fancyhdr}
+\fancyhf{}                           
+\fancyhead[L]{DSDM - BSE}
+\fancyhead[C]{\cl}
+\fancyhead[R]{Assignment \nass}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyfoot[C]{\thepage}
+\pagestyle{fancy}
+
+% --------------------------
+% Extras / includes / pdfpages
+% --------------------------
+\usepackage{pdfpages}
+\usepackage{newclude}               % si usas \includeonly/\newinclude
+\usepackage{csquotes}
+
+% --------------------------
+% Hyperref (una sola carga) + metadata
+% --------------------------
+\usepackage{hyperref}
+\hypersetup{
+    pdftitle    = {\cl - Assignment~\nass},
+    pdfsubject  = {This is a submission in the DSDM Masters at BSE.},
+    pdfauthor   = {Group~\gr},
+    pdfcreator  = {Overleaf},
+    pdfstartview= FitH
+}
+
+% --------------------------
+% Bibliografía (biblatex)
+% --------------------------
+\usepackage[backend=biber, style=authoryear, hyperref=true]{biblatex}
+\usepackage{csquotes}               
+\DeclareCiteCommand{\cite}
+  {\usebibmacro{prenote}}
+  {\usebibmacro{citeindex}%
+   \printnames{labelname}%
+   \space(\printfield{year})}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+\DeclareNameAlias{labelname}{family-given}
+\renewcommand*{\nameyeardelim}{\addcomma\space}
+\AtEveryCitekey{\ifciteseen{}{\defcounter{maxnames}{1}}}
+\addbibresource{Latex/chapters/references.bib}
+
+% --------------------------
+% Espaciado / estilo de párrafo
+% --------------------------
+\setlength{\parskip}{0.3\baselineskip}
+\setlength{\parindent}{0pt}
+\linespread{1.15}
+
+% --------------------------
+% List of code (adecuado para article -> uso section)
+% --------------------------
+\renewcommand{\listoflistings}{
+  \cleardoublepage
+  \addcontentsline{toc}{section}{List of Code} 
+  \listof{listing}{List of Code}
+}

@@ -1,0 +1,25 @@
+\section{Figures}
+You can include one or multiple figures:
+
+\subsection{Single Figure}
+\begin{figure}[h!]
+\centering
+\includesvg[width=0.75\textwidth]{Latex/imgs/distributions.svg}
+\caption{Single figure example}
+\end{figure}
+\newpage
+\subsection{Two Figures Side by Side}
+\begin{figure}[h!]
+\centering
+\begin{subfigure}{0.45\textwidth}
+  \includesvg[width=\linewidth]{Latex/imgs/scatter_plot_1.svg}
+  \caption{Figure A}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.45\textwidth}
+  \includesvg[width=\linewidth]{Latex/imgs/scatter_plot_2.svg}
+  \caption{Figure B}
+\end{subfigure}
+\caption{Two figures side by side}
+\end{figure}
+

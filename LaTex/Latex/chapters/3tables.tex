@@ -1,0 +1,71 @@
+\section{Tables}
+\subsection{Summary Statistics}
+You can generate summary statistics in Python or Stata and export directly to LaTeX.  
+For example, in Python:
+
+\begin{lstlisting}
+summary = df.describe().loc[['mean','std','count']]
+latex_table = summary.T.to_latex(float_format="%.2f",
+                                 caption="Summary statistics",
+                                 label="tab:summary")
+print(latex_table)
+\end{lstlisting}
+
+This produces a `.tex` file like `summary.tex`. You can include it in your LaTeX document:
+
+\begin{verbatim}
+\input{summary.tex}
+\end{verbatim}
+
+Example table (placeholder):
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lrrr}
+\toprule
+Variable & Mean & Std. Dev. & N \\
+\midrule
+$x$ & 7.00 & 1.58 & 5 \\
+$y$ & 12.00 & 1.58 & 5 \\
+\bottomrule
+\end{tabular}
+\caption{Summary statistics (from Python export)}
+\label{tab:summary}
+\end{table}
+
+\subsection{Regression Table}
+Regression results can also be exported from Python (using \texttt{stargazer}) or Stata.  
+Example in Python:
+
+\begin{lstlisting}
+from stargazer.stargazer import Stargazer
+stargazer = Stargazer([model])
+print(stargazer.render_latex())
+\end{lstlisting}
+
+This creates a `.tex` file like `regression.tex`. Include in LaTeX:
+
+\begin{verbatim}
+\input{regression.tex}
+\end{verbatim}
+
+Example regression table (placeholder):
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lcc}
+\toprule
+ & (1) & (2) \\
+\midrule
+$x$       & 0.52$^{***}$ & 0.48$^{***}$ \\
+          & (0.08)  & (0.07)  \\
+Constant  & 2.15$^{***}$ & 1.95$^{***}$ \\
+          & (0.50)  & (0.45)  \\
+\midrule
+Observations & 100 & 100 \\
+$R^2$ & 0.35 & 0.40 \\
+\bottomrule
+\end{tabular}
+\caption{OLS Regression Results (from Python/Stata export)}
+\label{tab:regression}
+\end{table}

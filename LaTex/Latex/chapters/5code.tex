@@ -1,0 +1,16 @@
+\section{Code Block Example}
+Python code can be included:
+
+\begin{lstlisting}
+import pandas as pd
+import statsmodels.api as sm
+
+# Load data
+df = pd.read_csv("data.csv")
+X = sm.add_constant(df["x"])
+y = df["y"]
+
+# Run OLS regression
+model = sm.OLS(y, X).fit()
+print(model.summary())
+\end{lstlisting}
