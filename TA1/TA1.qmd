@@ -3,10 +3,10 @@ title: "Econometrics"
 subtitle: "<span class=\"subtitle-text\">TA Session 1</span>"
 author: "Lucia Sauer"
 institute: "<em>Barcelona School of Economics</em>"
-date: "Fall 2025"
+date: "2025-09-25"
 format:
   revealjs:
-    #theme: cosmo.scss
+    #theme: metropolis
     transition: fade
     slide-number: true
     progress: true
@@ -35,9 +35,10 @@ Pull the repository and get the updated materials for each session.
 
 ## Overview
 
-- Matrix Algebra with Python
+- Matrix Algebra with Python and R
 - Derivatives with vectors
-- Histograms and KDE.
+- Histograms and KDE
+- Quick LaTex guide
 
 ---
 
@@ -65,9 +66,11 @@ Pull the repository and get the updated materials for each session.
 ## System of equations in Matrix Form
 Consider the following system of equations:
 $$
-2x_1 + 3x_2 + 10x_3= 5\\
-4x_1 + x_2  + 12 x_3= 6\\
-7x_1 + 2x_2  + x_3= 10\\
+\begin{cases}
+2x_1 + 3x_2 + 10x_3 = 5 \\
+4x_1 + x_2 + 12x_3 = 6 \\
+7x_1 + 2x_2 + x_3 = 10
+\end{cases}
 $$
 
 ::: {.callout-warning title="Exercises" icon="false"}
@@ -84,10 +87,10 @@ $$
 import numpy as np
 
 #Define matrix A and vector b
-A = np . array ([[2, 3, 10],
+A = np.array([[2, 3, 10],
                  [4 , 1, 12],
                  [7 , 2, 1]])
-b = np . array ([5 , 6, 10])
+b = np.array([5 , 6, 10])
 
 #Transpose A
 A_transpose = np.transpose(A)
@@ -99,6 +102,31 @@ x = np.dot(A_inverse, b)
 print('Solution: ', x)
 ```
 
+---
+
+## Matrix Operations using R
+
+```{python}
+#| echo: true
+#| eval: false
+# Define matrix A and vector b
+A <- matrix(c(2, 3, 10,
+              4, 1, 12,
+              7, 2, 1),
+            nrow = 3, byrow = TRUE)
+
+b <- c(5, 6, 10)
+
+# Transpose A
+A_transpose <- t(A)
+
+# Inverse A
+A_inverse <- solve(A)
+
+# Solve Ax = b
+x <- solve(A, b)
+print(x)
+```
 ---
 
 ## Derivatives of a vector
@@ -190,6 +218,7 @@ Given some observations from some variable $X$, we would like to obtain an estim
 ::: column
 ```{python}
 #| echo: false
+import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
@@ -231,31 +260,69 @@ plt.show()
 
 ---
 
-**Concept of Density**
+## Concept of Density
 
-Let's first differenciate between frequency histograms, and density histograms.
+Let's first differentiate between frequency histograms and density histograms.
+
+### Step 1: Bins and Frequency
+
+| Bins   | Frequency  |
+|--------|------------|
+| 0-5    | 2          |
+| 5-10   | 4          |
+| 10-15  | 5          |
+| 15-20  | 1          |
+
+---
+
+## Concept of Density
+
+Let's first differentiate between frequency histograms and density histograms.
+
+### Step 2: Add Width
+
+| Bins   | Frequency  | Width |
+|--------|------------|-------|
+| 0-5    | 2          | 5     |
+| 5-10   | 4          | 5     |
+| 10-15  | 5          | 5     |
+| 15-20  | 1          | 5     |
+
+---
+
+## Concept of Density
+
+Let's first differentiate between frequency histograms and density histograms.
+
+### Step 3: Add Density
 
 | Bins   | Frequency  | Width | Density |
 |--------|------------|-------|---------|
-| 0-5    |      2     | 5     | $2 / (12*5) = 0.033$ |
-| 5-10   |      4     | 5     | $4 / (12*5) = 0.067$ |
-| 10-15  |      5     | 5     | $5 / (12*5) = 0.083$ |
-| 15-20  |      1     | 5     | $1 / (12*5) = 0.017$ |
+| 0-5    | 2          | 5     | $2 / (12*5) = 0.033$ |
+| 5-10   | 4          | 5     | $4 / (12*5) = 0.067$ |
+| 10-15  | 5          | 5     | $5 / (12*5) = 0.083$ |
+| 15-20  | 1          | 5     | $1 / (12*5) = 0.017$ |
 
-Mathematically, for bin width $h$ and number of observations $n$:
+---
 
-<div style="text-align: center;">
-  <div style="border:2px solid #9d03c4ff; padding:10px; border-radius:8px; background-color:#f5e6ff; display:inline-block;">
-  $$
-  \hat{f(x)} = \frac{1}{nh} \sum_{i=1}^n \mathbf{1}\{x_i \in \text{bin}(x)\}
-  $$
-  </div>
-</div>
+## Concept of Density
+
+Let's first differentiate between frequency histograms and density histograms.
+
+| Bins   | Frequency  | Width | Density |
+|--------|------------|-------|---------|
+| 0-5    | 2          | 5     | $2 / (12*5) = 0.033$ |
+| 5-10   | 4          | 5     | $4 / (12*5) = 0.067$ |
+| 10-15  | 5          | 5     | $5 / (12*5) = 0.083$ |
+| 15-20  | 1          | 5     | $1 / (12*5) = 0.017$ |
+
+
+Mathematically, for bin width $h$ and number of observations $n$: <div style="text-align: center;"> <div style="border:2px solid #9d03c4ff; padding:10px; border-radius:8px; background-color:#f5e6ff; display:inline-block;"> $$ \hat{f(x)} = \frac{1}{nh} \sum_{i=1}^n \mathbf{1}\{x_i \in \text{bin}(x)\} $$ </div> </div>
 
 
 ---
 
-### Coding Example
+### Coding Example in Python
 Important parameters <code>bins</code>, <code>stat</code>, <code>binwidth</code>, <code>binrange</code>
 ```{python}
 #| echo: true
@@ -298,6 +365,28 @@ plt.tight_layout()
 plt.show()
 
 ```
+---
+
+### Coding Example in R
+Important parameters: <code>bins</code>, <code>aes(y = ..stat..)</code>, <code>binwidth</code>, <code>xlim()</code>
+```{python}
+#| echo: true
+#| eval: false
+
+library(ggplot2)
+library(readr)
+
+tips <- read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/tips.csv")
+x <- tips$total_bill
+
+bins <- c(15, 30, 70)
+for (bin in bins) {
+  p <- ggplot(data = data.frame(x = x), aes(x = x)) +
+    geom_histogram(aes(y = ..density..), bins = bin, color = "black", fill = "skyblue")
+  print(p)
+}
+```
+
 ---
 
 ## Kernel Density Estimation
@@ -353,6 +442,7 @@ ax.tick_params(axis="y", colors="black")
 plt.tight_layout()
 
 plt.show()
+
 ```
 :::
 :::
@@ -376,7 +466,7 @@ shape and distribution of influence associated with each observation.
 
 ---
 
-### Coding Example
+### Coding Example in Python
 ```{python}
 #| echo: true
 #| eval: false
@@ -436,5 +526,24 @@ plt.show()
 - Large $h$: oversmoothed estimate (high bias, low variance).
 
 ---
+
+### Coding example in R
+
+```{python}
+#| echo: true
+#| eval: false
+library(ggplot2)
+library(readr)
+
+tips <- read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/tips.csv")
+x <- tips$total_bill
+
+for (bw in c(0.3, 1, 2)) {
+  print(ggplot(data.frame(x = x), aes(x = x)) + 
+          geom_density(adjust = bw, color = "blue") +
+          ggtitle(paste("Bandwidth =", bw)))
+}
+```
+
 
 # Thanks!

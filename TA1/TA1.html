@@ -10,7 +10,7 @@
   <meta name="generator" content="quarto-1.7.31">
 
   <meta name="author" content="Lucia Sauer">
-  <meta name="dcterms.date" content="2025-01-01">
+  <meta name="dcterms.date" content="2025-09-25">
   <title>Econometrics</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -208,7 +208,7 @@ Lucia Sauer
     </div>
 </div>
 
-  <p class="date">2025-01-01</p>
+  <p class="date">2025-09-25</p>
 </section>
 <section id="ta-materials" class="slide level2">
 <h2>TA Materials</h2>
@@ -225,9 +225,10 @@ Lucia Sauer
 <section id="overview" class="slide level2">
 <h2>Overview</h2>
 <ul>
-<li>Matrix Algebra with Python</li>
+<li>Matrix Algebra with Python and R</li>
 <li>Derivatives with vectors</li>
-<li>Histograms and KDE.</li>
+<li>Histograms and KDE</li>
+<li>Quick LaTex guide</li>
 </ul>
 </section>
 <section id="why-these-topics" class="slide level2">
@@ -281,9 +282,11 @@ Lucia Sauer
 <section id="system-of-equations-in-matrix-form" class="slide level2">
 <h2>System of equations in Matrix Form</h2>
 <p>Consider the following system of equations: <span class="math display">\[
-2x_1 + 3x_2 + 10x_3= 5\\
-4x_1 + x_2  + 12 x_3= 6\\
-7x_1 + 2x_2  + x_3= 10\\
+\begin{cases}
+2x_1 + 3x_2 + 10x_3 = 5 \\
+4x_1 + x_2 + 12x_3 = 6 \\
+7x_1 + 2x_2 + x_3 = 10
+\end{cases}
 \]</span></p>
 <div title="Exercises">
 <div class="callout callout-warning no-icon callout-titled callout-style-default">
@@ -303,14 +306,14 @@ Lucia Sauer
 </section>
 <section id="matrix-operations-using-python" class="slide level2">
 <h2>Matrix Operations using Python</h2>
-<div id="c0c612bb" class="cell" data-execution_count="1">
+<div id="af0d352a" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1" data-code-line-numbers="1-2|3-7|8-10|11-13|14-15|16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href=""></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href=""></a></span>
 <span id="cb1-3"><a href=""></a><span class="co">#Define matrix A and vector b</span></span>
-<span id="cb1-4"><a href=""></a>A <span class="op">=</span> np . array ([[<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">10</span>],</span>
+<span id="cb1-4"><a href=""></a>A <span class="op">=</span> np.array([[<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">10</span>],</span>
 <span id="cb1-5"><a href=""></a>                 [<span class="dv">4</span> , <span class="dv">1</span>, <span class="dv">12</span>],</span>
 <span id="cb1-6"><a href=""></a>                 [<span class="dv">7</span> , <span class="dv">2</span>, <span class="dv">1</span>]])</span>
-<span id="cb1-7"><a href=""></a>b <span class="op">=</span> np . array ([<span class="dv">5</span> , <span class="dv">6</span>, <span class="dv">10</span>])</span>
+<span id="cb1-7"><a href=""></a>b <span class="op">=</span> np.array([<span class="dv">5</span> , <span class="dv">6</span>, <span class="dv">10</span>])</span>
 <span id="cb1-8"><a href=""></a></span>
 <span id="cb1-9"><a href=""></a><span class="co">#Transpose A</span></span>
 <span id="cb1-10"><a href=""></a>A_transpose <span class="op">=</span> np.transpose(A)</span>
@@ -323,6 +326,28 @@ Lucia Sauer
 <div class="cell-output cell-output-stdout">
 <pre><code>Solution:  [1.21078431 0.74509804 0.03431373]</code></pre>
 </div>
+</div>
+</section>
+<section id="matrix-operations-using-r" class="slide level2">
+<h2>Matrix Operations using R</h2>
+<div id="733d05cb" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href=""></a><span class="co"># Define matrix A and vector b</span></span>
+<span id="cb3-2"><a href=""></a>A <span class="op">&lt;-</span> matrix(c(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">10</span>,</span>
+<span id="cb3-3"><a href=""></a>              <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">12</span>,</span>
+<span id="cb3-4"><a href=""></a>              <span class="dv">7</span>, <span class="dv">2</span>, <span class="dv">1</span>),</span>
+<span id="cb3-5"><a href=""></a>            nrow <span class="op">=</span> <span class="dv">3</span>, byrow <span class="op">=</span> TRUE)</span>
+<span id="cb3-6"><a href=""></a></span>
+<span id="cb3-7"><a href=""></a>b <span class="op">&lt;-</span> c(<span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">10</span>)</span>
+<span id="cb3-8"><a href=""></a></span>
+<span id="cb3-9"><a href=""></a><span class="co"># Transpose A</span></span>
+<span id="cb3-10"><a href=""></a>A_transpose <span class="op">&lt;-</span> t(A)</span>
+<span id="cb3-11"><a href=""></a></span>
+<span id="cb3-12"><a href=""></a><span class="co"># Inverse A</span></span>
+<span id="cb3-13"><a href=""></a>A_inverse <span class="op">&lt;-</span> solve(A)</span>
+<span id="cb3-14"><a href=""></a></span>
+<span id="cb3-15"><a href=""></a><span class="co"># Solve Ax = b</span></span>
+<span id="cb3-16"><a href=""></a>x <span class="op">&lt;-</span> solve(A, b)</span>
+<span id="cb3-17"><a href=""></a><span class="bu">print</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="derivatives-of-a-vector" class="slide level2">
@@ -430,21 +455,88 @@ b_{22} &amp; b_{22}
 <li>Plots the <strong>frequency</strong> of data points in each bin</li>
 </ul>
 </div><div class="column">
-<div id="a5d7ce7d" class="cell" data-execution_count="2">
+<div id="dcb3f038" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
-<p><img data-src="TA1_files/figure-revealjs/cell-3-output-1.png"></p>
+<p><img data-src="TA1_files/figure-revealjs/cell-4-output-1.png"></p>
 </figure>
 </div>
 </div>
 </div>
 </div></div>
 </section>
-<section class="slide level2">
-
-<p><strong>Concept of Density</strong></p>
-<p>Let’s first differenciate between frequency histograms, and density histograms.</p>
+<section id="concept-of-density" class="slide level2">
+<h2>Concept of Density</h2>
+<p>Let’s first differentiate between frequency histograms and density histograms.</p>
+<h3 id="step-1-bins-and-frequency">Step 1: Bins and Frequency</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Bins</th>
+<th>Frequency</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0-5</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td>5-10</td>
+<td>4</td>
+</tr>
+<tr class="odd">
+<td>10-15</td>
+<td>5</td>
+</tr>
+<tr class="even">
+<td>15-20</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="concept-of-density-1" class="slide level2">
+<h2>Concept of Density</h2>
+<p>Let’s first differentiate between frequency histograms and density histograms.</p>
+<h3 id="step-2-add-width">Step 2: Add Width</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Bins</th>
+<th>Frequency</th>
+<th>Width</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0-5</td>
+<td>2</td>
+<td>5</td>
+</tr>
+<tr class="even">
+<td>5-10</td>
+<td>4</td>
+<td>5</td>
+</tr>
+<tr class="odd">
+<td>10-15</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr class="even">
+<td>15-20</td>
+<td>1</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="concept-of-density-2" class="slide level2">
+<h2>Concept of Density</h2>
+<p>Let’s first differentiate between frequency histograms and density histograms.</p>
+<h3 id="step-3-add-density">Step 3: Add Density</h3>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -481,28 +573,85 @@ b_{22} &amp; b_{22}
 </tr>
 </tbody>
 </table>
-<p>Mathematically, for bin width <span class="math inline">\(h\)</span> and number of observations <span class="math inline">\(n\)</span>:</p>
+</section>
+<section id="concept-of-density-3" class="slide level2">
+<h2>Concept of Density</h2>
+<p>Let’s first differentiate between frequency histograms and density histograms.</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Bins</th>
+<th>Frequency</th>
+<th>Width</th>
+<th>Density</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0-5</td>
+<td>2</td>
+<td>5</td>
+<td><span class="math inline">\(2 / (12*5) = 0.033\)</span></td>
+</tr>
+<tr class="even">
+<td>5-10</td>
+<td>4</td>
+<td>5</td>
+<td><span class="math inline">\(4 / (12*5) = 0.067\)</span></td>
+</tr>
+<tr class="odd">
+<td>10-15</td>
+<td>5</td>
+<td>5</td>
+<td><span class="math inline">\(5 / (12*5) = 0.083\)</span></td>
+</tr>
+<tr class="even">
+<td>15-20</td>
+<td>1</td>
+<td>5</td>
+<td><span class="math inline">\(1 / (12*5) = 0.017\)</span></td>
+</tr>
+</tbody>
+</table>
+Mathematically, for bin width <span class="math inline">\(h\)</span> and number of observations <span class="math inline">\(n\)</span>:
 <div style="text-align: center;">
 <div style="border:2px solid #9d03c4ff; padding:10px; border-radius:8px; background-color:#f5e6ff; display:inline-block;">
-<span class="math display">\[
-  \hat{f(x)} = \frac{1}{nh} \sum_{i=1}^n \mathbf{1}\{x_i \in \text{bin}(x)\}
-  \]</span>
+<span class="math display">\[ \hat{f(x)} = \frac{1}{nh} \sum_{i=1}^n \mathbf{1}\{x_i \in \text{bin}(x)\} \]</span>
 </div>
 </div>
 </section>
 <section class="slide level2">
 
-<h3 id="coding-example">Coding Example</h3>
+<h3 id="coding-example-in-python">Coding Example in Python</h3>
 <p>Important parameters <code>bins</code>, <code>stat</code>, <code>binwidth</code>, <code>binrange</code></p>
-<div id="3bcf3b02" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href=""></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
-<span id="cb3-2"><a href=""></a>x <span class="op">=</span> sns.load_dataset(<span class="st">"tips"</span>)[<span class="st">"total_bill"</span>]</span>
-<span id="cb3-3"><a href=""></a>bins <span class="op">=</span> [<span class="dv">15</span>, <span class="dv">30</span>, <span class="dv">70</span>]</span>
-<span id="cb3-4"><a href=""></a><span class="cf">for</span> <span class="bu">bin</span> <span class="kw">in</span> bins:</span>
-<span id="cb3-5"><a href=""></a>  sns.histplot(x,bins<span class="op">=</span><span class="bu">bin</span>, stat<span class="op">=</span><span class="st">'density'</span>, binwidth<span class="op">=</span><span class="va">None</span>, binrange<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="ff3f2199" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href=""></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb4-2"><a href=""></a>x <span class="op">=</span> sns.load_dataset(<span class="st">"tips"</span>)[<span class="st">"total_bill"</span>]</span>
+<span id="cb4-3"><a href=""></a>bins <span class="op">=</span> [<span class="dv">15</span>, <span class="dv">30</span>, <span class="dv">70</span>]</span>
+<span id="cb4-4"><a href=""></a><span class="cf">for</span> <span class="bu">bin</span> <span class="kw">in</span> bins:</span>
+<span id="cb4-5"><a href=""></a>  sns.histplot(x,bins<span class="op">=</span><span class="bu">bin</span>, stat<span class="op">=</span><span class="st">'density'</span>, binwidth<span class="op">=</span><span class="va">None</span>, binrange<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
-<img data-src="TA1_files/figure-revealjs/cell-5-output-1.png" class="r-stretch"></section>
+<img data-src="TA1_files/figure-revealjs/cell-6-output-1.png" class="r-stretch"></section>
+<section class="slide level2">
+
+<h3 id="coding-example-in-r">Coding Example in R</h3>
+<p>Important parameters: <code>bins</code>, <code>aes(y = ..stat..)</code>, <code>binwidth</code>, <code>xlim()</code></p>
+<div id="990f0d41" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href=""></a>library(ggplot2)</span>
+<span id="cb5-2"><a href=""></a>library(readr)</span>
+<span id="cb5-3"><a href=""></a></span>
+<span id="cb5-4"><a href=""></a>tips <span class="op">&lt;-</span> read_csv(<span class="st">"https://raw.githubusercontent.com/mwaskom/seaborn-data/master/tips.csv"</span>)</span>
+<span id="cb5-5"><a href=""></a>x <span class="op">&lt;-</span> tips$total_bill</span>
+<span id="cb5-6"><a href=""></a></span>
+<span id="cb5-7"><a href=""></a>bins <span class="op">&lt;-</span> c(<span class="dv">15</span>, <span class="dv">30</span>, <span class="dv">70</span>)</span>
+<span id="cb5-8"><a href=""></a><span class="cf">for</span> (<span class="bu">bin</span> <span class="kw">in</span> bins) {</span>
+<span id="cb5-9"><a href=""></a>  p <span class="op">&lt;-</span> ggplot(data <span class="op">=</span> data.frame(x <span class="op">=</span> x), aes(x <span class="op">=</span> x)) <span class="op">+</span></span>
+<span id="cb5-10"><a href=""></a>    geom_histogram(aes(y <span class="op">=</span> ..density..), bins <span class="op">=</span> <span class="bu">bin</span>, color <span class="op">=</span> <span class="st">"black"</span>, fill <span class="op">=</span> <span class="st">"skyblue"</span>)</span>
+<span id="cb5-11"><a href=""></a>  <span class="bu">print</span>(p)</span>
+<span id="cb5-12"><a href=""></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
 <section id="kernel-density-estimation" class="slide level2">
 <h2>Kernel Density Estimation</h2>
 <blockquote>
@@ -514,11 +663,11 @@ b_{22} &amp; b_{22}
 <li>Instead of counting frequencies in bins, KDE places a smooth kernel function (usually Gaussian) centered at each data point, and then averages them.</li>
 </ul>
 </div><div class="column">
-<div id="f70d45d5" class="cell" data-execution_count="5">
+<div id="acf5dcf7" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
-<p><img data-src="TA1_files/figure-revealjs/cell-6-output-1.png"></p>
+<p><img data-src="TA1_files/figure-revealjs/cell-8-output-1.png"></p>
 </figure>
 </div>
 </div>
@@ -541,21 +690,35 @@ b_{22} &amp; b_{22}
 </section>
 <section class="slide level2">
 
-<h3 id="coding-example-1">Coding Example</h3>
-<div id="e4e3e886" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href=""></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
-<span id="cb4-2"><a href=""></a>x <span class="op">=</span> sns.load_dataset(<span class="st">'tips'</span>)[<span class="st">'total_bill'</span>]</span>
-<span id="cb4-3"><a href=""></a><span class="cf">for</span> bw <span class="kw">in</span> [<span class="fl">0.3</span>, <span class="dv">1</span>, <span class="dv">2</span>]:</span>
-<span id="cb4-4"><a href=""></a>    sns.kdeplot(x, bw_adjust<span class="op">=</span>bw, label<span class="op">=</span><span class="ss">f"Bandwidth = </span><span class="sc">{</span>bw<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<h3 id="coding-example-in-python-1">Coding Example in Python</h3>
+<div id="39a99d6b" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href=""></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb6-2"><a href=""></a>x <span class="op">=</span> sns.load_dataset(<span class="st">'tips'</span>)[<span class="st">'total_bill'</span>]</span>
+<span id="cb6-3"><a href=""></a><span class="cf">for</span> bw <span class="kw">in</span> [<span class="fl">0.3</span>, <span class="dv">1</span>, <span class="dv">2</span>]:</span>
+<span id="cb6-4"><a href=""></a>    sns.kdeplot(x, bw_adjust<span class="op">=</span>bw, label<span class="op">=</span><span class="ss">f"Bandwidth = </span><span class="sc">{</span>bw<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
-<img data-src="TA1_files/figure-revealjs/cell-8-output-1.png" class="r-stretch"><ul>
+<img data-src="TA1_files/figure-revealjs/cell-10-output-1.png" class="r-stretch"><ul>
 <li>Small <span class="math inline">\(h\)</span>: very wiggly estimate (low bias, high variance).</li>
 <li>Large <span class="math inline">\(h\)</span>: oversmoothed estimate (high bias, low variance).</li>
 </ul>
 </section>
 <section class="slide level2">
 
+<h3 id="coding-example-in-r-1">Coding example in R</h3>
+<div id="b0d9b166" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href=""></a>library(ggplot2)</span>
+<span id="cb7-2"><a href=""></a>library(readr)</span>
+<span id="cb7-3"><a href=""></a></span>
+<span id="cb7-4"><a href=""></a>tips <span class="op">&lt;-</span> read_csv(<span class="st">"https://raw.githubusercontent.com/mwaskom/seaborn-data/master/tips.csv"</span>)</span>
+<span id="cb7-5"><a href=""></a>x <span class="op">&lt;-</span> tips$total_bill</span>
+<span id="cb7-6"><a href=""></a></span>
+<span id="cb7-7"><a href=""></a><span class="cf">for</span> (bw <span class="kw">in</span> c(<span class="fl">0.3</span>, <span class="dv">1</span>, <span class="dv">2</span>)) {</span>
+<span id="cb7-8"><a href=""></a>  <span class="bu">print</span>(ggplot(data.frame(x <span class="op">=</span> x), aes(x <span class="op">=</span> x)) <span class="op">+</span> </span>
+<span id="cb7-9"><a href=""></a>          geom_density(adjust <span class="op">=</span> bw, color <span class="op">=</span> <span class="st">"blue"</span>) <span class="op">+</span></span>
+<span id="cb7-10"><a href=""></a>          ggtitle(paste(<span class="st">"Bandwidth ="</span>, bw)))</span>
+<span id="cb7-11"><a href=""></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="thanks" class="title-slide slide level1 center">
 <h1>Thanks!</h1>
