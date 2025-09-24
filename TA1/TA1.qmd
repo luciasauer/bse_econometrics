@@ -92,9 +92,6 @@ A = np.array([[2, 3, 10],
                  [7 , 2, 1]])
 b = np.array([5 , 6, 10])
 
-#Transpose A
-A_transpose = np.transpose(A)
-
 #Inverse A
 A_inverse = np.linalg.inv(A)
 
@@ -117,11 +114,9 @@ A <- matrix(c(2, 3, 10,
 
 b <- c(5, 6, 10)
 
-# Transpose A
-A_transpose <- t(A)
-
 # Inverse A
 A_inverse <- solve(A)
+x <- A_inverse %*% b
 
 # Solve Ax = b
 x <- solve(A, b)
@@ -264,14 +259,18 @@ plt.show()
 
 Let's first differentiate between frequency histograms and density histograms.
 
-### Step 1: Bins and Frequency
+Suppose a dataset with 12 observations:
 
-| Bins   | Frequency  |
-|--------|------------|
-| 0-5    | 2          |
-| 5-10   | 4          |
-| 10-15  | 5          |
-| 15-20  | 1          |
+`[2, 3, 5, 5, 6, 8, 8, 8, 10, 12, 15, 17]`
+
+### Step 1: Calculate the binwidth of each bin
+
+If we want to create a histogram with 3 bins:
+
+- $\text{min value} = 2$
+- $\text{max value} = 17$
+- $\text{range} = \text{max value} - \text{min value} = 15$
+- $\text{binwidth} = \frac{\text{range}}{n\_bins} = \frac{15}{3} = 5$
 
 ---
 
@@ -279,14 +278,14 @@ Let's first differentiate between frequency histograms and density histograms.
 
 Let's first differentiate between frequency histograms and density histograms.
 
-### Step 2: Add Width
+### Step 2: Define the limits of each bin
 
-| Bins   | Frequency  | Width |
-|--------|------------|-------|
-| 0-5    | 2          | 5     |
-| 5-10   | 4          | 5     |
-| 10-15  | 5          | 5     |
-| 15-20  | 1          | 5     |
+| Bins         | Frequency  | 
+|--------------|------------|
+| [2-7)        | 5          |
+| [7-12)       | 4          |
+| [12-17]      | 3          |
+
 
 ---
 
@@ -296,29 +295,18 @@ Let's first differentiate between frequency histograms and density histograms.
 
 ### Step 3: Add Density
 
-| Bins   | Frequency  | Width | Density |
-|--------|------------|-------|---------|
-| 0-5    | 2          | 5     | $2 / (12*5) = 0.033$ |
-| 5-10   | 4          | 5     | $4 / (12*5) = 0.067$ |
-| 10-15  | 5          | 5     | $5 / (12*5) = 0.083$ |
-| 15-20  | 1          | 5     | $1 / (12*5) = 0.017$ |
+| Bins         | Frequency  | Width | Density |
+|--------------|------------|-------|---------|
+| [2-7)        | 5          | 5     | $5 / (12*5) = 0.0833$ |
+| [7-12)       | 4          | 5     | $4 / (12*5) = 0.0667$ |
+| [12-17]      | 3          | 5     | $3 / (12*5) = 0.05$ |
 
----
 
-## Concept of Density
-
-Let's first differentiate between frequency histograms and density histograms.
-
-| Bins   | Frequency  | Width | Density |
-|--------|------------|-------|---------|
-| 0-5    | 2          | 5     | $2 / (12*5) = 0.033$ |
-| 5-10   | 4          | 5     | $4 / (12*5) = 0.067$ |
-| 10-15  | 5          | 5     | $5 / (12*5) = 0.083$ |
-| 15-20  | 1          | 5     | $1 / (12*5) = 0.017$ |
-
+::: {.fragment}
 
 Mathematically, for bin width $h$ and number of observations $n$: <div style="text-align: center;"> <div style="border:2px solid #9d03c4ff; padding:10px; border-radius:8px; background-color:#f5e6ff; display:inline-block;"> $$ \hat{f(x)} = \frac{1}{nh} \sum_{i=1}^n \mathbf{1}\{x_i \in \text{bin}(x)\} $$ </div> </div>
 
+:::
 
 ---
 
@@ -365,8 +353,55 @@ plt.tight_layout()
 plt.show()
 
 ```
+
 ---
 
+### Coding Example in Python
+Important parameters <code>bins</code>, <code>stat</code>, <code>binwidth</code>, <code>binrange</code>
+```{python}
+#| echo: true
+#| eval: false
+import seaborn as sns
+x = sns.load_dataset("tips")["total_bill"]
+bin_widths = [3, 7, 14]
+for bin_w in bin_widths:
+  sns.histplot(x,bins=None, stat='density', binwidth=bin_w, binrange=None)
+```
+
+```{python}
+#| echo: false
+#| eval: true
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load data
+x = sns.load_dataset("tips")["total_bill"]
+
+# Create 1 row, 3 columns
+fig, axes = plt.subplots(1, 3, figsize=(15, 6), sharey=True)
+
+# Different bin settings
+bin_widths = [3, 7, 14]
+colors = ['purple', 'darkblue', 'orange']
+for ax, bin_w, color in zip(axes, bin_widths, colors):
+    sns.histplot(x, bins=None, stat="density", color=color, edgecolor="black", ax=ax, binwidth=bin_w)
+    ax.set_title(f"bin width = {bin_w}")
+    ax.set_xlabel("Total Bill")
+    ax.set_ylabel("Density")
+    
+    # Hide top and right spines
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["bottom"].set_color("black")
+    ax.spines["left"].set_color("black")
+
+plt.tight_layout()
+plt.show()
+
+```
+
+
+---
 ### Coding Example in R
 Important parameters: <code>bins</code>, <code>aes(y = ..stat..)</code>, <code>binwidth</code>, <code>xlim()</code>
 ```{python}
@@ -516,14 +551,75 @@ plt.show()
 
 ```
 
-
-
-
-
-
-
 - Small $h$: very wiggly estimate (low bias, high variance).
 - Large $h$: oversmoothed estimate (high bias, low variance).
+
+---
+
+### Bandwidth in KDE with Python
+```{python}
+#| echo: false
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import numpy as np
+from scipy.stats import gaussian_kde
+
+# Generate random variables from N(0,1)
+np.random.seed(0)
+data = np.random.randn(1000)
+
+# Create x values for smooth curves
+x_range = np.linspace(data.min() - 1, data.max() + 1, 200)
+
+# Different bandwidth values
+bandwidths = [0.01, 0.03, 0.5, 0.8, 2.0]
+colors = ['rgba(0,128,0,0.8)', 'rgba(255,0,0,0.8)', 'rgba(0,0,255,0.8)', 
+          'rgba(255,165,0,0.8)', 'rgba(128,0,128,0.8)']
+
+fig = go.Figure()
+
+for i, bw in enumerate(bandwidths):
+    # Create KDE with specified bandwidth
+    kde = gaussian_kde(data, bw_method=bw)
+    kde_values = kde(x_range)
+    
+    fig.add_trace(go.Scatter(
+        x=x_range,
+        y=kde_values,
+        mode='lines',
+        name=f'Bandwidth: {bw}',
+        line=dict(color=colors[i], width=3),
+        fill='tozeroy',
+        visible=True if i == 2 else False  # Show middle option by default
+    ))
+
+# Add dropdown menu for interactivity
+fig.update_layout(
+    title='Interactive KDE - Bandwidth Selection',
+    xaxis_title='Value',
+    yaxis_title='Density',
+    updatemenus=[
+        dict(
+            buttons=list([
+                dict(label=f"Bandwidth: {bw}",
+                     method="update",
+                     args=[{"visible": [i == j for j in range(len(bandwidths))]}])
+                for i, bw in enumerate(bandwidths)
+            ]),
+            direction="down",
+            showactive=True,
+            x=0.01,
+            xanchor="left",
+            y=1.02,
+            yanchor="top"
+        ),
+    ],
+    width=800,
+    height=500
+)
+
+fig.show()
+```
 
 ---
 
