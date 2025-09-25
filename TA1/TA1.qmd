@@ -507,7 +507,7 @@ shape and distribution of influence associated with each observation.
 #| eval: false
 import seaborn as sns
 x = sns.load_dataset('tips')['total_bill']
-for bw in [0.3, 1, 2]:
+for bw in [0.3, 2, 10]:
     sns.kdeplot(x, bw_adjust=bw, label=f"Bandwidth = {bw}")
 ```
 
