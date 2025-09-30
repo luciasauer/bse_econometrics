@@ -165,8 +165,8 @@ z_2
 \end{bmatrix}
 \quad
 B = \begin{bmatrix}
-b_{12} & b_{12} \\
-b_{22} & b_{22}
+b_{11} & b_{12} \\
+b_{21} & b_{22}
 \end{bmatrix}
 $$
 
@@ -494,7 +494,7 @@ plt.show()
 
 
 - $N$ is the number of observations
-- $w$ is the bandwidth (controls how
+- $h$ is the bandwidth (controls how
 much the influence of each observation expands)
 - and, $K$ is the Kernel, a function that defines the
 shape and distribution of influence associated with each observation.
