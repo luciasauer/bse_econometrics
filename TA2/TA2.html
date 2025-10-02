@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="TA2_files/libs/clipboard/clipboard.min.js"></script>
+<script src="TA2_files/libs/clipboard/clipboard.min.js"></script>
 <script src="TA2_files/libs/quarto-html/tabby.min.js"></script>
 <script src="TA2_files/libs/quarto-html/popper.min.js"></script>
 <script src="TA2_files/libs/quarto-html/tippy.umd.min.js"></script>
@@ -188,9 +188,8 @@
       margin-right: 0; 
     }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-  
-  <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+  <link href="TA2_files/libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+  <script src="TA2_files/libs/pagedtable-1.1/js/pagedtable.js"></script>
 </head>
 <body class="quarto-light">
   <div class="reveal">
@@ -289,236 +288,54 @@ The <em>sample conditional mean</em> is the average of all observed <span class=
 
 <h3 id="example-house-prices-and-size">Example: House Prices and Size</h3>
 <p><a href="http://fmwww.bc.edu/ec-p/data/wooldridge/datasets.list.html">Description dataset</a></p>
-<div id="c510d670" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href=""></a><span class="im">import</span> wooldridge</span>
-<span id="cb1-2"><a href=""></a>df <span class="op">=</span> wooldridge.data(<span class="st">'hprice1'</span>)</span>
-<span id="cb1-3"><a href=""></a><span class="co">#Look to a sample of 8 observations</span></span>
-<span id="cb1-4"><a href=""></a>df.sample(<span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="76">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-
-<table class="dataframe caption-top" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header" style="text-align: right;">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">price</th>
-<th data-quarto-table-cell-role="th">assess</th>
-<th data-quarto-table-cell-role="th">bdrms</th>
-<th data-quarto-table-cell-role="th">lotsize</th>
-<th data-quarto-table-cell-role="th">sqrft</th>
-<th data-quarto-table-cell-role="th">colonial</th>
-<th data-quarto-table-cell-role="th">lprice</th>
-<th data-quarto-table-cell-role="th">lassess</th>
-<th data-quarto-table-cell-role="th">llotsize</th>
-<th data-quarto-table-cell-role="th">lsqrft</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">38</td>
-<td>209.001007</td>
-<td>289.399994</td>
-<td>4</td>
-<td>6400.0</td>
-<td>1854</td>
-<td>1</td>
-<td>5.342339</td>
-<td>5.667810</td>
-<td>8.764053</td>
-<td>7.525101</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">76</td>
-<td>318.000000</td>
-<td>295.200012</td>
-<td>4</td>
-<td>92681.0</td>
-<td>1696</td>
-<td>1</td>
-<td>5.762052</td>
-<td>5.687653</td>
-<td>11.436919</td>
-<td>7.436028</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">21</td>
-<td>270.000000</td>
-<td>318.799988</td>
-<td>3</td>
-<td>7800.0</td>
-<td>2124</td>
-<td>1</td>
-<td>5.598422</td>
-<td>5.764564</td>
-<td>8.961879</td>
-<td>7.661057</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">7</td>
-<td>315.000000</td>
-<td>300.200012</td>
-<td>3</td>
-<td>6210.0</td>
-<td>1731</td>
-<td>1</td>
-<td>5.752573</td>
-<td>5.704449</td>
-<td>8.733916</td>
-<td>7.456455</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">87</td>
-<td>242.000000</td>
-<td>252.000000</td>
-<td>4</td>
-<td>4950.0</td>
-<td>1774</td>
-<td>1</td>
-<td>5.488938</td>
-<td>5.529429</td>
-<td>8.507143</td>
-<td>7.480992</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">35</td>
-<td>190.000000</td>
-<td>212.500000</td>
-<td>4</td>
-<td>3500.0</td>
-<td>1702</td>
-<td>0</td>
-<td>5.247024</td>
-<td>5.358942</td>
-<td>8.160519</td>
-<td>7.439559</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">70</td>
-<td>215.000000</td>
-<td>300.399994</td>
-<td>3</td>
-<td>11554.0</td>
-<td>1694</td>
-<td>0</td>
-<td>5.370638</td>
-<td>5.705115</td>
-<td>9.354787</td>
-<td>7.434848</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">39</td>
-<td>225.000000</td>
-<td>268.100006</td>
-<td>2</td>
-<td>8880.0</td>
-<td>1421</td>
-<td>0</td>
-<td>5.416101</td>
-<td>5.591360</td>
-<td>9.091557</td>
-<td>7.259116</td>
-</tr>
-</tbody>
-</table>
-
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="fu">library</span>(wooldridge)</span>
+<span id="cb1-2"><a href=""></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-3"><a href=""></a>df <span class="ot">&lt;-</span> wooldridge<span class="sc">::</span>hprice1</span>
+<span id="cb1-4"><a href=""></a><span class="co"># Sample of 8 observations</span></span>
+<span id="cb1-5"><a href=""></a>df[<span class="fu">sample</span>(<span class="fu">nrow</span>(df), <span class="dv">8</span>), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["price"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["assess"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["bdrms"],"name":[3],"type":["int"],"align":["right"]},{"label":["lotsize"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["sqrft"],"name":[5],"type":["int"],"align":["right"]},{"label":["colonial"],"name":[6],"type":["int"],"align":["right"]},{"label":["lprice"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["lassess"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["llotsize"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["lsqrft"],"name":[10],"type":["dbl"],"align":["right"]}],"data":[{"1":"361","2":"354.9","3":"4","4":"9000","5":"2066","6":"1","7":"5.888878","8":"5.871836","9":"9.104980","10":"7.633369","_rn_":"35"},{"1":"264","2":"313.9","3":"3","4":"6637","5":"1972","6":"1","7":"5.575949","8":"5.749074","9":"8.800415","10":"7.586803","_rn_":"51"},{"1":"266","2":"286.4","3":"4","4":"5484","5":"1664","6":"1","7":"5.583496","8":"5.657390","9":"8.609590","10":"7.416980","_rn_":"62"},{"1":"247","2":"239.7","3":"3","4":"9425","5":"1440","6":"1","7":"5.509388","8":"5.479388","9":"9.151121","10":"7.272398","_rn_":"25"},{"1":"190","2":"212.5","3":"4","4":"3500","5":"1702","6":"0","7":"5.247024","8":"5.358942","9":"8.160519","10":"7.439559","_rn_":"36"},{"1":"265","2":"287.5","3":"3","4":"6519","5":"2312","6":"1","7":"5.579730","8":"5.661223","9":"8.782476","10":"7.745868","_rn_":"15"},{"1":"220","2":"263.4","3":"3","4":"6300","5":"1587","6":"1","7":"5.393628","8":"5.573674","9":"8.748305","10":"7.369601","_rn_":"70"},{"1":"373","2":"319.1","3":"4","4":"6095","5":"2514","6":"1","7":"5.921578","8":"5.765504","9":"8.715224","10":"7.829630","_rn_":"5"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
 </div>
 </div>
 </div>
 </section>
 <section class="slide level2">
 
-<h3 id="compute-conditional-mean">Compute Conditional Mean</h3>
-<div id="3e2a07c6" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href=""></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb2-2"><a href=""></a>df_grouped <span class="op">=</span> df.groupby(<span class="st">'bdrms'</span>)[<span class="st">'price'</span>].mean().reset_index()</span>
-<span id="cb2-3"><a href=""></a>df_grouped</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="77">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-
-<table class="dataframe caption-top" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header" style="text-align: right;">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">bdrms</th>
-<th data-quarto-table-cell-role="th">price</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
-<td>2</td>
-<td>251.250000</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
-<td>3</td>
-<td>261.979167</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
-<td>4</td>
-<td>285.163667</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">3</td>
-<td>5</td>
-<td>518.003571</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">4</td>
-<td>6</td>
-<td>310.000000</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">5</td>
-<td>7</td>
-<td>477.500000</td>
-</tr>
-</tbody>
-</table>
-
+<h3 id="compute-conditional-mean-in-r">Compute Conditional Mean in R</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a>df_grouped <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb2-2"><a href=""></a>  <span class="fu">group_by</span>(bdrms) <span class="sc">%&gt;%</span></span>
+<span id="cb2-3"><a href=""></a>  <span class="fu">summarise</span>(<span class="at">mean_price =</span> <span class="fu">mean</span>(price))</span>
+<span id="cb2-4"><a href=""></a>df_grouped</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["bdrms"],"name":[1],"type":["int"],"align":["right"]},{"label":["mean_price"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"2","2":"251.2500"},{"1":"3","2":"261.9792"},{"1":"4","2":"285.1637"},{"1":"5","2":"518.0036"},{"1":"6","2":"310.0000"},{"1":"7","2":"477.5000"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
 </div>
 </div>
 </div>
 </section>
 <section class="slide level2">
 
-<h3 id="plot-conditional-mean">Plot Conditional Mean</h3>
-<div id="8582e738" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href=""></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb3-2"><a href=""></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
-<span id="cb3-3"><a href=""></a>sns.scatterplot(data<span class="op">=</span>df, x<span class="op">=</span><span class="st">'bdrms'</span>, y<span class="op">=</span><span class="st">'price'</span>, color<span class="op">=</span><span class="st">'purple'</span>, s<span class="op">=</span><span class="dv">100</span>)</span>
-<span id="cb3-4"><a href=""></a>sns.lineplot(data<span class="op">=</span>df_grouped, x<span class="op">=</span><span class="st">'bdrms'</span>, y<span class="op">=</span><span class="st">'price'</span>, color<span class="op">=</span><span class="st">'purple'</span>)</span>
-<span id="cb3-5"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<h3 id="plot-conditional-mean-in-r">Plot Conditional Mean in R</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb3-2"><a href=""></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb3-3"><a href=""></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> df, <span class="fu">aes</span>(<span class="at">x =</span> bdrms, <span class="at">y =</span> price),</span>
+<span id="cb3-4"><a href=""></a>             <span class="at">color =</span> <span class="st">'orange'</span>, <span class="at">alpha =</span> <span class="fl">0.6</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb3-5"><a href=""></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> df_grouped, <span class="fu">aes</span>(<span class="at">x =</span> bdrms, <span class="at">y =</span> mean_price),</span>
+<span id="cb3-6"><a href=""></a>            <span class="at">color =</span> <span class="st">'orange'</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb3-7"><a href=""></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="fu">expression</span>(<span class="fu">hat</span>(E)[price <span class="sc">~</span> <span class="st">"|"</span> <span class="sc">~</span> bdrms]),</span>
+<span id="cb3-8"><a href=""></a>       <span class="at">x =</span> <span class="st">"Number of bedrooms"</span>,</span>
+<span id="cb3-9"><a href=""></a>       <span class="at">y =</span> <span class="st">"Average house price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
-<img data-src="TA2_files/figure-revealjs/cell-5-output-1.png" class="r-stretch"></section>
+<img data-src="TA2_files/figure-revealjs/unnamed-chunk-4-1.png" width="960" class="r-stretch"></section>
 <section id="ols-in-matrix-algebra" class="slide level2">
 <h2>OLS in Matrix Algebra</h2>
 <p>Using our dataset, we can write the model as: <span class="math display">\[price\_i = \beta_1 + \beta_2 \cdot bdrms_i + \beta_3 \cdot sqrft_i + \beta_4 \cdot colonial + \varepsilon_i \]</span></p>
@@ -589,17 +406,24 @@ price_n
 </section>
 <section class="slide level2">
 
-<div id="719b7b61" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href=""></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb4-2"><a href=""></a>df[<span class="st">'intercept'</span>] <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb4-3"><a href=""></a>X <span class="op">=</span> df[[<span class="st">'intercept'</span>, <span class="st">'bdrms'</span>, <span class="st">'sqrft'</span>, <span class="st">'colonial'</span>]].values</span>
-<span id="cb4-4"><a href=""></a>y <span class="op">=</span> df[<span class="st">'price'</span>].values</span>
-<span id="cb4-5"><a href=""></a>X_tX <span class="op">=</span> X.T <span class="op">@</span> X</span>
-<span id="cb4-6"><a href=""></a>X_ty <span class="op">=</span> X.T <span class="op">@</span> y</span>
-<span id="cb4-7"><a href=""></a>beta_hat <span class="op">=</span> np.linalg.inv(X_tX) <span class="op">@</span> X_ty</span>
-<span id="cb4-8"><a href=""></a><span class="bu">print</span>(<span class="st">"Coefficients (beta_hat):"</span>,np.<span class="bu">round</span>(beta_hat,<span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a>df<span class="sc">$</span>intercept <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb4-2"><a href=""></a>X <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(df[, <span class="fu">c</span>(<span class="st">"intercept"</span>, <span class="st">"bdrms"</span>, <span class="st">"sqrft"</span>, <span class="st">"colonial"</span>)])</span>
+<span id="cb4-3"><a href=""></a>y <span class="ot">&lt;-</span>df<span class="sc">$</span>price</span>
+<span id="cb4-4"><a href=""></a></span>
+<span id="cb4-5"><a href=""></a><span class="co">#define X_tX and X_ty</span></span>
+<span id="cb4-6"><a href=""></a>X_tX <span class="ot">&lt;-</span> <span class="fu">t</span>(X)<span class="sc">%*%</span>X</span>
+<span id="cb4-7"><a href=""></a>X_ty <span class="ot">&lt;-</span> <span class="fu">t</span>(X)<span class="sc">%*%</span>y</span>
+<span id="cb4-8"><a href=""></a></span>
+<span id="cb4-9"><a href=""></a><span class="co">#solve the system</span></span>
+<span id="cb4-10"><a href=""></a>beta_hat<span class="ot">&lt;-</span> <span class="fu">solve</span>(X_tX)<span class="sc">%*%</span>X_ty</span>
+<span id="cb4-11"><a href=""></a><span class="fu">round</span>(beta_hat, <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Coefficients (beta_hat): [-21.55  12.49   0.13  13.08]</code></pre>
+<pre><code>            [,1]
+intercept -21.55
+bdrms      12.49
+sqrft       0.13
+colonial   13.08</code></pre>
 </div>
 </div>
 <p>Fitted model:</p>
@@ -614,22 +438,14 @@ price_n
 
 <h4 id="compute-the-fitted-values-and-ols-residuals.">2. Compute the fitted values and OLS residuals.</h4>
 <p><span class="math display">\[{\hat{y}} = {X}\hat{\beta}\]</span></p>
-<div id="39134713" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href=""></a><span class="co"># Fitted values</span></span>
-<span id="cb6-2"><a href=""></a>y_hat <span class="op">=</span> X <span class="op">@</span> beta_hat</span>
-<span id="cb6-3"><a href=""></a><span class="bu">print</span>(np.<span class="bu">round</span>(y_hat[:<span class="dv">10</span>], <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[358.05 298.55 194.32 217.01 367.92 411.57 297.39 253.76 245.35 261.32]</code></pre>
-</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a><span class="co"># Fitted values</span></span>
+<span id="cb6-2"><a href=""></a>y_hat <span class="ot">&lt;-</span> X <span class="sc">%*%</span> beta_hat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><span class="math display">\[ \hat{\varepsilon} = {y} - {\hat{y}} \]</span></p>
-<div id="0a84d3b5" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href=""></a><span class="co"># Residuals</span></span>
-<span id="cb8-2"><a href=""></a>epsilon_hat <span class="op">=</span> y <span class="op">-</span> y_hat</span>
-<span id="cb8-3"><a href=""></a><span class="bu">print</span>(np.<span class="bu">round</span>(epsilon_hat[:<span class="dv">10</span>], <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[-58.05  71.45  -3.32 -22.01   5.08  54.71  35.11  61.24 -39.35 -21.32]</code></pre>
-</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a><span class="co"># Residuals</span></span>
+<span id="cb7-2"><a href=""></a>epsilon_hat <span class="ot">&lt;-</span> y <span class="sc">-</span> y_hat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div title="Units">
 <div class="callout callout-warning no-icon callout-titled callout-style-default">
@@ -654,12 +470,13 @@ price_n
 <p><span class="math display">\[SSE = {\hat{\varepsilon}}'{\hat{\varepsilon}}\]</span></p>
 <p>Note that this is exactly the same as:</p>
 <p><span class="math display">\[ SSE = \sum_{i=1}^{n} (\hat{\varepsilon}_{i})^{2} = \sum_{i=1}^n (y_i - \hat{y}_i)^2\]</span></p>
-<div id="793c19fb" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href=""></a><span class="co">#Sum of Squared Errors</span></span>
-<span id="cb10-2"><a href=""></a>SSE <span class="op">=</span> epsilon_hat.T <span class="op">@</span> epsilon_hat</span>
-<span id="cb10-3"><a href=""></a><span class="bu">print</span>(np.<span class="bu">round</span>(SSE, <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a><span class="co">#Sum of Squared Errors</span></span>
+<span id="cb8-2"><a href=""></a>SSE <span class="ot">&lt;-</span> <span class="fu">t</span>(epsilon_hat) <span class="sc">%*%</span> epsilon_hat</span>
+<span id="cb8-3"><a href=""></a><span class="fu">round</span>(SSE, <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>334982.95</code></pre>
+<pre><code>       [,1]
+[1,] 334983</code></pre>
 </div>
 </div>
 <div title="SSE Units">
@@ -680,14 +497,15 @@ price_n
 <h4 id="compute-the-r2-statistic.">4. Compute the <span class="math inline">\(R^2\)</span> statistic.</h4>
 <p><span class="math display">\[R^2 = 1 - \frac{SSE}{SST}\]</span></p>
 <p>where <span class="math display">\[SST = ({y} - \bar{y}{1})'({y} - \bar{y}{1})\]</span></p>
-<div id="a743e478" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href=""></a><span class="co"># Total Sum of Squares</span></span>
-<span id="cb12-2"><a href=""></a>y_bar <span class="op">=</span> np.mean(y)</span>
-<span id="cb12-3"><a href=""></a>SST <span class="op">=</span> ((y <span class="op">-</span> y_bar).T <span class="op">@</span> (y <span class="op">-</span> y_bar))</span>
-<span id="cb12-4"><a href=""></a>r2 <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> (SSE <span class="op">/</span> SST)</span>
-<span id="cb12-5"><a href=""></a><span class="bu">print</span>(np.<span class="bu">round</span>(r2, <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href=""></a><span class="co"># Total Sum of Squares</span></span>
+<span id="cb10-2"><a href=""></a>y_bar <span class="ot">&lt;-</span> <span class="fu">mean</span>(y)</span>
+<span id="cb10-3"><a href=""></a>SST <span class="ot">&lt;-</span> <span class="fu">t</span>(y <span class="sc">-</span> y_bar) <span class="sc">%*%</span> (y <span class="sc">-</span> y_bar)</span>
+<span id="cb10-4"><a href=""></a>r2 <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> SSE<span class="sc">/</span>SST</span>
+<span id="cb10-5"><a href=""></a><span class="fu">round</span>(r2, <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>0.635</code></pre>
+<pre><code>      [,1]
+[1,] 0.635</code></pre>
 </div>
 </div>
 <div title="$R^2$ Units">
@@ -725,43 +543,30 @@ price_n
 </section>
 <section class="slide level2">
 
-<h4 id="code-example-in-python">Code example in Python</h4>
-<div id="0f3dc25a" class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href=""></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
-<span id="cb14-2"><a href=""></a><span class="co"># Fit the model using statsmodels (OLS)</span></span>
-<span id="cb14-3"><a href=""></a>model <span class="op">=</span> sm.OLS(y, X).fit()</span>
-<span id="cb14-4"><a href=""></a><span class="co"># Print the coefficients and SSE</span></span>
-<span id="cb14-5"><a href=""></a>betas <span class="op">=</span> model.params</span>
-<span id="cb14-6"><a href=""></a>y_hat <span class="op">=</span> model.fittedvalues</span>
-<span id="cb14-7"><a href=""></a>epsilon_hat <span class="op">=</span> model.resid</span>
-<span id="cb14-8"><a href=""></a>SSE <span class="op">=</span> np.<span class="bu">sum</span>(epsilon_hat <span class="op">**</span> <span class="dv">2</span>)</span>
-<span id="cb14-9"><a href=""></a>r2 <span class="op">=</span> model.rsquared</span>
-<span id="cb14-10"><a href=""></a><span class="bu">print</span>(<span class="st">"Coefficients (betas):"</span>, np.<span class="bu">round</span>(betas, <span class="dv">2</span>))</span>
-<span id="cb14-11"><a href=""></a><span class="bu">print</span>(<span class="st">"(SSE):"</span>, SSE)</span>
-<span id="cb14-12"><a href=""></a><span class="bu">print</span>(<span class="st">"(R^2):"</span>, r2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Coefficients (betas): [-21.55  12.49   0.13  13.08]
-(SSE): 334982.94691739464
-(R^2): 0.6350369859143852</code></pre>
-</div>
-</div>
-</section>
-<section class="slide level2">
-
 <h4 id="code-example-in-r">Code example in R</h4>
-<div id="f706560e" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href=""></a>library(wooldridge)</span>
-<span id="cb16-2"><a href=""></a>df <span class="op">&lt;-</span> wooldridge::hprice1</span>
-<span id="cb16-3"><a href=""></a>df$intercept <span class="op">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb16-4"><a href=""></a>model <span class="op">&lt;-</span> lm(price <span class="op">~</span> intercept <span class="op">+</span> bdrms <span class="op">+</span> sqrft <span class="op">+</span> colonial, data <span class="op">=</span> df)</span>
-<span id="cb16-5"><a href=""></a></span>
-<span id="cb16-6"><a href=""></a>summary(model)$coefficients</span>
-<span id="cb16-7"><a href=""></a>SSE <span class="op">&lt;-</span> <span class="bu">sum</span>(residuals(model)<span class="op">^</span><span class="dv">2</span>)</span>
-<span id="cb16-8"><a href=""></a>r2 <span class="op">&lt;-</span> summary(model)$r.squared</span>
-<span id="cb16-9"><a href=""></a></span>
-<span id="cb16-10"><a href=""></a><span class="bu">print</span>(paste(<span class="st">"Coefficients (betas):"</span>, <span class="bu">round</span>(coef(model), <span class="dv">2</span>)))</span>
-<span id="cb16-11"><a href=""></a><span class="bu">print</span>(paste(<span class="st">"SSE:"</span>, <span class="bu">round</span>(SSE, <span class="dv">2</span>)))</span>
-<span id="cb16-12"><a href=""></a><span class="bu">print</span>(paste(<span class="st">"R^2:"</span>, <span class="bu">round</span>(r2, <span class="dv">4</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href=""></a><span class="co">#Estimate the model with lm function </span></span>
+<span id="cb12-2"><a href=""></a>model <span class="ot">&lt;-</span> <span class="fu">lm</span>(price <span class="sc">~</span> bdrms <span class="sc">+</span> sqrft <span class="sc">+</span> colonial, <span class="at">data =</span> df)</span>
+<span id="cb12-3"><a href=""></a>beta_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(model)</span>
+<span id="cb12-4"><a href=""></a>y_hat <span class="ot">&lt;-</span> <span class="fu">fitted</span>(model)</span>
+<span id="cb12-5"><a href=""></a>epsilon_hat <span class="ot">&lt;-</span> <span class="fu">residuals</span>(model)</span>
+<span id="cb12-6"><a href=""></a></span>
+<span id="cb12-7"><a href=""></a>sse <span class="ot">&lt;-</span> <span class="fu">sum</span>(epsilon_hat<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb12-8"><a href=""></a>r2 <span class="ot">&lt;-</span> <span class="fu">summary</span>(model)<span class="sc">$</span>r.squared</span>
+<span id="cb12-9"><a href=""></a><span class="fu">cat</span>(<span class="st">"Coefficients (betas):</span><span class="sc">\n</span><span class="st">"</span>, beta_hat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Coefficients (betas):
+ -21.55241 12.48749 0.1298488 13.07755</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href=""></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">SSE:"</span>, <span class="fu">round</span>(sse, <span class="dv">2</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+SSE: 334983 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href=""></a><span class="fu">cat</span>(<span class="st">"R^2:"</span>, <span class="fu">round</span>(r2, <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>R^2: 0.635 </code></pre>
+</div>
 </div>
 </section>
 <section class="slide level2">
@@ -769,32 +574,39 @@ price_n
 <h3 id="plotting-observations-and-fitted-line">4. Plotting Observations and Fitted Line</h3>
 <p>For a simple model of <span class="math inline">\(K=2\)</span>, estimate the model and plot the observations and the fitted line.</p>
 <p><span class="math display">\[ price_i = \beta_1 + \beta_2 \cdot sqrft_i + \epsilon_i \]</span></p>
-<div id="71adbf35" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href=""></a><span class="co">#estimate the model</span></span>
-<span id="cb17-2"><a href=""></a></span>
-<span id="cb17-3"><a href=""></a>X <span class="op">=</span> df[[<span class="st">'intercept'</span>, <span class="st">'sqrft'</span>]].values</span>
-<span id="cb17-4"><a href=""></a>y <span class="op">=</span> df[<span class="st">'price'</span>].values</span>
-<span id="cb17-5"><a href=""></a><span class="co">#using statsmodels</span></span>
-<span id="cb17-6"><a href=""></a>model <span class="op">=</span> sm.OLS(y, X).fit()</span>
-<span id="cb17-7"><a href=""></a>betas <span class="op">=</span> model.params</span>
-<span id="cb17-8"><a href=""></a>y_hat <span class="op">=</span> model.fittedvalues</span>
-<span id="cb17-9"><a href=""></a><span class="bu">print</span>(<span class="st">"Coefficients (betas):"</span>, np.<span class="bu">round</span>(betas, <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href=""></a><span class="co">#estimate the model</span></span>
+<span id="cb18-2"><a href=""></a><span class="co">#first we need to estimate simple model</span></span>
+<span id="cb18-3"><a href=""></a>model <span class="ot">&lt;-</span> <span class="fu">lm</span>(price <span class="sc">~</span> sqrft, <span class="at">data =</span> df)</span>
+<span id="cb18-4"><a href=""></a>y_hat <span class="ot">&lt;-</span> <span class="fu">fitted</span>(model)</span>
+<span id="cb18-5"><a href=""></a>beta_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(model)</span>
+<span id="cb18-6"><a href=""></a>beta_hat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Coefficients (betas): [11.2   0.14]</code></pre>
+<pre><code>(Intercept)       sqrft 
+  11.204145    0.140211 </code></pre>
 </div>
 </div>
 </section>
 <section class="slide level2">
 
-<div id="33be27a8" class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href=""></a><span class="co"># Scatter: data points</span></span>
-<span id="cb19-2"><a href=""></a>sns.scatterplot(x<span class="op">=</span>df[<span class="st">'sqrft'</span>], y<span class="op">=</span>df[<span class="st">'price'</span>], color<span class="op">=</span><span class="st">'purple'</span>, s<span class="op">=</span><span class="dv">50</span>, ax<span class="op">=</span>ax)</span>
-<span id="cb19-3"><a href=""></a><span class="co"># Fitted line</span></span>
-<span id="cb19-4"><a href=""></a>sns.lineplot(x<span class="op">=</span>df[<span class="st">'sqrft'</span>], y<span class="op">=</span>y_hat, color<span class="op">=</span><span class="st">'grey'</span>, ax<span class="op">=</span>ax)</span>
-<span id="cb19-5"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href=""></a><span class="co">#plot observations with scatter and fitted line</span></span>
+<span id="cb20-2"><a href=""></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb20-3"><a href=""></a>    <span class="co">#scatter with raw data</span></span>
+<span id="cb20-4"><a href=""></a>    <span class="fu">geom_point</span>(<span class="at">data =</span> df, <span class="fu">aes</span>(<span class="at">x =</span> sqrft, <span class="at">y =</span> price),</span>
+<span id="cb20-5"><a href=""></a>    <span class="at">color =</span> <span class="st">'#00518b'</span>) <span class="sc">+</span></span>
+<span id="cb20-6"><a href=""></a></span>
+<span id="cb20-7"><a href=""></a>    <span class="fu">geom_abline</span>(<span class="at">intercept=</span> beta_hat[<span class="dv">1</span>], <span class="at">slope =</span> beta_hat[<span class="dv">2</span>],</span>
+<span id="cb20-8"><a href=""></a>    <span class="at">color =</span> <span class="st">'black'</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb20-9"><a href=""></a>    <span class="co">#labels and styling</span></span>
+<span id="cb20-10"><a href=""></a>    <span class="fu">labs</span>(</span>
+<span id="cb20-11"><a href=""></a>        <span class="at">title =</span> <span class="st">'House size and price'</span>,</span>
+<span id="cb20-12"><a href=""></a>        <span class="at">x =</span> <span class="st">'sqrft'</span>,</span>
+<span id="cb20-13"><a href=""></a>        <span class="at">y=</span><span class="st">'house price in 1000 usd'</span></span>
+<span id="cb20-14"><a href=""></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
-<img data-src="TA2_files/figure-revealjs/cell-15-output-1.png" class="r-stretch"></section>
+<img data-src="TA2_files/figure-revealjs/unnamed-chunk-13-1.png" width="960" class="r-stretch"></section>
 <section class="slide level2">
 
 <h3 id="numerical-property-of-ols">5. Numerical Property of OLS</h3>
@@ -808,7 +620,7 @@ price_n
 <p>These properties are independent of the statistical assumptions, they are purely mathematical properties of the OLS estimator, that hold given a sample.</p>
 <ol type="1">
 <li><p><span class="math display">\[\sum_{i=1}^{n} \hat{\varepsilon_i} = 0\]</span></p></li>
-<li><p><span class="math display">\[X' \hat{\varepsilon} = 0\]</span></p></li>
+<li><p>OLS is unitdependent, hence SSE is also unit independent.</p></li>
 </ol>
 </div>
 </div>
@@ -818,30 +630,44 @@ price_n
 <section class="slide level2">
 
 <h4 id="sum-of-residuals-is-zero">1. Sum of residuals is zero</h4>
-<div id="3a716209" class="cell" data-execution_count="15">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href=""></a>epsilon_hat <span class="op">=</span> y <span class="op">-</span> y_hat</span>
-<span id="cb20-2"><a href=""></a><span class="bu">print</span>(epsilon_hat.<span class="bu">sum</span>().<span class="bu">round</span>(<span class="dv">8</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href=""></a>epsilon_hat <span class="ot">&lt;-</span> <span class="fu">residuals</span>(model)</span>
+<span id="cb21-2"><a href=""></a><span class="fu">round</span>(<span class="fu">sum</span>(epsilon_hat),<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>-0.0</code></pre>
+<pre><code>[1] 0</code></pre>
 </div>
 </div>
 <p>Illustration:</p>
 
-<img data-src="TA2_files/figure-revealjs/cell-17-output-1.png" class="r-stretch"></section>
+<img data-src="TA2_files/figure-revealjs/unnamed-chunk-15-1.png" width="960" class="r-stretch"></section>
 <section class="slide level2">
 
-<h4 id="residuals-are-orthogonal-to-regressors">2. Residuals are orthogonal to regressors</h4>
-<div id="3c355ba7" class="cell" data-execution_count="17">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href=""></a>X_t_epsilon <span class="op">=</span> X.T <span class="op">@</span> epsilon_hat</span>
-<span id="cb22-2"><a href=""></a><span class="bu">print</span>(np.<span class="bu">round</span>(X_t_epsilon, <span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<h4 id="ols-unit-dependent-hence-sse-also-unit-dependent.">2. OLS unit dependent, hence SSE also unit dependent.</h4>
+<p>Our dependent variable is expressed in $1000s, so let’s scale it to actual dollars and see how the SSE changes.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href=""></a>df<span class="sc">$</span>price <span class="ot">&lt;-</span> df<span class="sc">$</span>price <span class="sc">*</span> <span class="dv">1000</span></span>
+<span id="cb23-2"><a href=""></a>model_dollars <span class="ot">&lt;-</span> <span class="fu">lm</span>(price <span class="sc">~</span> sqrft, <span class="at">data =</span> df)</span>
+<span id="cb23-3"><a href=""></a>beta_hat_dollars <span class="ot">&lt;-</span> <span class="fu">coef</span>(model_dollars)</span>
+<span id="cb23-4"><a href=""></a>sse_dollars <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">residuals</span>(model_dollars)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb23-5"><a href=""></a><span class="fu">cat</span>(<span class="st">"Coefficients in thousands of dollars:"</span>, <span class="fu">round</span>(beta_hat, <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[-0. -0.]</code></pre>
+<pre><code>Coefficients in thousands of dollars: 11.2041 0.1402 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href=""></a><span class="fu">cat</span>(<span class="st">"Coefficients in dollars:"</span>, <span class="fu">round</span>(beta_hat_dollars, <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Coefficients in dollars: 11204.15 140.211 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href=""></a><span class="fu">cat</span>(<span class="st">"SSE in thousands of dollars:"</span>, <span class="fu">round</span>(sse, <span class="dv">2</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SSE in thousands of dollars: 334983 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href=""></a><span class="fu">cat</span>(<span class="st">"SSE in dollars:"</span>, <span class="fu">round</span>(sse_dollars, <span class="dv">2</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SSE in dollars: 348053431609 </code></pre>
 </div>
 </div>
-<p>Illustration:</p>
 
-
-<img data-src="TA2_files/figure-revealjs/cell-19-output-1.png" class="r-stretch"></section>
+</section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
@@ -1057,6 +883,44 @@ price_n
         ]
       });
     </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
     <script id="quarto-html-after-body" type="application/javascript">
       window.document.addEventListener("DOMContentLoaded", function (event) {
         const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")

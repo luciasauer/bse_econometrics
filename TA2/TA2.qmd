@@ -6,6 +6,7 @@ institute: "<em>Barcelona School of Economics</em>"
 date: "2025-10-01"
 format:
   revealjs:
+    df-print: paged
     #theme: metropolis
     transition: fade
     slide-number: true
@@ -70,62 +71,79 @@ where $N_x$ is the number of observations with $X_i = x$.
 
 [Description dataset](http://fmwww.bc.edu/ec-p/data/wooldridge/datasets.list.html)
 
-```{python}
+```{r, message=FALSE, warning=FALSE}
 #| echo: true
 #| eval: true
-
-import wooldridge
-df = wooldridge.data('hprice1')
-#Look to a sample of 8 observations
-df.sample(8)
+library(wooldridge)
+library(dplyr)
+df <- wooldridge::hprice1
+# Sample of 8 observations
+df[sample(nrow(df), 8), ]
 ```
 ---
 
-### Compute Conditional Mean
-```{python}
+### Compute Conditional Mean in R
+```{r}
 #| echo: true
 #| eval: true
-import pandas as pd
-df_grouped = df.groupby('bdrms')['price'].mean().reset_index()
+df_grouped <- df %>%
+  group_by(bdrms) %>%
+  summarise(mean_price = mean(price))
 df_grouped
 ```
 
 ---
-### Plot Conditional Mean
-```{python}
+
+
+
+### Plot Conditional Mean in R
+```{r}
 #| echo: true
 #| eval: false
-import matplotlib.pyplot as plt
-import seaborn as sns
-sns.scatterplot(data=df, x='bdrms', y='price', color='purple', s=100)
-sns.lineplot(data=df_grouped, x='bdrms', y='price', color='purple')
-plt.show()
+library(ggplot2)
+ggplot() +
+  geom_point(data = df, aes(x = bdrms, y = price),
+             color = 'orange', alpha = 0.6, size = 3) +
+  geom_line(data = df_grouped, aes(x = bdrms, y = mean_price),
+            color = 'orange', size = 1) +
+  labs(title = expression(hat(E)[price ~ "|" ~ bdrms]),
+       x = "Number of bedrooms",
+       y = "Average house price")
 ```
-```{python}
+```{r}
 #| echo: false
 #| eval: true
-import matplotlib.pyplot as plt
-import seaborn as sns
-fig, ax = plt.subplots(figsize=(6,5))
-sns.scatterplot(data=df, x='bdrms', y='price', color='purple', s=100, ax=ax, alpha=0.6, edgecolor='w')
-sns.lineplot(data=df_grouped, x='bdrms', y='price', color='purple', marker='o', ax=ax)
-ax.set_title(r'$\hat{E}[price | bdrms]$', fontsize=16)
-ax.set_xlabel('Number of bedrooms', fontsize=14)
-ax.set_ylabel('Average house price', fontsize=14)
-ax.spines["top"].set_visible(False)
-ax.spines["right"].set_visible(False)
-ax.spines["bottom"].set_color("black")
-ax.spines["left"].set_color("black")
-# Set tick color to black
-ax.tick_params(axis="x", colors="black")
-ax.tick_params(axis="y", colors="black")
-plt.tight_layout()
-plt.show()
+library(ggplot2)
+#initialize the plot
+ggplot() +
+  # Scatter of raw data
+  geom_point(data = df, aes(x = bdrms, y = price),
+             color = "orange", size = 3, alpha = 0.6) +
+  
+  # Line plot of conditional means
+  geom_line(data = df_grouped, aes(x = bdrms, y = mean_price),
+            color = "orange", linewidth = 1) +
+  
+  # Titles and labels
+  labs(
+    title = expression(hat(E)*"["*price*"|"* bdrms*"]"),
+    x = "Number of bedrooms",
+    y = "House price"
+  ) +
+  
+  # Styling similar to your Python example
+  theme_minimal(base_size = 14) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "grey80"),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),
+    plot.title = element_text(size = 16, face = "bold")
+  )
 ```
 
-
-
 ---
+
 
 ## OLS in Matrix Algebra
 Using our dataset, we can write the model as:
@@ -190,17 +208,20 @@ The solution is given by:
 
 ---
 
-```{python}
+```{r}
 #| echo: true
 #| eval: true
-import numpy as np
-df['intercept'] = 1
-X = df[['intercept', 'bdrms', 'sqrft', 'colonial']].values
-y = df['price'].values
-X_tX = X.T @ X
-X_ty = X.T @ y
-beta_hat = np.linalg.inv(X_tX) @ X_ty
-print("Coefficients (beta_hat):",np.round(beta_hat,2))
+df$intercept <- 1
+X <- as.matrix(df[, c("intercept", "bdrms", "sqrft", "colonial")])
+y <-df$price
+
+#define X_tX and X_ty
+X_tX <- t(X)%*%X
+X_ty <- t(X)%*%y
+
+#solve the system
+beta_hat<- solve(X_tX)%*%X_ty
+round(beta_hat, 2)
 ```
 
 Fitted model:
@@ -219,21 +240,19 @@ where the dependent variable `price` is in **$1000s**.
  $${\hat{y}} = {X}\hat{\beta}$$ 
 
 
-```{python}
+```{r}
 #| echo: true
 #| eval: true
 # Fitted values
-y_hat = X @ beta_hat
-print(np.round(y_hat[:10], 2))
+y_hat <- X %*% beta_hat
 ```
 
 $$ \hat{\varepsilon} = {y} - {\hat{y}} $$
-```{python}
+```{r}
 #| echo: true
 #| eval: true
 # Residuals
-epsilon_hat = y - y_hat
-print(np.round(epsilon_hat[:10], 2))
+epsilon_hat <- y - y_hat
 ```
 ::: {.callout-warning title="Units" icon="false"}
 1. In what units are the fitted values ${\hat{y}}$?  
@@ -251,12 +270,12 @@ Note that this is exactly the same as:
 
 $$ SSE = \sum_{i=1}^{n} (\hat{\varepsilon}_{i})^{2} = \sum_{i=1}^n (y_i - \hat{y}_i)^2$$
 
-```{python}
+```{r}
 #| echo: true
 #| eval: true
 #Sum of Squared Errors
-SSE = epsilon_hat.T @ epsilon_hat
-print(np.round(SSE, 2))
+SSE <- t(epsilon_hat) %*% epsilon_hat
+round(SSE, 2)
 ```
 ::: {.callout-warning title = "SSE Units" icon=false}
 **Note:** The SSE is in the squared units of the dependent variable (here, the price in 1000s of dollars).
@@ -271,14 +290,14 @@ $$R^2 = 1 - \frac{SSE}{SST}$$
 where
 $$SST = ({y} - \bar{y}{1})'({y} - \bar{y}{1})$$
 
-```{python}
+```{r}
 #| echo: true
 #| eval: true
 # Total Sum of Squares
-y_bar = np.mean(y)
-SST = ((y - y_bar).T @ (y - y_bar))
-r2 = 1 - (SSE / SST)
-print(np.round(r2, 4))
+y_bar <- mean(y)
+SST <- t(y - y_bar) %*% (y - y_bar)
+r2 <- 1 - SSE/SST
+round(r2, 4)
 ```
 ::: {.callout-warning title = "$R^2$ Units" icon=false}
 **Note:** The $R^2$ is unit free, and tells us that about 64\% of the variation in house price is captured by the model.
@@ -298,44 +317,23 @@ All the operations we did in matrix algebra can be done using preset functions i
 
 ---
 
-#### Code example in Python
-
-```{python}
-#| echo: true
-#| eval: true
-import statsmodels.api as sm
-# Fit the model using statsmodels (OLS)
-model = sm.OLS(y, X).fit()
-# Print the coefficients and SSE
-betas = model.params
-y_hat = model.fittedvalues
-epsilon_hat = model.resid
-SSE = np.sum(epsilon_hat ** 2)
-r2 = model.rsquared
-print("Coefficients (betas):", np.round(betas, 2))
-print("(SSE):", SSE)
-print("(R^2):", r2)
-
-```
----
-
 #### Code example in R
 
-```{python}
+```{r}
 #| echo: true
-#| eval: false
-library(wooldridge)
-df <- wooldridge::hprice1
-df$intercept <- 1
-model <- lm(price ~ intercept + bdrms + sqrft + colonial, data = df)
+#| eval: true
+#Estimate the model with lm function 
+model <- lm(price ~ bdrms + sqrft + colonial, data = df)
+beta_hat <- coef(model)
+y_hat <- fitted(model)
+epsilon_hat <- residuals(model)
 
-summary(model)$coefficients
-SSE <- sum(residuals(model)^2)
+sse <- sum(epsilon_hat^2)
 r2 <- summary(model)$r.squared
+cat("Coefficients (betas):\n", beta_hat)
 
-print(paste("Coefficients (betas):", round(coef(model), 2)))
-print(paste("SSE:", round(SSE, 2)))
-print(paste("R^2:", round(r2, 4)))
+cat("\nSSE:", round(sse, 2), "\n")
+cat("R^2:", round(r2, 4), "\n")
 ```
 
 ---
@@ -346,64 +344,56 @@ For a simple model of $K=2$, estimate the model and plot the observations and th
 
 $$ price_i = \beta_1 + \beta_2 \cdot sqrft_i + \epsilon_i $$
 
-```{python}
+```{r}
 #| echo: true
 #| eval: true
 #estimate the model
-
-X = df[['intercept', 'sqrft']].values
-y = df['price'].values
-#using statsmodels
-model = sm.OLS(y, X).fit()
-betas = model.params
-y_hat = model.fittedvalues
-print("Coefficients (betas):", np.round(betas, 2))
+#first we need to estimate simple model
+model <- lm(price ~ sqrft, data = df)
+y_hat <- fitted(model)
+beta_hat <- coef(model)
+beta_hat
 ```
 ---
 
-```{python}
+```{r}
 #| echo: true
 #| eval: false
+#plot observations with scatter and fitted line
+ggplot() + 
+    #scatter with raw data
+    geom_point(data = df, aes(x = sqrft, y = price),
+    color = '#00518b') +
 
-# Scatter: data points
-sns.scatterplot(x=df['sqrft'], y=df['price'], color='purple', s=50, ax=ax)
-# Fitted line
-sns.lineplot(x=df['sqrft'], y=y_hat, color='grey', ax=ax)
-plt.show()
+    geom_abline(intercept= beta_hat[1], slope = beta_hat[2],
+    color = 'black', linewidth = 1) +
+    #labels and styling
+    labs(
+        title = 'House size and price',
+        x = 'sqrft',
+        y='house price in 1000 usd'
+    )
 
 ```
 
-```{python}
+```{r}
 #| echo: false
 #| eval: true
-fig, ax = plt.subplots(figsize=(6,5))
+eq <- paste0("price = ", round(beta_hat[1], 2), " + ", round(beta_hat[2], 2), " * sqrft")
 
-# Scatter: data points
-sns.scatterplot(x=df['sqrft'], y=df['price'], color='purple', s=50, ax=ax, label='Data points')
-
-# Fitted line
-sns.lineplot(x=df['sqrft'], y=y_hat, color='grey', ax=ax, label=f'price = {betas[0]:.2f} + {betas[1]:.2f} * sqrft')
-
-# Titles and labels
-ax.set_title('House Size and House Price', fontsize=16)
-ax.set_xlabel('House Size (Sqrft)', fontsize=14)
-ax.set_ylabel('House Price (1000 USD)', fontsize=14)
-
-# Spine formatting
-ax.spines["top"].set_visible(False)
-ax.spines["right"].set_visible(False)
-ax.spines["bottom"].set_color("black")
-ax.spines["left"].set_color("black")
-
-# Tick formatting
-ax.tick_params(axis="x", colors="black")
-ax.tick_params(axis="y", colors="black")
-
-# Legend
-ax.legend(fontsize=12, frameon=False)
-
-plt.tight_layout()
-plt.show()
+ggplot(df, aes(x = sqrft, y = price)) +
+  geom_point(color = "#00518b", size = 3, alpha = 0.6) +
+  geom_abline(intercept = beta_hat[1], slope = beta_hat[2], color = "black", linewidth = 1) +
+  annotate("text", x = min(df$sqrft), y = max(df$price), label = eq, hjust = 0, size = 5) +
+  labs(title = "House Size and House Price", x = "House Size (Sqrft)", y = "House Price (1000 USD)") +
+  theme_minimal(base_size = 14) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "grey80"),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),
+    plot.title = element_text(size = 16, face = "bold")
+  )
 
 ```
 
@@ -416,74 +406,68 @@ These properties are independent of the statistical assumptions, they are purely
 
 1. $$\sum_{i=1}^{n} \hat{\varepsilon_i} = 0$$
 
-2. $$X' \hat{\varepsilon} = 0$$
+2. OLS is unitdependent, hence SSE is also unit independent.
 
 :::
 
 ---
 
 #### 1. Sum of residuals is zero
-```{python}
+```{r}
 #| echo: true
 #| eval: true
-epsilon_hat = y - y_hat
-print(epsilon_hat.sum().round(8))
+epsilon_hat <- residuals(model)
+round(sum(epsilon_hat),2)
 ```
 
 Illustration:
-```{python}
+```{r}
 #| echo: false
 #| eval: true
 # 1) Residuals vs index (sum of residuals = 0)
-fig, ax = plt.subplots(figsize=(6,5))
-plt.scatter(range(len(epsilon_hat)), epsilon_hat, color='green', alpha=0.6, s=50)
-plt.axhline(0, color='grey', linestyle='--') 
-# Spine formatting
-ax.spines["top"].set_visible(False)
-ax.spines["right"].set_visible(False)
-ax.spines["bottom"].set_color("black")
-ax.spines["left"].set_color("black")
+# Create a data frame with index and residuals
+residuals_df <- data.frame(
+  index = 1:length(epsilon_hat),
+  residuals = epsilon_hat
+)
+#inspect visually this property
+ggplot(residuals_df, aes(x = index, y = residuals)) +
+  geom_point(color = "darkgreen", size = 3, alpha = 0.6) +   # scatter points
+  geom_hline(yintercept = 0, color = "black", linetype = "dashed") +  # horizontal line at 0
+  labs(
+    x = "Observation index",
+    y = expression(hat(epsilon)),
+    title = expression(hat(epsilon) ~ "vs Observation Index")
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "grey80"),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),
+    plot.title = element_text(size = 16, face = "bold")
+  )
 
-# Tick formatting
-ax.tick_params(axis="x", colors="black")
-ax.tick_params(axis="y", colors="black") # horizontal line at 0
-plt.xlabel('Observation index')
-plt.ylabel(r'$\hat{\epsilon}$')
-plt.title(r'$\hat{\epsilon}$ vs Observation Index')
-plt.show()
 ```
 ---
 
-#### 2. Residuals are orthogonal to regressors
+#### 2. OLS unit dependent, hence SSE also unit dependent.
 
-```{python}
+Our dependent variable is expressed in \$1000s, so let's scale it to actual dollars and see how the SSE changes.
+
+
+```{r}
 #| echo: true
 #| eval: true
+df$price <- df$price * 1000
+model_dollars <- lm(price ~ sqrft, data = df)
+beta_hat_dollars <- coef(model_dollars)
+sse_dollars <- sum(residuals(model_dollars)^2)
+cat("Coefficients in thousands of dollars:", round(beta_hat, 4), "\n")
+cat("Coefficients in dollars:", round(beta_hat_dollars, 4), "\n")
 
-X_t_epsilon = X.T @ epsilon_hat
-print(np.round(X_t_epsilon, 5))
+cat("SSE in thousands of dollars:", round(sse, 2), "\n")
+cat("SSE in dollars:", round(sse_dollars, 2), "\n")
+
 ```
 
-Illustration:
-```{python}
-
-#| echo: false
-#| eval: true
-# 3) Residuals vs independent variable (residuals ⟂ X)
-fig, ax = plt.subplots(figsize=(6,5))
-sns.scatterplot(x=df['sqrft'], y=epsilon_hat, color='orange', ax=ax)
-plt.axhline(0, color='black', linestyle='--')
-plt.xlabel('sqrft')
-plt.ylabel(r'$\hat{\epsilon}$')
-plt.title(r'$\hat{\epsilon}$ vs sqrft')
-# Spine formatting
-ax.spines["top"].set_visible(False)
-ax.spines["right"].set_visible(False)
-ax.spines["bottom"].set_color("black")
-ax.spines["left"].set_color("black")
-
-# Tick formatting
-ax.tick_params(axis="x", colors="black")
-ax.tick_params(axis="y", colors="black")
-plt.show()
-```
