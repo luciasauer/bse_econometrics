@@ -3,7 +3,7 @@ title: "Econometrics"
 subtitle: "<span class=\"subtitle-text\">TA Session 2</span>"
 author: "Lucia Sauer"
 institute: "<em>Barcelona School of Economics</em>"
-date: "2025-10-01"
+date: "2025-10-03"
 format:
   revealjs:
     df-print: paged
@@ -200,7 +200,7 @@ $$
 #### 1. Estimate the OLS Coefficients
 Starting from the OLS objective function:
 
-$$ \min_{{b}} {\varepsilon}'{\varepsilon} = \min_{{b}} ({y} - {X}{b})'({y} - {X}{b}) $$
+$$ \min_{{\tilde{\beta}}} {\tilde{\varepsilon}}'{\tilde{\varepsilon}} = \min_{{\tilde{\beta}}} ({y} - {X}{\tilde{\beta}})'({y} - {X}{\tilde{\beta}}) $$
 The solution is given by:
 
 <div style="text-align: center;"> <div style="border:2px solid #9d03c4ff; padding:10px; border-radius:8px; background-color:#f5e6ff; display:inline-block;"> $$\hat{\beta} = ({X}'{X})^{-1}{X}'{y}$$ </div> </div>
