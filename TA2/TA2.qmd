@@ -147,7 +147,7 @@ ggplot() +
 
 ## OLS in Matrix Algebra
 Using our dataset, we can write the model as:
-$$price\_i = \beta_1 + \beta_2 \cdot bdrms_i + \beta_3 \cdot sqrft_i + \beta_4 \cdot colonial + \varepsilon_i $$
+$$price\_i = \beta_1 + \beta_2 \cdot bdrms_i + \beta_3 \cdot sqrft_i + \beta_4 \cdot colonial_i + \varepsilon_i $$
 
 We can express this model in matrix form as:
 
