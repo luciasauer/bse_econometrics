@@ -1,0 +1,340 @@
+---
+title: "Econometrics"
+subtitle: "<span class='subtitle-text'>TA Session 3</span>"
+author: "Lucia Sauer"
+institute: "<em>Barcelona School of Economics</em>"
+date: "2025-10-10"
+format:
+  revealjs:
+    transition: fade
+    slide-number: true
+    progress: true
+    title-slide-attributes:
+      data-background-position: "95% 90%"
+      data-background-size: "100px"
+editor:
+  render-on-save: true
+---
+
+## Overview
+
+- Review of A1
+- Regression Analysis
+- Standard Error Calculation
+- Introduction to Stata
+- Hypothesis Testing
+- Export Regression output to LaTeX
+
+---
+
+## How I Grade (and Why I’m Tough 😅)
+
+
+<div style="text-align: center;">
+  <img src="tronchatoro_gif.gif" width="70%">
+</div>
+
+--- 
+
+::: {.callout-tip title = "Correction Principles" icon=false}
+
+When grading, I focus on three things:
+
+**1. Rigor:** 
+
+Be precise with **notation** and **concepts**.  
+
+
+**2. Clarity:**  
+
+Each line should have a clear purpose. Avoid algebraic noise.  
+
+   > “If your reader has to guess what you mean — rewrite it.”
+
+   
+**3. Conciseness:** 
+   
+Prove what’s asked, no more, no less.  
+
+   > “If you can prove something in 3 clean steps,  don’t use 10.”
+
+:::
+---
+
+## Common Mistakes (1)
+
+> “Expectations are over populations, not individuals.”
+
+$$E(y_i|d_i = 1)$$ captures the expected <code>variable_name</code> for individuals with <code>treatment_name</code> = 1.
+
+❌ It is **not**: 
+
+- the expectation of an individual outcome, nor  
+- the average of the observed $y_i$’s in the sample. 
+
+
+--- 
+
+## Common Mistakes (2)
+
+Best linear approximation can be written as:
+
+$$E^{*}(Y|X) = \beta_1 + \beta_2X$$ or just 
+
+$$\beta_1 + \beta_2X$$
+
+
+
+| ❌ Wrong | 🚫 Why |
+|----------|---------|
+| $E(Y|X) \approx \beta_1 + \beta_2X$ | Suggests population expectation equals linear approximation |
+| $Y = \beta_1 + \beta_2X + u$ | Treats the model as exact, not an approximation |
+| $\hat{Y} = \beta_1 + \beta_2X$ | Mixes estimator notation with population relation |
+
+
+## Common Mistakes (3)
+
+
+When deriving $\beta_1$ and $\beta_2$ from the OLS minimization problem, we are deriving the **population parameters**. 
+
+- Step 1: 
+
+$$\frac{\partial(.)}{\partial b_1}: \sum_{i=1}^{n} (y_i - b_1 - b_2x_i)$$
+
+- Step 2: once I set to 0, the solution is $\beta_1$ and $\beta_2$:
+
+$$\frac{\partial(.) }{\partial b_1}: \sum_{i=1}^{n} (y_i - \beta_1 - \beta_2x_i)=0$$
+
+--- 
+
+End of Review of A1...
+
+you are doing great, keep it up! 😊
+
+---
+
+## Birthweight Data
+
+The `bwght` dataset contains information on 1,388 births in the United States.
+
+It was collected to study the determinants of infant birth weight, particularly the effects of maternal smoking and socioeconomic factors during pregnancy.
+
+```{python}
+#| echo: true
+#| eval: true
+
+import pandas as pd
+import wooldridge as woo
+df = woo.data('bwght')
+df = df.dropna()
+df.head(5)
+```
+
+---
+
+## Regression Analysis
+
+
+$$\texttt{bwght}_i = \beta_1 + \beta_2 \texttt{cigs}_i + \beta_3 \texttt{parity}_i + \beta_4 \texttt{faminc}_i + \beta_5 \texttt{motheduc}_i + \beta_6 \texttt{fatheduc}_i + \epsilon_i$$
+
+where:
+
+- $\texttt{bwght}$: birth weight, in pounds; 
+- $\texttt{cigs}$: average number of cigarettes the mother smoked per day during pregnancy; 
+- $\texttt{parity}$: birth order of the child; 
+- $\texttt{faminc}$: annual family income; 
+- $\texttt{motheduc}$: years of schooling of the mother; 
+- $\texttt{fatheduc}$: years of schooling of the father.
+
+---
+
+## Results in Python
+
+```{python}
+#| echo: true
+#| eval: true
+import statsmodels.api as sm
+
+X = sm.add_constant(df[['cigs', 'parity', 'faminc', 'motheduc', 'fatheduc']])
+model = sm.OLS(df['bwght'], X).fit()
+print(model.summary())
+```
+
+---
+
+## Standard Error Calculation
+
+How does the $se(\hat{\beta}_2)$ is calculated?
+
+$$se(\hat{\beta}_2)=\sqrt{\hat{\sigma}^2(\mathbf{X}'\mathbf{X})^{-1}_{22}}$$
+
+where:
+
+- $\hat{\sigma}^2 = \frac{1}{n-K} \hat{\epsilon}'\hat{\epsilon}$ is the estimator of the variance of the error term.
+- $(\mathbf{X}'\mathbf{X})^{-1}_{22}$ is the second diagonal element of the inverse of the matrix $\mathbf{X}'\mathbf{X}$, which captures the variance of $\texttt{cigs}$ conditional on all other regressors.
+
+---
+
+To calculate $\hat{\sigma}^2$
+```{python}
+#| echo: true
+#| eval: true
+sse = model.ssr 
+sse
+```
+
+$$\frac{SSE}{n-K} = \frac{464041.14}{1191-6} $$
+
+
+To calculate $(\mathbf{X}'\mathbf{X})^{-1}_{22}$:
+
+```{python}
+#| echo: true
+#| eval: true
+import numpy as np
+XtX = np.dot(X.T, X)
+XtX_inv = np.linalg.inv(XtX)
+round(XtX_inv[1,1],4) # This is (X'X)^{-1}_{22}
+```
+
+Now let's calculate the standard error:
+
+```{python}
+#| echo: true
+#| eval: true
+n_k = model.df_resid  # n - K
+se_beta2 = np.sqrt((sse/n_k) * XtX_inv[1,1])
+round(se_beta2,4)
+```
+
+---
+
+
+
+## Introduction to <code>Stata</code>
+
+Stata is a statistical software widely used in econometrics.
+
+- <code>dta.</code> is the format for Stata datasets, but you can also import and export data in various formats like CSV, Excel, and more.
+- <code>do.</code> files are the native file formats of Stata where you can write and execute commands and share scripts with others.
+- Stata's interface is made up of various windows that can be moved around or closed to optimize the user's experience.
+
+To follow best practices, I found this tutorial very useful:
+[Stata Tutorial](https://sites.google.com/idinsight.org/bootcamp/lessons/1a-intro-to-stata)
+
+---
+
+
+Useful commands:
+
+- `use` to load a dataset
+- `describe` to get a summary of the dataset
+- `regress` to run a regression
+- `summarize` to get summary statistics
+- `gen` to create new variables
+- `browse` to view the dataset in a spreadsheet-like format
+- `outreg` to export regression results to LaTeX
+
+---
+
+## Example in Stata
+
+Let's load the `bwght` dataset.
+
+```stata
+**********************************************************
+* 2. Load Dataset
+**********************************************************
+
+* Install bcuse if not already installed
+ssc install bcuse 
+
+* Load Wooldridge dataset
+bcuse bwght, clear
+
+* Inspect data
+br in 1/10
+
+```
+---
+
+Run the regression:
+```stata
+**********************************************************
+* 3. Regression Analysis
+**********************************************************
+
+* Model:
+* bwght_i = β1 + β2*cigs_i + β3*parity_i + β4*faminc_i + β5*motheduc_i + β6*fatheduc_i + ε_i
+
+regress bwght cigs parity faminc motheduc fatheduc
+```
+
+
+
+---
+
+## Hypothesis Testing 
+
+We want to test:
+
+1. Whether $\texttt{cigs}$ is statistically significant.
+2. Whether $\texttt{motheduc}$ and $\texttt{fatheduc}$ are jointly statistically significant.
+
+::: {.callout-warning title = "Exercise" icon=false}
+
+1. Indicate **null and alternative hypotheses**.
+2. Write the expression of the **t-test statistic** or **F-test statistic** used for this test, and its assumed distribution.
+3. Indicate the decision rule.
+4. Draw the **acceptance and rejection regions** associated with this test. Properly label the axes. Include any relevant value to clearly identify both regions.
+5. At what **significance level** would the regressors be statistically significant? Draw the **p-value** associated to the test performed. Properly label the axes. What is the minimum significance level that would make this regressor be significant?
+:::
+
+
+
+---
+
+## Regression Output with <code>stargazer</code>
+
+<code>stargazer</code> is a package that creates well-formatted regression tables and exports them to LaTeX, HTML, or text formats.
+
+
+::: {.callout-caution collapse="true"}
+You will need to: 
+
+```bash
+uv sync 
+``` 
+
+your env because I have installed it <code>Stargazer</code> for this session.
+:::
+
+---
+
+### Example usage
+
+```{python}
+#| echo: true
+#| eval: true
+from stargazer.stargazer import Stargazer  
+stargazer = Stargazer([model])
+with open("regression_output.tex", "w") as f:
+    f.write(stargazer.render_latex())
+
+#Print the LaTeX code
+print(stargazer.render_latex())
+```
+
+---
+
+## How to attach tables in LaTeX
+
+Two versions:
+
+1. You can upload the .tex file to Overleaf and call it in your main .tex file with:
+```latex
+\input{regression_output.tex}
+```
+2. You can copy the code from the .tex file and paste it directly in your main .tex file.
+
+
