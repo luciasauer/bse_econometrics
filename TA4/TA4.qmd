@@ -1,0 +1,657 @@
+---
+title: "Econometrics"
+subtitle: "<span class='subtitle-text'>TA Session 4</span>"
+author: "Lucia Sauer"
+institute: "<em>Barcelona School of Economics</em>"
+date: "2025-10-15"
+format:
+  revealjs:
+    transition: fade
+    slide-number: true
+    progress: true
+    title-slide-attributes:
+      data-background-position: "95% 90%"
+      data-background-size: "100px"
+editor:
+  render-on-save: true
+
+---
+
+## Overview
+
+- Global Hypothesis Testing
+- Multiple Hypothesis Testing
+- Monte Carlo Simulations
+
+
+--- 
+
+Let's start by running the following regression:
+
+$$\texttt{colGPA}_i​=\beta_1​+\beta_2\texttt{​hsGPA}_i​+\beta_3​\texttt{job19}_i​
++\beta_4​\texttt{job20}_i​
++\beta_5​\texttt{skipped}_i​+\beta_6​\texttt{bgfriend}_i​+\beta_7​\texttt{alcohol}_i​ +\varepsilon_i​ $$
+
+where:
+
+- $\texttt{colGPA}$: college GPA
+- $\texttt{hsGPA}$: high school GPA
+- $\texttt{job19}$: worked in 2019 (1=yes, 0=no)
+- $\texttt{job20}$: worked in 2020 (1=yes, 0=no)
+- $\texttt{skipped}$: skipped classes (1=yes, 0=no)
+- $\texttt{bgfriend}$: has a boyfriend/girlfriend (1=yes, 0=no)
+- $\texttt{alcohol}$: alcohol consumption (1=yes, 0=no)
+
+
+
+---
+
+```stata
+bcuse gpa1, clear
+regress colgpa hsGPA job19 job20 skipped bgfriend alcohol
+```
+
+
+```{=html}
+<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
+      Source |       SS           df       MS      Number of obs   =       141
+-------------+----------------------------------   F(6, 134)       =      7.74
+       Model |  4.99628709         6  .832714515   Prob > F        =    0.0000
+    Residual |  14.4098124       134  .107535913   R-squared       =    0.2575
+-------------+----------------------------------   Adj R-squared   =    0.2242
+       Total |  19.4060994       140  .138614996   Root MSE        =    .32793
+
+------------------------------------------------------------------------------
+      colGPA | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       hsGPA |   .4649713   .0874578     5.32   0.000     .2919951    .6379475
+       job19 |  -.0052822   .0644549    -0.08   0.935    -.1327628    .1221984
+       job20 |  -.0765349   .0822574    -0.93   0.354    -.2392258    .0861559
+     skipped |  -.0940715   .0272287    -3.45   0.001    -.1479251   -.0402179
+    bgfriend |   .0991959   .0561251     1.77   0.079    -.0118099    .2102016
+     alcohol |   .0356602   .0228506     1.56   0.121    -.0095344    .0808547
+       _cons |   1.476362   .3072519     4.81   0.000     .8686709    2.084052
+------------------------------------------------------------------------------
+</pre>
+```
+
+::: {.callout-caution title = "Global Hypothesis Testing" icon=false}
+
+What is testing the F value present in the regression output?
+
+:::
+
+---
+
+## Global Hypothesis Testing
+
+We want to test whether our regression model adds explanatory power beyond the mean.
+
+
+::: {.callout-warning title = "Exercise" icon=false}
+
+1. Indicate **null and alternative hypotheses**.
+2. Write the expression of the **F-test statistic** used for this test, and its assumed distribution.
+3. Run the restricted model, compute the RSSE (restricted model), SSE (unrestricted model) and F-statistic.
+4. Find the critical value of the F-distribution and compute the p-value.
+
+:::
+
+---
+
+### 1. Indicate **null and alternative hypotheses**.
+
+<div style="color:gray">
+
+$$H_0: \beta_2 = \beta_3 = \beta_4 = \beta_5 = \beta_6 = \beta_7 = 0$$
+$$H_a: \text{at least one } \beta_j \neq 0$$
+
+Also can be written as:
+
+$$H_0: R\beta = r \quad \text{versus} \quad H_a: R\beta \neq r $$
+
+where:
+
+$$
+R = 
+\begin{bmatrix}
+0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 1
+\end{bmatrix}
+\qquad
+r = 
+\begin{bmatrix}
+0 \\
+0 \\
+0 \\
+0 \\
+0 \\
+0
+\end{bmatrix}
+\qquad
+q = 6
+$$
+
+</div>
+
+
+---
+
+### 2. **F-test statistic**
+<div style="color:gray">
+The F-test statistic is given by:
+
+$$F = \frac{(RSSE - SSE) / q}{SSE / (n - k)} \stackrel{Under H_0}{\sim} F_{6, 141-7} $$
+
+where:
+
+- $RSSE$ is the sum of squared errors for the restricted model
+- $SSE$ is the sum of squared errors for the unrestricted model
+
+
+
+</div>
+
+---
+
+### 3. RSSE and SSE
+<div style="color:gray">
+
+1. The restricted model includes only an intercept (no explanatory variables):
+
+
+$$\texttt{colGPA}_i​ = \beta_1 + \epsilon_i \quad \hat{\texttt{colGPA}}_i = \bar{\texttt{colGPA}}_i$$
+
+
+2. Compute the RSSE, SSE and F-statistic:
+```stata
+// RSSE
+summarize colGPA
+scalar colgpa_mean = r(mean)
+generate double resid_R = colGPA - colgpa_mean
+generate double resid_R_sq = resid_R^2
+summarize resid_R_sq
+scalar RSSE = r(sum)
+// SSE
+scalar SSE = e(rss)
+scalar F = ((RSSE - SSE) / 6) / (SSE / (e(N) - 7))
+
+```
+</div>
+---
+
+### 4. Critical value and p-value
+<div style="color:gray">
+Decision rule:
+
+- If $F > F_{critical}$, reject $H_0$, otherwise do not reject $H_0$.
+
+
+  ```stata
+  // Critical value
+  scalar F_critical = invF(0.95, 6, e(N) - 7)
+  display F_critical F 
+  ```
+
+
+
+- If $p\text{-value} < \alpha$, reject $H_0$, otherwise do not reject $H_0$.
+
+  $$p\text{-value} = Prob\{F_{statistic}>F|H_0\}$$
+
+  ```stata
+  // P-value
+  scalar p_value = 1 - F(F, 6, e(N) - 7)
+  display p_value
+  ```
+</div>
+
+---
+
+## Multiple Hypothesis Testing
+
+Consider testing whether <code>job19</code> and <code>job20</code> are jointly significant at $\alpha=0.05$:
+
+
+::: {.callout-warning title = "Exercise" icon=false}
+
+1. Indicate **null and alternative hypotheses**.
+2. Write the expression of the **F-test statistic** used for this test, and its assumed distribution.
+3. Run the restricted model, compute the RSSE (restricted model), SSE (unrestricted model) and F-statistic.
+4. Find the critical value of the F-distribution and compute the p-value.
+5. Draw the p-value  and the critical value.
+6. Compare the results with the ones obtained in Stata.
+
+:::
+
+---
+
+## Monte Carlo Simulations
+
+
+<div style="text-align: center;">
+  <figure>
+    <img src="IMG_5988.jpg" width="50%">
+    <figcaption style="font-style: italic; font-size: 0.9em; margin-top: 5px;">
+      Monte Carlo Casino
+    </figcaption>
+  </figure>
+</div>
+
+---
+
+::: {.callout-tip icon=true title="Monte Carlo: a lab for estimators"}
+**Workflow**
+
+1. **Specify a known DGP** (the “true” model).
+2. **Generate** many random samples from it.
+3. **Estimate** the coefficients repeatedly.
+4. **Observe** the estimator’s behavior across replications:
+   - mean (*bias*)
+   - spread (*variance*)
+   - shape (*sampling distribution*)
+:::
+---
+
+### Data-Generating Process (DGP)
+
+We will generate $m=10000$ samples of size $n=100$ from the following DGP:
+
+::: {.callout-tip title = "DGP" icon=false background="lightgreen"}
+
+$$
+y_i = 4 + 2x_{i2} + 2x_{i3} + \varepsilon_i 
+$$
+
+$$\varepsilon_i \,|\, X_i \sim \text{i.i.d. } N(0,32)$$
+
+$$
+x_{i2} \sim U[0,40], \quad
+x_{i3} = x_{i2} + v_i, \; v_i \sim N(0, 16)
+$$
+
+:::
+
+
+---
+
+### Function in Python
+
+Let's create a function to analyze the behavior of $\hat{\beta}_2$:
+```{python}
+#| echo: false
+
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.api as sm
+
+sns.set(style="whitegrid", context="talk")
+```
+
+```{python}
+#| echo: true
+#| eval: true
+
+
+def simulate_betas(n=100, sigma_eps=32, sigma_v=16, reps=10000, conditional=False):
+    """
+    Monte Carlo simulation of β₂ from y = 4 + 2x₂ + 2x₃ + ε.
+    """
+    betas = []
+    
+    # For conditional distribution: fix X once
+    if conditional:
+        x2_fixed = np.random.uniform(0, 40, n)
+        v_fixed  = np.random.normal(0, sigma_v, n)
+        x3_fixed = x2_fixed + v_fixed
+    
+    for _ in range(reps):
+        if conditional:
+            x2, x3 = x2_fixed, x3_fixed
+        else:
+            x2 = np.random.uniform(0, 40, n)
+            v  = np.random.normal(0, sigma_v, n)
+            x3 = x2 + v
+
+        eps = np.random.normal(0, sigma_eps, n)
+        y = 4 + 2*x2 + 2*x3 + eps
+
+        X = sm.add_constant(np.column_stack([x2, x3]))
+        model = sm.OLS(y, X).fit()
+        betas.append(model.params[1])
+
+    return np.array(betas)
+```
+
+---
+
+Let's run the simulation for the conditional distribution of $\hat{\beta}_2$:
+
+```{python}
+#| echo: true
+#| eval: false
+#| fig-align: "center"
+
+betas_base = simulate_betas(n=1000, sigma_eps=32, sigma_v=16, reps=10000)
+
+plt.figure(figsize=(6,5))
+sns.kdeplot(betas_base, fill=True, alpha=0.5, color="purple", label="Baseline", edgecolor="black")
+plt.axvline(2, color="black", ls="--", label=r"True $\beta_2$")
+plt.title(r"$\hat{\beta}_2$ sampling distribution")
+plt.xlabel(r"$\hat{\beta}_2$")
+plt.show()
+```
+
+```{python}
+#| echo: false
+#| eval: true
+#| fig-align: "center"
+
+betas_base = simulate_betas(n=1000, sigma_eps=32, sigma_v=16, reps=10000)
+
+fig, ax = plt.subplots(figsize=(6,5))
+
+sns.kdeplot(betas_base, fill=True, alpha=0.5, color="purple", label="Baseline", edgecolor="black", ax=ax)
+plt.axvline(2, color="black", ls="--", label=r"True $\beta_2$")
+
+plt.title(r"$\hat{\beta}_2$ sampling distribution")
+plt.xlabel(r"$\hat{\beta}_2$")
+
+# Hide top and right spines
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+
+# Set bottom and left spines to black
+ax.spines["bottom"].set_color("black")
+ax.spines["left"].set_color("black")
+# Set tick color to black
+ax.tick_params(axis="x", colors="black")
+ax.tick_params(axis="y", colors="black")
+
+plt.tight_layout()
+
+plt.legend(frameon=False)
+plt.show()
+```
+
+---
+
+Now, let's increase $\sigma_{\varepsilon}^2$:
+
+```{python}
+#| echo: true
+#| eval: false
+#| fig-align: "center"
+
+betas_high_sigma = simulate_betas(n=1000, sigma_eps=64, sigma_v=16, reps=10000)
+betas_low_sigma = simulate_betas(n=1000, sigma_eps=16, sigma_v=16, reps=10000)
+
+plt.figure(figsize=(6,5))
+for sns, color, label in zip([betas_low_sigma, betas_base, betas_high_sigma], [r"$\sigma_{\varepsilon}=16$", r"$\sigma_{\varepsilon}=32$", r"$\sigma_{\varepsilon}=64$"]):
+    sns.kdeplot(sns, fill=True, alpha=0.5, edgecolor="black", color=color, label=label)
+plt.axvline(2, color="black", ls="--", label=r"True $\beta_2$")
+plt.title(r"$\hat{\beta}_2$ sampling distribution")
+plt.xlabel(r"$\hat{\beta}_2$")
+plt.show()
+```
+
+```{python}
+#| echo: false
+#| eval: true
+#| fig-align: "center"
+
+betas_base = simulate_betas(n=1000, sigma_eps=32, sigma_v=16, reps=10000)
+betas_low_sigma = simulate_betas(n=1000, sigma_eps=16, sigma_v=16, reps=10000)
+
+betas_high_sigma = simulate_betas(n=1000, sigma_eps=64, sigma_v=16, reps=10000)
+
+fig, ax = plt.subplots(figsize=(6,5))
+
+sns.kdeplot(betas_low_sigma, fill=True, alpha=0.5, color = 'orange', label=r"$\sigma_{\varepsilon}=16$", edgecolor="black", ax=ax)
+sns.kdeplot(betas_base, fill=True, alpha=0.5, color= 'purple',label=r"$\sigma_{\varepsilon}=32$", edgecolor="black", ax=ax)
+sns.kdeplot(betas_high_sigma, fill=True, alpha=0.5, color = 'darkblue', label=r"$\sigma_{\varepsilon}=64$", edgecolor="black", ax=ax)
+
+plt.axvline(2, color="black", ls="--", label=r"True $\beta_2$")
+
+plt.title(r"$\hat{\beta}_2$ sampling distribution")
+plt.xlabel(r"$\hat{\beta}_2$")
+
+# Hide top and right spines
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+
+# Set bottom and left spines to black
+ax.spines["bottom"].set_color("black")
+ax.spines["left"].set_color("black")
+# Set tick color to black
+ax.tick_params(axis="x", colors="black")
+ax.tick_params(axis="y", colors="black")
+
+plt.tight_layout()
+
+plt.legend(frameon=False)
+plt.show()
+```
+
+---
+
+<div style="color:gray">
+The OLS variance can then be expressed as:
+$$
+Var(\hat{\beta}^2|X) =
+\sigma_{\varepsilon}^2\frac{1}{(1-R_2^2)}\frac{1}{\sum (x_{2i}-\bar{x}_2)^2}
+$$
+
+Hence, as  $\sigma_{\varepsilon}^2 \uparrow$, the numerator increases and the estimator becomes increasingly unstable.
+
+</div>
+
+---
+
+
+Now, let's reduce $\sigma_{v}^2$, the collinearity between $x_2$ and $x_3$:
+
+```{python}
+#| echo: true
+#| eval: false
+#| fig-align: "center"
+
+betas_high_collinear = simulate_betas(n=1000, sigma_eps=32, sigma_v=32, reps=10000)
+betas_low_collinear = simulate_betas(n=1000, sigma_eps=32, sigma_v=8, reps=10000)
+
+plt.figure(figsize=(6,5))
+for sns, color, label in zip([betas_low_collinear, betas_base, betas_high_collinear], [r"$\sigma_{v}=8$", r"$\sigma_{v}=16$", r"$\sigma_{v}=32$"]):
+    sns.kdeplot(sns, fill=True, alpha=0.5, edgecolor="black", color=color, label=label)
+plt.axvline(2, color="black", ls="--", label=r"True $\beta_2$")
+plt.title(r"$\hat{\beta}_2$ sampling distribution")
+plt.xlabel(r"$\hat{\beta}_2$")
+plt.show()
+```
+
+```{python}
+#| echo: false
+#| eval: true
+#| fig-align: "center"
+
+betas_high_collinear = simulate_betas(n=1000, sigma_eps=32, sigma_v=32, reps=10000)
+betas_low_collinear = simulate_betas(n=1000, sigma_eps=32, sigma_v=8, reps=10000)
+
+fig, ax = plt.subplots(figsize=(6,5))
+
+sns.kdeplot(betas_low_collinear, fill=True, alpha=0.5, color = 'orange', label=r"$\sigma_{v}=8$", edgecolor="black", ax=ax)
+sns.kdeplot(betas_base, fill=True, alpha=0.5, color= 'purple',label=r"$\sigma_{v}=16$", edgecolor="black", ax=ax)
+sns.kdeplot(betas_high_collinear, fill=True, alpha=0.5, color = 'darkblue', label=r"$\sigma_{v}=32$", edgecolor="black", ax=ax)
+
+plt.axvline(2, color="black", ls="--", label=r"True $\beta_2$")
+
+plt.title(r"$\hat{\beta}_2$ sampling distribution")
+plt.xlabel(r"$\hat{\beta}_2$")
+
+# Hide top and right spines
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+
+# Set bottom and left spines to black
+ax.spines["bottom"].set_color("black")
+ax.spines["left"].set_color("black")
+# Set tick color to black
+ax.tick_params(axis="x", colors="black")
+ax.tick_params(axis="y", colors="black")
+
+plt.tight_layout()
+
+plt.legend(frameon=False)
+plt.show()
+```
+
+---
+
+<div style="color:gray">
+Formally, as we reduce $\sigma_v^2$, $x_2$ and $x_3$ become more correlated:
+
+
+$$\rho(x_2,x_3) = \sqrt{\frac{Var(x_2)}{Var(x_2)+\sigma_v^2}}$$
+In the auxiliary regression $x_2 = \alpha + \delta x_3 + u_2$,
+$$
+R_2^2 = \rho(x_2,x_3)^2.
+$$
+
+Hence, as   $\rho \uparrow 1$ (or $R_2^2 \uparrow 1$), affecting the VIF and the estimator becomes increasingly unstable — the classic symptom of **multicollinearity**.
+</div>
+
+---
+
+
+Increasing the sample size $n$:
+
+```{python}
+#| echo: true
+#| eval: false
+#| fig-align: "center"
+
+betas_large_sample = simulate_betas(n=10000)
+betas_small_sample = simulate_betas(n=100)
+
+
+plt.figure(figsize=(6,5))
+for sns, color, label in zip([betas_small_sample, betas_base, betas_large_sample], [r"$n=100$", r"$n=1000$", r"$n=10000$"]):
+    sns.kdeplot(sns, fill=True, alpha=0.5, edgecolor="black", color=color, label=label)
+plt.axvline(2, color="black", ls="--", label=r"True $\beta_2$")
+plt.title(r"$\hat{\beta}_2$ sampling distribution")
+plt.xlabel(r"$\hat{\beta}_2$")
+plt.show()
+```
+
+```{python}
+#| echo: false
+#| eval: true
+#| fig-align: "center"
+
+
+betas_large_sample = simulate_betas(n=10000)
+betas_small_sample = simulate_betas(n=100)
+
+
+
+fig, ax = plt.subplots(figsize=(6,5))
+
+sns.kdeplot(betas_large_sample, fill=True, alpha=0.5, color = 'orange', label=r"$n=10000$", edgecolor="black", ax=ax)
+sns.kdeplot(betas_base, fill=True, alpha=0.5, color= 'purple',label=r"$n=1000$", edgecolor="black", ax=ax)
+sns.kdeplot(betas_small_sample, fill=True, alpha=0.5, color= 'darkblue',label=r"$n=100$", edgecolor="black", ax=ax)
+
+plt.axvline(2, color="black", ls="--", label=r"True $\beta_2$")
+
+plt.title(r"$\hat{\beta}_2$ sampling distribution")
+plt.xlabel(r"$\hat{\beta}_2$")
+
+# Hide top and right spines
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+
+# Set bottom and left spines to black
+ax.spines["bottom"].set_color("black")
+ax.spines["left"].set_color("black")
+# Set tick color to black
+ax.tick_params(axis="x", colors="black")
+ax.tick_params(axis="y", colors="black")
+
+plt.tight_layout()
+
+plt.legend(frameon=False)
+plt.show()
+```
+
+---
+
+<div style="color:gray">
+Consistency:
+
+$$\hat{\beta}_2 \xrightarrow{p} \beta_2 \quad \text{as } n \to \infty$$
+
+In the limit the sampling distribution collapses to a spike at the true value.
+</div>
+
+---
+
+Now, running the simulation for the unconditional distribution of $\hat{\beta}_2$:
+
+```{python}
+#| echo: true
+#| eval: false
+#| fig-align: "center"
+
+betas_base_cond = simulate_betas()
+betas_base_uncond = simulate_betas(conditional=True)
+
+
+plt.figure(figsize=(6,5))
+for sns, color, label in zip([betas_base_uncond, betas_base_cond], [r"$Conditioned on X$", r"$Unconditioned on X$"]):
+    sns.kdeplot(sns, fill=True, alpha=0.5, edgecolor="black", color=color, label=label)
+plt.axvline(2, color="black", ls="--", label=r"True $\beta_2$")
+plt.title(r"$\hat{\beta}_2$ sampling distribution")
+plt.xlabel(r"$\hat{\beta}_2$")
+plt.show()
+```
+
+```{python}
+#| echo: false
+#| eval: true
+#| fig-align: "center"
+
+
+betas_base_cond = simulate_betas()
+betas_base_uncond = simulate_betas(conditional=True)
+
+
+
+fig, ax = plt.subplots(figsize=(6,5))
+
+sns.kdeplot(betas_base_cond, fill=True, alpha=0.5, color = 'orange', label=r"$Conditioned$", edgecolor="black", ax=ax)
+sns.kdeplot(betas_base_uncond, fill=True, alpha=0.5, color= 'purple',label=r"$Unconditioned$", edgecolor="black", ax=ax)
+
+plt.axvline(2, color="black", ls="--", label=r"True $\beta_2$")
+
+plt.title(r"$\hat{\beta}_2$ sampling distribution")
+plt.xlabel(r"$\hat{\beta}_2$")
+
+# Hide top and right spines
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+
+# Set bottom and left spines to black
+ax.spines["bottom"].set_color("black")
+ax.spines["left"].set_color("black")
+# Set tick color to black
+ax.tick_params(axis="x", colors="black")
+ax.tick_params(axis="y", colors="black")
+
+plt.tight_layout()
+
+plt.legend(frameon=False)
+plt.show()
+```
