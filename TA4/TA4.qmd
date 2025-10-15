@@ -101,114 +101,20 @@ We want to test whether our regression model adds explanatory power beyond the m
 
 ### 1. Indicate **null and alternative hypotheses**.
 
-<div style="color:gray">
-
-$$H_0: \beta_2 = \beta_3 = \beta_4 = \beta_5 = \beta_6 = \beta_7 = 0$$
-$$H_a: \text{at least one } \beta_j \neq 0$$
-
-Also can be written as:
-
-$$H_0: R\beta = r \quad \text{versus} \quad H_a: R\beta \neq r $$
-
-where:
-
-$$
-R = 
-\begin{bmatrix}
-0 & 1 & 0 & 0 & 0 & 0 & 0 \\
-0 & 0 & 1 & 0 & 0 & 0 & 0 \\
-0 & 0 & 0 & 1 & 0 & 0 & 0 \\
-0 & 0 & 0 & 0 & 1 & 0 & 0 \\
-0 & 0 & 0 & 0 & 0 & 1 & 0 \\
-0 & 0 & 0 & 0 & 0 & 0 & 1
-\end{bmatrix}
-\qquad
-r = 
-\begin{bmatrix}
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0
-\end{bmatrix}
-\qquad
-q = 6
-$$
-
-</div>
 
 
 ---
 
 ### 2. **F-test statistic**
-<div style="color:gray">
-The F-test statistic is given by:
 
-$$F = \frac{(RSSE - SSE) / q}{SSE / (n - k)} \stackrel{Under H_0}{\sim} F_{6, 141-7} $$
-
-where:
-
-- $RSSE$ is the sum of squared errors for the restricted model
-- $SSE$ is the sum of squared errors for the unrestricted model
-
-
-
-</div>
 
 ---
 
 ### 3. RSSE and SSE
-<div style="color:gray">
 
-1. The restricted model includes only an intercept (no explanatory variables):
-
-
-$$\texttt{colGPA}_i​ = \beta_1 + \epsilon_i \quad \hat{\texttt{colGPA}}_i = \bar{\texttt{colGPA}}_i$$
-
-
-2. Compute the RSSE, SSE and F-statistic:
-```stata
-// RSSE
-summarize colGPA
-scalar colgpa_mean = r(mean)
-generate double resid_R = colGPA - colgpa_mean
-generate double resid_R_sq = resid_R^2
-summarize resid_R_sq
-scalar RSSE = r(sum)
-// SSE
-scalar SSE = e(rss)
-scalar F = ((RSSE - SSE) / 6) / (SSE / (e(N) - 7))
-
-```
-</div>
 ---
 
 ### 4. Critical value and p-value
-<div style="color:gray">
-Decision rule:
-
-- If $F > F_{critical}$, reject $H_0$, otherwise do not reject $H_0$.
-
-
-  ```stata
-  // Critical value
-  scalar F_critical = invF(0.95, 6, e(N) - 7)
-  display F_critical F 
-  ```
-
-
-
-- If $p\text{-value} < \alpha$, reject $H_0$, otherwise do not reject $H_0$.
-
-  $$p\text{-value} = Prob\{F_{statistic}>F|H_0\}$$
-
-  ```stata
-  // P-value
-  scalar p_value = 1 - F(F, 6, e(N) - 7)
-  display p_value
-  ```
-</div>
 
 ---
 
@@ -440,16 +346,6 @@ plt.show()
 
 ---
 
-<div style="color:gray">
-The OLS variance can then be expressed as:
-$$
-Var(\hat{\beta}^2|X) =
-\sigma_{\varepsilon}^2\frac{1}{(1-R_2^2)}\frac{1}{\sum (x_{2i}-\bar{x}_2)^2}
-$$
-
-Hence, as  $\sigma_{\varepsilon}^2 \uparrow$, the numerator increases and the estimator becomes increasingly unstable.
-
-</div>
 
 ---
 
@@ -511,18 +407,7 @@ plt.show()
 
 ---
 
-<div style="color:gray">
-Formally, as we reduce $\sigma_v^2$, $x_2$ and $x_3$ become more correlated:
 
-
-$$\rho(x_2,x_3) = \sqrt{\frac{Var(x_2)}{Var(x_2)+\sigma_v^2}}$$
-In the auxiliary regression $x_2 = \alpha + \delta x_3 + u_2$,
-$$
-R_2^2 = \rho(x_2,x_3)^2.
-$$
-
-Hence, as   $\rho \uparrow 1$ (or $R_2^2 \uparrow 1$), affecting the VIF and the estimator becomes increasingly unstable — the classic symptom of **multicollinearity**.
-</div>
 
 ---
 
@@ -588,13 +473,6 @@ plt.show()
 
 ---
 
-<div style="color:gray">
-Consistency:
-
-$$\hat{\beta}_2 \xrightarrow{p} \beta_2 \quad \text{as } n \to \infty$$
-
-In the limit the sampling distribution collapses to a spike at the true value.
-</div>
 
 ---
 

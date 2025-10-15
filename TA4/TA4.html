@@ -295,89 +295,18 @@ Lucia Sauer
 <section class="slide level2">
 
 <h3 id="indicate-null-and-alternative-hypotheses.">1. Indicate <strong>null and alternative hypotheses</strong>.</h3>
-<div style="color:gray">
-<p><span class="math display">\[H_0: \beta_2 = \beta_3 = \beta_4 = \beta_5 = \beta_6 = \beta_7 = 0\]</span> <span class="math display">\[H_a: \text{at least one } \beta_j \neq 0\]</span></p>
-<p>Also can be written as:</p>
-<p><span class="math display">\[H_0: R\beta = r \quad \text{versus} \quad H_a: R\beta \neq r \]</span></p>
-<p>where:</p>
-<p><span class="math display">\[
-R =
-\begin{bmatrix}
-0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
-0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
-0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 \\
-0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 \\
-0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 \\
-0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1
-\end{bmatrix}
-\qquad
-r =
-\begin{bmatrix}
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0
-\end{bmatrix}
-\qquad
-q = 6
-\]</span></p>
-</div>
 </section>
 <section class="slide level2">
 
 <h3 id="f-test-statistic">2. <strong>F-test statistic</strong></h3>
-<div style="color:gray">
-<p>The F-test statistic is given by:</p>
-<p><span class="math display">\[F = \frac{(RSSE - SSE) / q}{SSE / (n - k)} \stackrel{Under H_0}{\sim} F_{6, 141-7} \]</span></p>
-<p>where:</p>
-<ul>
-<li><span class="math inline">\(RSSE\)</span> is the sum of squared errors for the restricted model</li>
-<li><span class="math inline">\(SSE\)</span> is the sum of squared errors for the unrestricted model</li>
-</ul>
-</div>
 </section>
 <section class="slide level2">
 
 <h3 id="rsse-and-sse">3. RSSE and SSE</h3>
-<div style="color:gray">
-<ol type="1">
-<li>The restricted model includes only an intercept (no explanatory variables):</li>
-</ol>
-<p><span class="math display">\[\texttt{colGPA}_i​ = \beta_1 + \epsilon_i \quad \hat{\texttt{colGPA}}_i = \bar{\texttt{colGPA}}_i\]</span></p>
-<ol start="2" type="1">
-<li>Compute the RSSE, SSE and F-statistic:</li>
-</ol>
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource stata number-lines code-with-copy"><code class="sourceCode stata"><span id="cb2-1"><a href=""></a><span class="co">// RSSE</span></span>
-<span id="cb2-2"><a href=""></a><span class="kw">summarize</span> colGPA</span>
-<span id="cb2-3"><a href=""></a><span class="fu">scalar</span> colgpa_mean = <span class="fu">r</span>(<span class="kw">mean</span>)</span>
-<span id="cb2-4"><a href=""></a><span class="kw">generate</span> <span class="kw">double</span> resid_R = colGPA - colgpa_mean</span>
-<span id="cb2-5"><a href=""></a><span class="kw">generate</span> <span class="kw">double</span> resid_R_sq = resid_R^2</span>
-<span id="cb2-6"><a href=""></a><span class="kw">summarize</span> resid_R_sq</span>
-<span id="cb2-7"><a href=""></a><span class="fu">scalar</span> RSSE = <span class="fu">r</span>(<span class="kw">sum</span>)</span>
-<span id="cb2-8"><a href=""></a><span class="co">// SSE</span></span>
-<span id="cb2-9"><a href=""></a><span class="fu">scalar</span> SSE = <span class="fu">e</span>(rss)</span>
-<span id="cb2-10"><a href=""></a><span class="fu">scalar</span> <span class="fu">F</span> = ((RSSE - SSE) / 6) / (SSE / (<span class="fu">e</span>(<span class="kw">N</span>) - 7))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 </section>
 <section class="slide level2">
 
 <h3 id="critical-value-and-p-value">4. Critical value and p-value</h3>
-<div style="color:gray">
-<p>Decision rule:</p>
-<ul>
-<li><p>If <span class="math inline">\(F &gt; F_{critical}\)</span>, reject <span class="math inline">\(H_0\)</span>, otherwise do not reject <span class="math inline">\(H_0\)</span>.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource stata number-lines code-with-copy"><code class="sourceCode stata"><span id="cb3-1"><a href=""></a><span class="co">// Critical value</span></span>
-<span id="cb3-2"><a href=""></a><span class="fu">scalar</span> F_critical = <span class="fu">invF</span>(0.95, 6, <span class="fu">e</span>(<span class="kw">N</span>) - 7)</span>
-<span id="cb3-3"><a href=""></a><span class="kw">display</span> F_critical <span class="fu">F</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
-<li><p>If <span class="math inline">\(p\text{-value} &lt; \alpha\)</span>, reject <span class="math inline">\(H_0\)</span>, otherwise do not reject <span class="math inline">\(H_0\)</span>.</p>
-<p><span class="math display">\[p\text{-value} = Prob\{F_{statistic}&gt;F|H_0\}\]</span></p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource stata number-lines code-with-copy"><code class="sourceCode stata"><span id="cb4-1"><a href=""></a><span class="co">// P-value</span></span>
-<span id="cb4-2"><a href=""></a><span class="fu">scalar</span> p_value = 1 - <span class="fu">F</span>(<span class="fu">F</span>, 6, <span class="fu">e</span>(<span class="kw">N</span>) - 7)</span>
-<span id="cb4-3"><a href=""></a><span class="kw">display</span> p_value</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
-</ul>
-</div>
 </section>
 <section id="multiple-hypothesis-testing" class="slide level2">
 <h2>Multiple Hypothesis Testing</h2>
@@ -470,147 +399,128 @@ x_{i3} = x_{i2} + v_i, \; v_i \sim N(0, 16)
 
 <h3 id="function-in-python">Function in Python</h3>
 <p>Let’s create a function to analyze the behavior of <span class="math inline">\(\hat{\beta}_2\)</span>:</p>
-<div id="0981b17d" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href=""></a><span class="kw">def</span> simulate_betas(n<span class="op">=</span><span class="dv">100</span>, sigma_eps<span class="op">=</span><span class="dv">32</span>, sigma_v<span class="op">=</span><span class="dv">16</span>, reps<span class="op">=</span><span class="dv">10000</span>, conditional<span class="op">=</span><span class="va">False</span>):</span>
-<span id="cb5-2"><a href=""></a>    <span class="co">"""</span></span>
-<span id="cb5-3"><a href=""></a><span class="co">    Monte Carlo simulation of β₂ from y = 4 + 2x₂ + 2x₃ + ε.</span></span>
-<span id="cb5-4"><a href=""></a><span class="co">    """</span></span>
-<span id="cb5-5"><a href=""></a>    betas <span class="op">=</span> []</span>
-<span id="cb5-6"><a href=""></a>    </span>
-<span id="cb5-7"><a href=""></a>    <span class="co"># For conditional distribution: fix X once</span></span>
-<span id="cb5-8"><a href=""></a>    <span class="cf">if</span> conditional:</span>
-<span id="cb5-9"><a href=""></a>        x2_fixed <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, <span class="dv">40</span>, n)</span>
-<span id="cb5-10"><a href=""></a>        v_fixed  <span class="op">=</span> np.random.normal(<span class="dv">0</span>, sigma_v, n)</span>
-<span id="cb5-11"><a href=""></a>        x3_fixed <span class="op">=</span> x2_fixed <span class="op">+</span> v_fixed</span>
-<span id="cb5-12"><a href=""></a>    </span>
-<span id="cb5-13"><a href=""></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(reps):</span>
-<span id="cb5-14"><a href=""></a>        <span class="cf">if</span> conditional:</span>
-<span id="cb5-15"><a href=""></a>            x2, x3 <span class="op">=</span> x2_fixed, x3_fixed</span>
-<span id="cb5-16"><a href=""></a>        <span class="cf">else</span>:</span>
-<span id="cb5-17"><a href=""></a>            x2 <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, <span class="dv">40</span>, n)</span>
-<span id="cb5-18"><a href=""></a>            v  <span class="op">=</span> np.random.normal(<span class="dv">0</span>, sigma_v, n)</span>
-<span id="cb5-19"><a href=""></a>            x3 <span class="op">=</span> x2 <span class="op">+</span> v</span>
-<span id="cb5-20"><a href=""></a></span>
-<span id="cb5-21"><a href=""></a>        eps <span class="op">=</span> np.random.normal(<span class="dv">0</span>, sigma_eps, n)</span>
-<span id="cb5-22"><a href=""></a>        y <span class="op">=</span> <span class="dv">4</span> <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>x2 <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>x3 <span class="op">+</span> eps</span>
-<span id="cb5-23"><a href=""></a></span>
-<span id="cb5-24"><a href=""></a>        X <span class="op">=</span> sm.add_constant(np.column_stack([x2, x3]))</span>
-<span id="cb5-25"><a href=""></a>        model <span class="op">=</span> sm.OLS(y, X).fit()</span>
-<span id="cb5-26"><a href=""></a>        betas.append(model.params[<span class="dv">1</span>])</span>
-<span id="cb5-27"><a href=""></a></span>
-<span id="cb5-28"><a href=""></a>    <span class="cf">return</span> np.array(betas)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="794812f2" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href=""></a><span class="kw">def</span> simulate_betas(n<span class="op">=</span><span class="dv">100</span>, sigma_eps<span class="op">=</span><span class="dv">32</span>, sigma_v<span class="op">=</span><span class="dv">16</span>, reps<span class="op">=</span><span class="dv">10000</span>, conditional<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb2-2"><a href=""></a>    <span class="co">"""</span></span>
+<span id="cb2-3"><a href=""></a><span class="co">    Monte Carlo simulation of β₂ from y = 4 + 2x₂ + 2x₃ + ε.</span></span>
+<span id="cb2-4"><a href=""></a><span class="co">    """</span></span>
+<span id="cb2-5"><a href=""></a>    betas <span class="op">=</span> []</span>
+<span id="cb2-6"><a href=""></a>    </span>
+<span id="cb2-7"><a href=""></a>    <span class="co"># For conditional distribution: fix X once</span></span>
+<span id="cb2-8"><a href=""></a>    <span class="cf">if</span> conditional:</span>
+<span id="cb2-9"><a href=""></a>        x2_fixed <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, <span class="dv">40</span>, n)</span>
+<span id="cb2-10"><a href=""></a>        v_fixed  <span class="op">=</span> np.random.normal(<span class="dv">0</span>, sigma_v, n)</span>
+<span id="cb2-11"><a href=""></a>        x3_fixed <span class="op">=</span> x2_fixed <span class="op">+</span> v_fixed</span>
+<span id="cb2-12"><a href=""></a>    </span>
+<span id="cb2-13"><a href=""></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(reps):</span>
+<span id="cb2-14"><a href=""></a>        <span class="cf">if</span> conditional:</span>
+<span id="cb2-15"><a href=""></a>            x2, x3 <span class="op">=</span> x2_fixed, x3_fixed</span>
+<span id="cb2-16"><a href=""></a>        <span class="cf">else</span>:</span>
+<span id="cb2-17"><a href=""></a>            x2 <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, <span class="dv">40</span>, n)</span>
+<span id="cb2-18"><a href=""></a>            v  <span class="op">=</span> np.random.normal(<span class="dv">0</span>, sigma_v, n)</span>
+<span id="cb2-19"><a href=""></a>            x3 <span class="op">=</span> x2 <span class="op">+</span> v</span>
+<span id="cb2-20"><a href=""></a></span>
+<span id="cb2-21"><a href=""></a>        eps <span class="op">=</span> np.random.normal(<span class="dv">0</span>, sigma_eps, n)</span>
+<span id="cb2-22"><a href=""></a>        y <span class="op">=</span> <span class="dv">4</span> <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>x2 <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>x3 <span class="op">+</span> eps</span>
+<span id="cb2-23"><a href=""></a></span>
+<span id="cb2-24"><a href=""></a>        X <span class="op">=</span> sm.add_constant(np.column_stack([x2, x3]))</span>
+<span id="cb2-25"><a href=""></a>        model <span class="op">=</span> sm.OLS(y, X).fit()</span>
+<span id="cb2-26"><a href=""></a>        betas.append(model.params[<span class="dv">1</span>])</span>
+<span id="cb2-27"><a href=""></a></span>
+<span id="cb2-28"><a href=""></a>    <span class="cf">return</span> np.array(betas)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
 
 <p>Let’s run the simulation for the conditional distribution of <span class="math inline">\(\hat{\beta}_2\)</span>:</p>
-<div id="6b825e0a" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href=""></a>betas_base <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">1000</span>, sigma_eps<span class="op">=</span><span class="dv">32</span>, sigma_v<span class="op">=</span><span class="dv">16</span>, reps<span class="op">=</span><span class="dv">10000</span>)</span>
-<span id="cb6-2"><a href=""></a></span>
-<span id="cb6-3"><a href=""></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>,<span class="dv">5</span>))</span>
-<span id="cb6-4"><a href=""></a>sns.kdeplot(betas_base, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, color<span class="op">=</span><span class="st">"purple"</span>, label<span class="op">=</span><span class="st">"Baseline"</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>)</span>
-<span id="cb6-5"><a href=""></a>plt.axvline(<span class="dv">2</span>, color<span class="op">=</span><span class="st">"black"</span>, ls<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="vs">r"True </span><span class="dv">$\b</span><span class="vs">eta_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
-<span id="cb6-6"><a href=""></a>plt.title(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs"> sampling distribution"</span>)</span>
-<span id="cb6-7"><a href=""></a>plt.xlabel(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
-<span id="cb6-8"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="bc7670b7" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href=""></a>betas_base <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">1000</span>, sigma_eps<span class="op">=</span><span class="dv">32</span>, sigma_v<span class="op">=</span><span class="dv">16</span>, reps<span class="op">=</span><span class="dv">10000</span>)</span>
+<span id="cb3-2"><a href=""></a></span>
+<span id="cb3-3"><a href=""></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>,<span class="dv">5</span>))</span>
+<span id="cb3-4"><a href=""></a>sns.kdeplot(betas_base, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, color<span class="op">=</span><span class="st">"purple"</span>, label<span class="op">=</span><span class="st">"Baseline"</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>)</span>
+<span id="cb3-5"><a href=""></a>plt.axvline(<span class="dv">2</span>, color<span class="op">=</span><span class="st">"black"</span>, ls<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="vs">r"True </span><span class="dv">$\b</span><span class="vs">eta_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb3-6"><a href=""></a>plt.title(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs"> sampling distribution"</span>)</span>
+<span id="cb3-7"><a href=""></a>plt.xlabel(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb3-8"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 <img data-src="TA4_files/figure-revealjs/cell-5-output-1.png" class="quarto-figure quarto-figure-center r-stretch"></section>
 <section class="slide level2">
 
 <p>Now, let’s increase <span class="math inline">\(\sigma_{\varepsilon}^2\)</span>:</p>
-<div id="9cc0bdaf" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href=""></a>betas_high_sigma <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">1000</span>, sigma_eps<span class="op">=</span><span class="dv">64</span>, sigma_v<span class="op">=</span><span class="dv">16</span>, reps<span class="op">=</span><span class="dv">10000</span>)</span>
-<span id="cb7-2"><a href=""></a>betas_low_sigma <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">1000</span>, sigma_eps<span class="op">=</span><span class="dv">16</span>, sigma_v<span class="op">=</span><span class="dv">16</span>, reps<span class="op">=</span><span class="dv">10000</span>)</span>
-<span id="cb7-3"><a href=""></a></span>
-<span id="cb7-4"><a href=""></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>,<span class="dv">5</span>))</span>
-<span id="cb7-5"><a href=""></a><span class="cf">for</span> sns, color, label <span class="kw">in</span> <span class="bu">zip</span>([betas_low_sigma, betas_base, betas_high_sigma], [<span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_{</span><span class="ch">\v</span><span class="vs">arepsilon}=16</span><span class="dv">$</span><span class="vs">"</span>, <span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_{</span><span class="ch">\v</span><span class="vs">arepsilon}=32</span><span class="dv">$</span><span class="vs">"</span>, <span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_{</span><span class="ch">\v</span><span class="vs">arepsilon}=64</span><span class="dv">$</span><span class="vs">"</span>]):</span>
-<span id="cb7-6"><a href=""></a>    sns.kdeplot(sns, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>, color<span class="op">=</span>color, label<span class="op">=</span>label)</span>
-<span id="cb7-7"><a href=""></a>plt.axvline(<span class="dv">2</span>, color<span class="op">=</span><span class="st">"black"</span>, ls<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="vs">r"True </span><span class="dv">$\b</span><span class="vs">eta_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
-<span id="cb7-8"><a href=""></a>plt.title(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs"> sampling distribution"</span>)</span>
-<span id="cb7-9"><a href=""></a>plt.xlabel(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
-<span id="cb7-10"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="810b7735" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href=""></a>betas_high_sigma <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">1000</span>, sigma_eps<span class="op">=</span><span class="dv">64</span>, sigma_v<span class="op">=</span><span class="dv">16</span>, reps<span class="op">=</span><span class="dv">10000</span>)</span>
+<span id="cb4-2"><a href=""></a>betas_low_sigma <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">1000</span>, sigma_eps<span class="op">=</span><span class="dv">16</span>, sigma_v<span class="op">=</span><span class="dv">16</span>, reps<span class="op">=</span><span class="dv">10000</span>)</span>
+<span id="cb4-3"><a href=""></a></span>
+<span id="cb4-4"><a href=""></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>,<span class="dv">5</span>))</span>
+<span id="cb4-5"><a href=""></a><span class="cf">for</span> sns, color, label <span class="kw">in</span> <span class="bu">zip</span>([betas_low_sigma, betas_base, betas_high_sigma], [<span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_{</span><span class="ch">\v</span><span class="vs">arepsilon}=16</span><span class="dv">$</span><span class="vs">"</span>, <span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_{</span><span class="ch">\v</span><span class="vs">arepsilon}=32</span><span class="dv">$</span><span class="vs">"</span>, <span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_{</span><span class="ch">\v</span><span class="vs">arepsilon}=64</span><span class="dv">$</span><span class="vs">"</span>]):</span>
+<span id="cb4-6"><a href=""></a>    sns.kdeplot(sns, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>, color<span class="op">=</span>color, label<span class="op">=</span>label)</span>
+<span id="cb4-7"><a href=""></a>plt.axvline(<span class="dv">2</span>, color<span class="op">=</span><span class="st">"black"</span>, ls<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="vs">r"True </span><span class="dv">$\b</span><span class="vs">eta_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb4-8"><a href=""></a>plt.title(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs"> sampling distribution"</span>)</span>
+<span id="cb4-9"><a href=""></a>plt.xlabel(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb4-10"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 <img data-src="TA4_files/figure-revealjs/cell-7-output-1.png" class="quarto-figure quarto-figure-center r-stretch"></section>
 <section class="slide level2">
 
-<div style="color:gray">
-<p>The OLS variance can then be expressed as: <span class="math display">\[
-Var(\hat{\beta}^2|X) =
-\sigma_{\varepsilon}^2\frac{1}{(1-R_2^2)}\frac{1}{\sum (x_{2i}-\bar{x}_2)^2}
-\]</span></p>
-<p>Hence, as <span class="math inline">\(\sigma_{\varepsilon}^2 \uparrow\)</span>, the numerator increases and the estimator becomes increasingly unstable.</p>
-</div>
 </section>
 <section class="slide level2">
 
 <p>Now, let’s reduce <span class="math inline">\(\sigma_{v}^2\)</span>, the collinearity between <span class="math inline">\(x_2\)</span> and <span class="math inline">\(x_3\)</span>:</p>
-<div id="be0699b3" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href=""></a>betas_high_collinear <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">1000</span>, sigma_eps<span class="op">=</span><span class="dv">32</span>, sigma_v<span class="op">=</span><span class="dv">32</span>, reps<span class="op">=</span><span class="dv">10000</span>)</span>
-<span id="cb8-2"><a href=""></a>betas_low_collinear <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">1000</span>, sigma_eps<span class="op">=</span><span class="dv">32</span>, sigma_v<span class="op">=</span><span class="dv">8</span>, reps<span class="op">=</span><span class="dv">10000</span>)</span>
-<span id="cb8-3"><a href=""></a></span>
-<span id="cb8-4"><a href=""></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>,<span class="dv">5</span>))</span>
-<span id="cb8-5"><a href=""></a><span class="cf">for</span> sns, color, label <span class="kw">in</span> <span class="bu">zip</span>([betas_low_collinear, betas_base, betas_high_collinear], [<span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_{v}=8</span><span class="dv">$</span><span class="vs">"</span>, <span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_{v}=16</span><span class="dv">$</span><span class="vs">"</span>, <span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_{v}=32</span><span class="dv">$</span><span class="vs">"</span>]):</span>
-<span id="cb8-6"><a href=""></a>    sns.kdeplot(sns, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>, color<span class="op">=</span>color, label<span class="op">=</span>label)</span>
-<span id="cb8-7"><a href=""></a>plt.axvline(<span class="dv">2</span>, color<span class="op">=</span><span class="st">"black"</span>, ls<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="vs">r"True </span><span class="dv">$\b</span><span class="vs">eta_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
-<span id="cb8-8"><a href=""></a>plt.title(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs"> sampling distribution"</span>)</span>
-<span id="cb8-9"><a href=""></a>plt.xlabel(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
-<span id="cb8-10"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="bdf23f9b" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href=""></a>betas_high_collinear <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">1000</span>, sigma_eps<span class="op">=</span><span class="dv">32</span>, sigma_v<span class="op">=</span><span class="dv">32</span>, reps<span class="op">=</span><span class="dv">10000</span>)</span>
+<span id="cb5-2"><a href=""></a>betas_low_collinear <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">1000</span>, sigma_eps<span class="op">=</span><span class="dv">32</span>, sigma_v<span class="op">=</span><span class="dv">8</span>, reps<span class="op">=</span><span class="dv">10000</span>)</span>
+<span id="cb5-3"><a href=""></a></span>
+<span id="cb5-4"><a href=""></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>,<span class="dv">5</span>))</span>
+<span id="cb5-5"><a href=""></a><span class="cf">for</span> sns, color, label <span class="kw">in</span> <span class="bu">zip</span>([betas_low_collinear, betas_base, betas_high_collinear], [<span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_{v}=8</span><span class="dv">$</span><span class="vs">"</span>, <span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_{v}=16</span><span class="dv">$</span><span class="vs">"</span>, <span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_{v}=32</span><span class="dv">$</span><span class="vs">"</span>]):</span>
+<span id="cb5-6"><a href=""></a>    sns.kdeplot(sns, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>, color<span class="op">=</span>color, label<span class="op">=</span>label)</span>
+<span id="cb5-7"><a href=""></a>plt.axvline(<span class="dv">2</span>, color<span class="op">=</span><span class="st">"black"</span>, ls<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="vs">r"True </span><span class="dv">$\b</span><span class="vs">eta_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb5-8"><a href=""></a>plt.title(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs"> sampling distribution"</span>)</span>
+<span id="cb5-9"><a href=""></a>plt.xlabel(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb5-10"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 <img data-src="TA4_files/figure-revealjs/cell-9-output-1.png" class="quarto-figure quarto-figure-center r-stretch"></section>
 <section class="slide level2">
 
-<div style="color:gray">
-<p>Formally, as we reduce <span class="math inline">\(\sigma_v^2\)</span>, <span class="math inline">\(x_2\)</span> and <span class="math inline">\(x_3\)</span> become more correlated:</p>
-<p><span class="math display">\[\rho(x_2,x_3) = \sqrt{\frac{Var(x_2)}{Var(x_2)+\sigma_v^2}}\]</span> In the auxiliary regression <span class="math inline">\(x_2 = \alpha + \delta x_3 + u_2\)</span>, <span class="math display">\[
-R_2^2 = \rho(x_2,x_3)^2.
-\]</span></p>
-<p>Hence, as <span class="math inline">\(\rho \uparrow 1\)</span> (or <span class="math inline">\(R_2^2 \uparrow 1\)</span>), affecting the VIF and the estimator becomes increasingly unstable — the classic symptom of <strong>multicollinearity</strong>.</p>
-</div>
 </section>
 <section class="slide level2">
 
 <p>Increasing the sample size <span class="math inline">\(n\)</span>:</p>
-<div id="52dc5fae" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href=""></a>betas_large_sample <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">10000</span>)</span>
-<span id="cb9-2"><a href=""></a>betas_small_sample <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">100</span>)</span>
-<span id="cb9-3"><a href=""></a></span>
-<span id="cb9-4"><a href=""></a></span>
-<span id="cb9-5"><a href=""></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>,<span class="dv">5</span>))</span>
-<span id="cb9-6"><a href=""></a><span class="cf">for</span> sns, color, label <span class="kw">in</span> <span class="bu">zip</span>([betas_small_sample, betas_base, betas_large_sample], [<span class="vs">r"</span><span class="dv">$</span><span class="vs">n=100</span><span class="dv">$</span><span class="vs">"</span>, <span class="vs">r"</span><span class="dv">$</span><span class="vs">n=1000</span><span class="dv">$</span><span class="vs">"</span>, <span class="vs">r"</span><span class="dv">$</span><span class="vs">n=10000</span><span class="dv">$</span><span class="vs">"</span>]):</span>
-<span id="cb9-7"><a href=""></a>    sns.kdeplot(sns, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>, color<span class="op">=</span>color, label<span class="op">=</span>label)</span>
-<span id="cb9-8"><a href=""></a>plt.axvline(<span class="dv">2</span>, color<span class="op">=</span><span class="st">"black"</span>, ls<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="vs">r"True </span><span class="dv">$\b</span><span class="vs">eta_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
-<span id="cb9-9"><a href=""></a>plt.title(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs"> sampling distribution"</span>)</span>
-<span id="cb9-10"><a href=""></a>plt.xlabel(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
-<span id="cb9-11"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="c3de9ab0" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href=""></a>betas_large_sample <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">10000</span>)</span>
+<span id="cb6-2"><a href=""></a>betas_small_sample <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">100</span>)</span>
+<span id="cb6-3"><a href=""></a></span>
+<span id="cb6-4"><a href=""></a></span>
+<span id="cb6-5"><a href=""></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>,<span class="dv">5</span>))</span>
+<span id="cb6-6"><a href=""></a><span class="cf">for</span> sns, color, label <span class="kw">in</span> <span class="bu">zip</span>([betas_small_sample, betas_base, betas_large_sample], [<span class="vs">r"</span><span class="dv">$</span><span class="vs">n=100</span><span class="dv">$</span><span class="vs">"</span>, <span class="vs">r"</span><span class="dv">$</span><span class="vs">n=1000</span><span class="dv">$</span><span class="vs">"</span>, <span class="vs">r"</span><span class="dv">$</span><span class="vs">n=10000</span><span class="dv">$</span><span class="vs">"</span>]):</span>
+<span id="cb6-7"><a href=""></a>    sns.kdeplot(sns, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>, color<span class="op">=</span>color, label<span class="op">=</span>label)</span>
+<span id="cb6-8"><a href=""></a>plt.axvline(<span class="dv">2</span>, color<span class="op">=</span><span class="st">"black"</span>, ls<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="vs">r"True </span><span class="dv">$\b</span><span class="vs">eta_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb6-9"><a href=""></a>plt.title(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs"> sampling distribution"</span>)</span>
+<span id="cb6-10"><a href=""></a>plt.xlabel(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb6-11"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 <img data-src="TA4_files/figure-revealjs/cell-11-output-1.png" class="quarto-figure quarto-figure-center r-stretch"></section>
 <section class="slide level2">
 
-<div style="color:gray">
-<p>Consistency:</p>
-<p><span class="math display">\[\hat{\beta}_2 \xrightarrow{p} \beta_2 \quad \text{as } n \to \infty\]</span></p>
-<p>In the limit the sampling distribution collapses to a spike at the true value.</p>
-</div>
 </section>
 <section class="slide level2">
 
 <p>Now, running the simulation for the unconditional distribution of <span class="math inline">\(\hat{\beta}_2\)</span>:</p>
-<div id="fb8baf1f" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href=""></a>betas_base_cond <span class="op">=</span> simulate_betas()</span>
-<span id="cb10-2"><a href=""></a>betas_base_uncond <span class="op">=</span> simulate_betas(conditional<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb10-3"><a href=""></a></span>
-<span id="cb10-4"><a href=""></a></span>
-<span id="cb10-5"><a href=""></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>,<span class="dv">5</span>))</span>
-<span id="cb10-6"><a href=""></a><span class="cf">for</span> sns, color, label <span class="kw">in</span> <span class="bu">zip</span>([betas_base_uncond, betas_base_cond], [<span class="vs">r"</span><span class="dv">$</span><span class="vs">Conditioned on X</span><span class="dv">$</span><span class="vs">"</span>, <span class="vs">r"</span><span class="dv">$</span><span class="vs">Unconditioned on X</span><span class="dv">$</span><span class="vs">"</span>]):</span>
-<span id="cb10-7"><a href=""></a>    sns.kdeplot(sns, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>, color<span class="op">=</span>color, label<span class="op">=</span>label)</span>
-<span id="cb10-8"><a href=""></a>plt.axvline(<span class="dv">2</span>, color<span class="op">=</span><span class="st">"black"</span>, ls<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="vs">r"True </span><span class="dv">$\b</span><span class="vs">eta_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
-<span id="cb10-9"><a href=""></a>plt.title(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs"> sampling distribution"</span>)</span>
-<span id="cb10-10"><a href=""></a>plt.xlabel(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
-<span id="cb10-11"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="d5f1cc50" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href=""></a>betas_base_cond <span class="op">=</span> simulate_betas()</span>
+<span id="cb7-2"><a href=""></a>betas_base_uncond <span class="op">=</span> simulate_betas(conditional<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb7-3"><a href=""></a></span>
+<span id="cb7-4"><a href=""></a></span>
+<span id="cb7-5"><a href=""></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>,<span class="dv">5</span>))</span>
+<span id="cb7-6"><a href=""></a><span class="cf">for</span> sns, color, label <span class="kw">in</span> <span class="bu">zip</span>([betas_base_uncond, betas_base_cond], [<span class="vs">r"</span><span class="dv">$</span><span class="vs">Conditioned on X</span><span class="dv">$</span><span class="vs">"</span>, <span class="vs">r"</span><span class="dv">$</span><span class="vs">Unconditioned on X</span><span class="dv">$</span><span class="vs">"</span>]):</span>
+<span id="cb7-7"><a href=""></a>    sns.kdeplot(sns, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>, color<span class="op">=</span>color, label<span class="op">=</span>label)</span>
+<span id="cb7-8"><a href=""></a>plt.axvline(<span class="dv">2</span>, color<span class="op">=</span><span class="st">"black"</span>, ls<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="vs">r"True </span><span class="dv">$\b</span><span class="vs">eta_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb7-9"><a href=""></a>plt.title(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs"> sampling distribution"</span>)</span>
+<span id="cb7-10"><a href=""></a>plt.xlabel(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb7-11"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
