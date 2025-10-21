@@ -6,6 +6,7 @@ institute: "<em>Barcelona School of Economics</em>"
 date: "2025-10-15"
 format:
   revealjs:
+    chalkboard: true
     transition: fade
     slide-number: true
     progress: true
@@ -28,19 +29,24 @@ editor:
 
 Let's start by running the following regression:
 
-$$\texttt{colGPA}_i​=\beta_1​+\beta_2\texttt{​hsGPA}_i​+\beta_3​\texttt{job19}_i​
-+\beta_4​\texttt{job20}_i​
-+\beta_5​\texttt{skipped}_i​+\beta_6​\texttt{bgfriend}_i​+\beta_7​\texttt{alcohol}_i​ +\varepsilon_i​ $$
+
+$$\begin{equation}
+\begin{split}
+\texttt{colGPA}_i &= \beta_1 + \beta_2\texttt{hsGPA}_i + \beta_3\texttt{job19}_i + \beta_4\texttt{job20}_i \\
+&\quad + \beta_5\texttt{skipped}_i + \beta_6\texttt{bgfriend}_i + \beta_7\texttt{alcohol}_i + \varepsilon_i
+\end{split}
+\end{equation}$$
+
 
 where:
 
 - $\texttt{colGPA}$: college GPA
 - $\texttt{hsGPA}$: high school GPA
-- $\texttt{job19}$: worked in 2019 (1=yes, 0=no)
-- $\texttt{job20}$: worked in 2020 (1=yes, 0=no)
-- $\texttt{skipped}$: skipped classes (1=yes, 0=no)
+- $\texttt{job19}$: =1 if job <= 19 hours
+- $\texttt{job20}$: =1 if job >= 20 hours
+- $\texttt{skipped}$: avg lectures missed per week
 - $\texttt{bgfriend}$: has a boyfriend/girlfriend (1=yes, 0=no)
-- $\texttt{alcohol}$: alcohol consumption (1=yes, 0=no)
+- $\texttt{alcohol}$: avg # days per week drink alcohol
 
 
 
@@ -105,8 +111,12 @@ We want to test whether our regression model adds explanatory power beyond the m
 
 ---
 
+---
+
 ### 2. **F-test statistic**
 
+
+---
 
 ---
 
@@ -114,7 +124,20 @@ We want to test whether our regression model adds explanatory power beyond the m
 
 ---
 
+---
+
 ### 4. Critical value and p-value
+
+
+---
+
+
+
+---
+
+### 5. Draw the p-value  and the critical value
+
+---
 
 ---
 
@@ -133,6 +156,39 @@ Consider testing whether <code>job19</code> and <code>job20</code> are jointly s
 6. Compare the results with the ones obtained in Stata.
 
 :::
+
+---
+
+### 1. Indicate **null and alternative hypotheses**.
+
+---
+
+---
+
+
+### 2. **F-test statistic**
+
+---
+
+---
+
+### 3. RSSE and SSE
+
+---
+
+---
+
+---
+
+### 4. Critical value and p-value
+
+---
+
+---
+
+### 5. Draw the p-value  and the critical value
+
+---
 
 ---
 
@@ -350,6 +406,9 @@ plt.show()
 ---
 
 
+---
+
+
 Now, let's reduce $\sigma_{v}^2$, the collinearity between $x_2$ and $x_3$:
 
 ```{python}
@@ -533,3 +592,8 @@ plt.tight_layout()
 plt.legend(frameon=False)
 plt.show()
 ```
+
+---
+
+---
+

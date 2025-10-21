@@ -53,7 +53,7 @@ display "Manual F = " F_manual
 display "Stata F = " e(F)
 
 // Compute critical value at 5% significance
-scalar F_critical = invF(0.95, 6, e(N) - 7)
+scalar F_critical = invF(6, e(N) - 7, 0.95)
 display "Critical value (5%): " F_critical
 
 // Compute p-value

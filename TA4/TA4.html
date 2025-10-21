@@ -100,6 +100,8 @@
   <link href="TA4_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="TA4_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="TA4_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="TA4_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="TA4_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
   <link href="TA4_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
     .reveal div.sourceCode {
@@ -221,18 +223,21 @@ Lucia Sauer
 <section class="slide level2">
 
 <p>Let’s start by running the following regression:</p>
-<p><span class="math display">\[\texttt{colGPA}_i​=\beta_1​+\beta_2\texttt{​hsGPA}_i​+\beta_3​\texttt{job19}_i​
-+\beta_4​\texttt{job20}_i​
-+\beta_5​\texttt{skipped}_i​+\beta_6​\texttt{bgfriend}_i​+\beta_7​\texttt{alcohol}_i​ +\varepsilon_i​ \]</span></p>
+<p><span class="math display">\[\begin{equation}
+\begin{split}
+\texttt{colGPA}_i &amp;= \beta_1 + \beta_2\texttt{hsGPA}_i + \beta_3\texttt{job19}_i + \beta_4\texttt{job20}_i \\
+&amp;\quad + \beta_5\texttt{skipped}_i + \beta_6\texttt{bgfriend}_i + \beta_7\texttt{alcohol}_i + \varepsilon_i
+\end{split}
+\end{equation}\]</span></p>
 <p>where:</p>
 <ul>
 <li><span class="math inline">\(\texttt{colGPA}\)</span>: college GPA</li>
 <li><span class="math inline">\(\texttt{hsGPA}\)</span>: high school GPA</li>
-<li><span class="math inline">\(\texttt{job19}\)</span>: worked in 2019 (1=yes, 0=no)</li>
-<li><span class="math inline">\(\texttt{job20}\)</span>: worked in 2020 (1=yes, 0=no)</li>
-<li><span class="math inline">\(\texttt{skipped}\)</span>: skipped classes (1=yes, 0=no)</li>
+<li><span class="math inline">\(\texttt{job19}\)</span>: =1 if job &lt;= 19 hours</li>
+<li><span class="math inline">\(\texttt{job20}\)</span>: =1 if job &gt;= 20 hours</li>
+<li><span class="math inline">\(\texttt{skipped}\)</span>: avg lectures missed per week</li>
 <li><span class="math inline">\(\texttt{bgfriend}\)</span>: has a boyfriend/girlfriend (1=yes, 0=no)</li>
-<li><span class="math inline">\(\texttt{alcohol}\)</span>: alcohol consumption (1=yes, 0=no)</li>
+<li><span class="math inline">\(\texttt{alcohol}\)</span>: avg # days per week drink alcohol</li>
 </ul>
 </section>
 <section class="slide level2">
@@ -298,7 +303,13 @@ Lucia Sauer
 </section>
 <section class="slide level2">
 
+</section>
+<section class="slide level2">
+
 <h3 id="f-test-statistic">2. <strong>F-test statistic</strong></h3>
+</section>
+<section class="slide level2">
+
 </section>
 <section class="slide level2">
 
@@ -306,7 +317,20 @@ Lucia Sauer
 </section>
 <section class="slide level2">
 
+</section>
+<section class="slide level2">
+
 <h3 id="critical-value-and-p-value">4. Critical value and p-value</h3>
+</section>
+<section class="slide level2">
+
+</section>
+<section class="slide level2">
+
+<h3 id="draw-the-p-value-and-the-critical-value">5. Draw the p-value and the critical value</h3>
+</section>
+<section class="slide level2">
+
 </section>
 <section id="multiple-hypothesis-testing" class="slide level2">
 <h2>Multiple Hypothesis Testing</h2>
@@ -330,6 +354,44 @@ Lucia Sauer
 </div>
 </div>
 </div>
+</section>
+<section class="slide level2">
+
+<h3 id="indicate-null-and-alternative-hypotheses.-1">1. Indicate <strong>null and alternative hypotheses</strong>.</h3>
+</section>
+<section class="slide level2">
+
+</section>
+<section class="slide level2">
+
+<h3 id="f-test-statistic-1">2. <strong>F-test statistic</strong></h3>
+</section>
+<section class="slide level2">
+
+</section>
+<section class="slide level2">
+
+<h3 id="rsse-and-sse-1">3. RSSE and SSE</h3>
+</section>
+<section class="slide level2">
+
+</section>
+<section class="slide level2">
+
+</section>
+<section class="slide level2">
+
+<h3 id="critical-value-and-p-value-1">4. Critical value and p-value</h3>
+</section>
+<section class="slide level2">
+
+</section>
+<section class="slide level2">
+
+<h3 id="draw-the-p-value-and-the-critical-value-1">5. Draw the p-value and the critical value</h3>
+</section>
+<section class="slide level2">
+
 </section>
 <section id="monte-carlo-simulations" class="slide level2">
 <h2>Monte Carlo Simulations</h2>
@@ -399,7 +461,7 @@ x_{i3} = x_{i2} + v_i, \; v_i \sim N(0, 16)
 
 <h3 id="function-in-python">Function in Python</h3>
 <p>Let’s create a function to analyze the behavior of <span class="math inline">\(\hat{\beta}_2\)</span>:</p>
-<div id="794812f2" class="cell" data-execution_count="2">
+<div id="88472398" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href=""></a><span class="kw">def</span> simulate_betas(n<span class="op">=</span><span class="dv">100</span>, sigma_eps<span class="op">=</span><span class="dv">32</span>, sigma_v<span class="op">=</span><span class="dv">16</span>, reps<span class="op">=</span><span class="dv">10000</span>, conditional<span class="op">=</span><span class="va">False</span>):</span>
 <span id="cb2-2"><a href=""></a>    <span class="co">"""</span></span>
 <span id="cb2-3"><a href=""></a><span class="co">    Monte Carlo simulation of β₂ from y = 4 + 2x₂ + 2x₃ + ε.</span></span>
@@ -433,7 +495,7 @@ x_{i3} = x_{i2} + v_i, \; v_i \sim N(0, 16)
 <section class="slide level2">
 
 <p>Let’s run the simulation for the conditional distribution of <span class="math inline">\(\hat{\beta}_2\)</span>:</p>
-<div id="bc7670b7" class="cell" data-execution_count="3">
+<div id="c3edae8a" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href=""></a>betas_base <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">1000</span>, sigma_eps<span class="op">=</span><span class="dv">32</span>, sigma_v<span class="op">=</span><span class="dv">16</span>, reps<span class="op">=</span><span class="dv">10000</span>)</span>
 <span id="cb3-2"><a href=""></a></span>
 <span id="cb3-3"><a href=""></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>,<span class="dv">5</span>))</span>
@@ -448,7 +510,7 @@ x_{i3} = x_{i2} + v_i, \; v_i \sim N(0, 16)
 <section class="slide level2">
 
 <p>Now, let’s increase <span class="math inline">\(\sigma_{\varepsilon}^2\)</span>:</p>
-<div id="810b7735" class="cell" data-execution_count="5">
+<div id="adcf069e" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href=""></a>betas_high_sigma <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">1000</span>, sigma_eps<span class="op">=</span><span class="dv">64</span>, sigma_v<span class="op">=</span><span class="dv">16</span>, reps<span class="op">=</span><span class="dv">10000</span>)</span>
 <span id="cb4-2"><a href=""></a>betas_low_sigma <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">1000</span>, sigma_eps<span class="op">=</span><span class="dv">16</span>, sigma_v<span class="op">=</span><span class="dv">16</span>, reps<span class="op">=</span><span class="dv">10000</span>)</span>
 <span id="cb4-3"><a href=""></a></span>
@@ -467,8 +529,11 @@ x_{i3} = x_{i2} + v_i, \; v_i \sim N(0, 16)
 </section>
 <section class="slide level2">
 
+</section>
+<section class="slide level2">
+
 <p>Now, let’s reduce <span class="math inline">\(\sigma_{v}^2\)</span>, the collinearity between <span class="math inline">\(x_2\)</span> and <span class="math inline">\(x_3\)</span>:</p>
-<div id="bdf23f9b" class="cell" data-execution_count="7">
+<div id="c52f2155" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href=""></a>betas_high_collinear <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">1000</span>, sigma_eps<span class="op">=</span><span class="dv">32</span>, sigma_v<span class="op">=</span><span class="dv">32</span>, reps<span class="op">=</span><span class="dv">10000</span>)</span>
 <span id="cb5-2"><a href=""></a>betas_low_collinear <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">1000</span>, sigma_eps<span class="op">=</span><span class="dv">32</span>, sigma_v<span class="op">=</span><span class="dv">8</span>, reps<span class="op">=</span><span class="dv">10000</span>)</span>
 <span id="cb5-3"><a href=""></a></span>
@@ -488,7 +553,7 @@ x_{i3} = x_{i2} + v_i, \; v_i \sim N(0, 16)
 <section class="slide level2">
 
 <p>Increasing the sample size <span class="math inline">\(n\)</span>:</p>
-<div id="c3de9ab0" class="cell" data-execution_count="9">
+<div id="bf92d429" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href=""></a>betas_large_sample <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">10000</span>)</span>
 <span id="cb6-2"><a href=""></a>betas_small_sample <span class="op">=</span> simulate_betas(n<span class="op">=</span><span class="dv">100</span>)</span>
 <span id="cb6-3"><a href=""></a></span>
@@ -509,7 +574,7 @@ x_{i3} = x_{i2} + v_i, \; v_i \sim N(0, 16)
 <section class="slide level2">
 
 <p>Now, running the simulation for the unconditional distribution of <span class="math inline">\(\hat{\beta}_2\)</span>:</p>
-<div id="d5f1cc50" class="cell" data-execution_count="11">
+<div id="0098de3f" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href=""></a>betas_base_cond <span class="op">=</span> simulate_betas()</span>
 <span id="cb7-2"><a href=""></a>betas_base_uncond <span class="op">=</span> simulate_betas(conditional<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb7-3"><a href=""></a></span>
@@ -523,8 +588,14 @@ x_{i3} = x_{i2} + v_i, \; v_i \sim N(0, 16)
 <span id="cb7-11"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
-
 <img data-src="TA4_files/figure-revealjs/cell-13-output-1.png" class="quarto-figure quarto-figure-center r-stretch"></section>
+<section class="slide level2">
+
+</section>
+<section class="slide level2">
+
+
+</section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
@@ -539,6 +610,7 @@ x_{i3} = x_{i2} + v_i, \; v_i \sim N(0, 16)
   <script src="TA4_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
   <script src="TA4_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
   <script src="TA4_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="TA4_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
   <script src="TA4_files/libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
@@ -560,7 +632,8 @@ x_{i3} = x_{i2} + v_i, \; v_i \sim N(0, 16)
 'autoAnimateDuration': 1,
 'autoAnimateUnmatched': true,
 'jumpToSlide': true,
-'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'chalkboard': {"buttons":true},
 'smaller': false,
  
         // Display controls in the bottom right corner
@@ -731,7 +804,7 @@ x_{i3} = x_{i2} + v_i, \; v_i \sim N(0, 16)
         },
 
         // reveal.js plugins
-        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
 
           RevealMath,
           RevealNotes,

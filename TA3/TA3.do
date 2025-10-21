@@ -30,7 +30,7 @@ Contents:
 ssc install bcuse 
 
 * Load Wooldridge dataset
-bcuse bwght, clear
+bcuse bwght, clear // import the dataset
 
 * Inspect data
 br in 1/10
@@ -50,7 +50,7 @@ misstable summarize
 * Model:
 * bwght_i = β1 + β2*cigs_i + β3*parity_i + β4*faminc_i + β5*motheduc_i + β6*fatheduc_i + ε_i
 drop if missing(bwght, cigs, parity, faminc, motheduc, fatheduc)
-regress bwght cigs parity faminc motheduc fatheduc
+reg bwght cigs parity faminc motheduc fatheduc
 
 * Interpretation:
 * - Coefficient on cigs (β2) captures ...

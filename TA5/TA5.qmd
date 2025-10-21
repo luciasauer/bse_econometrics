@@ -1,0 +1,315 @@
+---
+title: "Econometrics"
+subtitle: "<span class='subtitle-text'>TA Session 5</span>"
+author: "Lucia Sauer"
+institute: "<em>Barcelona School of Economics</em>"
+date: "2025-10-22"
+format:
+  revealjs:
+    chalkboard: true
+    transition: fade
+    slide-number: true
+    progress: true
+    title-slide-attributes:
+      data-background-position: "95% 90%"
+      data-background-size: "100px"
+editor:
+  render-on-save: true
+
+---
+
+## Overview
+
+- Visual Inspection of Heteroskedasticity
+- Testing for Heteroskedasticity: Breusch-Pagan Test
+- Classical vs. Robust Standard Errors
+- Bootstrapped Standard Errors in Stata
+- Clustered Data and Cluster-Robust Standard Errors
+
+
+---
+
+## Non-spherical disturbances
+
+The spherical disturbances includes two assumptions on the behavior of
+the disturbances:
+
+1. Homoskedasticity $var(\epsilon_i|X) = \sigma^2$
+
+2. Uncorrelatedness $cov(\epsilon_i, \epsilon_j|X) = 0, \forall i \neq j$
+
+Now, we will consider the possibility of abandoning one of these assumptions, and see how the estimation and inference procedures change.
+
+---
+
+## 1. Heteroskedasticity
+
+Let's start by relaxing the homoskedasticity assumption:
+$$var(\epsilon_i|X) = \sigma^2_i$$
+
+The variance-covariance matrix of the disturbances is now:
+$$\Sigma = \begin{bmatrix}
+\sigma_1^2 & 0 & 0 & \cdots & 0 \\
+0 & \sigma_2^2 & 0 & \cdots & 0 \\
+0 & 0 & \sigma_3^2 & \cdots & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+0 & 0 & 0 & \cdots & \sigma_n^2
+\end{bmatrix}
+$$
+
+---
+
+### 1.1 Visual Inspection of Heteroskedasticity
+
+$$ 
+price_i = \beta_1 + \beta_2 area_i + \beta_3 rooms_i + \epsilon_i 
+$$
+
+
+```{stata}
+clear all
+bcuse hprice3, clear
+regress price area rooms
+rvpplot area
+```
+::: {.center}
+![](visual_inspection.png){width=80%}
+:::
+
+---
+
+## 2. Testing for Heteroskedasticity
+
+Breusch-Pagan Test for the presence of heteroskedasticity:
+
+::: {.callout-note title = "BP Steps" icon=false}
+
+1. Estimate the original model and obtain the SSE
+
+2. Set auxiliary regression:
+
+$$
+\hat{\epsilon}_i^{2} = \alpha_1 + \alpha_2 area_i + \alpha_3 rooms_i + v_i 
+$$
+
+3. Then perform the test:
+
+$$
+H_0: \alpha_2 = \alpha_3 = 0 \quad (homoskedasticity)
+$$
+$$
+H_1: \text{at least one } \alpha_i \neq 0 \quad (heteroskedasticity)
+$$
+
+using the statistic:
+
+- Finite sample version:
+$$
+F = \frac{RSSE - SSE/2}{SSE/321-3}\underset{H_0}{\sim} F_{2, 321-3}
+$$
+
+- Asymptotic version:
+$$
+n \tilde{R}^2 \underset{H_0}{\overset{a}{\sim}} \chi^2(2)
+$$
+
+
+:::
+
+
+---
+
+## Classical SE
+
+```{stata}
+reg price rooms area
+```
+
+```{=html}
+<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
+
+      Source |       SS           df       MS      Number of obs   =       321
+-------------+----------------------------------   F(2, 318)       =    119.95
+       Model |  2.5709e+11         2  1.2854e+11   Prob > F        =    0.0000
+    Residual |  3.4077e+11       318  1.0716e+09   R-squared       =    0.4300
+-------------+----------------------------------   Adj R-squared   =    0.4264
+       Total |  5.9785e+11       320  1.8683e+09   Root MSE        =     32735
+
+------------------------------------------------------------------------------
+       price | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        area |   35.56307   3.114753    11.42   0.000     29.43494    41.69119
+       rooms |   6604.305   2401.922     2.75   0.006     1878.639    11329.97
+       _cons |  -22314.85   13628.21    -1.64   0.103     -49127.7    4497.993
+------------------------------------------------------------------------------
+
+</pre>
+```
+
+::: {.callout-warning title = "Question" icon=false}
+
+- How does the behavior of OLS estimator change under non-spherical disturbances?
+- Which properties of the estimator remain and which ones are lost? 
+
+:::
+
+
+---
+
+## Robust SE
+
+How to correctly estimate the model under the presence of heteroskedasticity?
+
+```{stata}
+reg price rooms area, vce(robust)
+```
+
+```{=html}
+<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
+Linear regression                               Number of obs     =        321
+                                                F(2, 318)         =      80.07
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.4300
+                                                Root MSE          =      32735
+
+------------------------------------------------------------------------------
+             |               Robust
+       price | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        area |   35.56307   4.816768     7.38   0.000     26.08631    45.03982
+       rooms |   6604.305   2501.109     2.64   0.009     1683.492    11525.12
+       _cons |  -22314.85   12067.17    -1.85   0.065    -46056.43    1426.722
+------------------------------------------------------------------------------
+
+
+</pre>
+```
+
+::: {.callout-warning title = "Question" icon=false}
+Elements that change and why?
+:::
+
+---
+
+## Bootstrapped SE
+
+Illustration of how the [Boostraping](https://seeing-theory.brown.edu/frequentist-inference/index.html#section3) works. 
+
+```{stata}
+bootstrap, reps(500) seed(123): regress price rooms area
+
+```
+```{=html}
+<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
+Linear regression                                   Number of obs =        321
+                                                    Replications  =        500
+                                                    Wald chi2(2)  =     149.93
+                                                    Prob > chi2   =     0.0000
+                                                    R-squared     =     0.4300
+                                                    Adj R-squared =     0.4264
+                                                    Root MSE      = 32735.2613
+
+------------------------------------------------------------------------------
+             |   Observed   Bootstrap                         Normal-based
+       price | coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        area |   35.56307   4.613844     7.71   0.000      26.5201    44.60603
+       rooms |   6604.305   2457.818     2.69   0.007     1787.071    11421.54
+       _cons |  -22314.85    12407.4    -1.80   0.072    -46632.92    2003.211
+------------------------------------------------------------------------------
+
+</pre>
+```
+
+---
+
+## Comparing confidence intervals across SE types
+
+::: {.center}
+![](ci_area.png){width=80%}
+:::
+
+*Same coefficient estimate for `area`, but wider confidence intervals under robust and bootstrap SEs.*
+
+
+
+----
+
+## 3. Clustered data 
+
+- A second reason to relax the **non-spherical disturbances** assumption arises when observations are **clustered**.
+
+- Within each **neighborhood**, house prices may move together.
+
+
+::: {.center}
+![](cluster_data.png){width=80%}
+:::
+
+
+
+---
+
+## Disturbance structure
+
+Within each neighborhood, residuals can move together:
+
+$$
+cov(\epsilon_i, \epsilon_j|X) =
+\begin{cases}
+ \neq 0, & \text{if } i = j \text{(same neighborhood)} \\
+0, & \text{if } i \neq j \text{(different neighborhoods)}
+\end{cases}
+$$
+
+Hence, the covariance matrix of disturbances has a **block-diagonal** form:
+
+$$
+\Sigma =
+\begin{bmatrix}
+\Sigma_1 & 0 & 0 & \cdots & 0 \\
+0 & \Sigma_2 & 0 & \cdots & 0 \\
+0 & 0 & \Sigma_3 & \cdots & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+0 & 0 & 0 & \cdots & \Sigma_G
+\end{bmatrix}
+$$
+
+
+Each block $\Sigma_j$ captures the correlation of errors **within neighborhood j**.
+
+
+
+
+---
+
+## Cluster robust SE
+
+The disturbances are correlated within clusters but uncorrelated across clusters:
+
+
+```{stata}
+reg price rooms area, vce(cluster nbh)
+```
+
+```{=html}
+<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
+Linear regression                               Number of obs     =        321
+                                                F(2, 6)           =      88.92
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.4300
+                                                Root MSE          =      32735
+
+                                    (Std. err. adjusted for 7 clusters in nbh)
+------------------------------------------------------------------------------
+             |               Robust
+       price | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        area |   35.56307   7.672663     4.64   0.004     16.78874    54.33739
+       rooms |   6604.305   3148.177     2.10   0.081    -1099.006    14307.62
+       _cons |  -22314.85   13356.84    -1.67   0.146    -54997.86    10368.16
+------------------------------------------------------------------------------
+
+</pre>
+```
+
