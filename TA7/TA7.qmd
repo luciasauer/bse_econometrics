@@ -1,0 +1,589 @@
+---
+title: "Econometrics"
+subtitle: "<span class='subtitle-text'>TA Session 7</span>"
+author: "Lucia Sauer"
+institute: "<em>Barcelona School of Economics</em>"
+date: "2025-11-14"
+format:
+  revealjs:
+    chalkboard: true
+    transition: fade
+    slide-number: true
+    progress: true
+    title-slide-attributes:
+      data-background-position: "95% 90%"
+      data-background-size: "100px"
+editor:
+  render-on-save: true
+
+---
+
+
+## Overview
+
+- Instrumental Variables (IV)
+- Two-Stage Least Squares (2SLS)
+- Probit (IV-Probit)
+- Marginal Effects
+- Local Average Treatment Effect (LATE)
+
+
+---
+
+## Motivation
+
+- Previously we have seen that RCT is the gold standard to identify causal effects. 
+
+::: {.center}
+
+![](rct.png){width=60%}
+:::
+
+--- 
+
+## Ways to address endogeneity
+
+However, in many situations, RCTs are not feasible or ethical and the presence of **confounders** can bias our estimates.
+
+
+::: {.center}
+![](observable_confounders.png){width=60% .center}
+:::
+
+
+
+1. **Matching**: we try to control for all confounders, but this only works when the confounders are **observable**.  
+<!-- 
+   - If unobserved factors also affect treatment and outcome, bias remains.  
+   - *(Example: Samu’s case — if we only observe neighborhood, matching won’t remove bias from unobserved confounders like motivation or income.)* -->
+
+---
+
+## Ways to address endogeneity
+
+However, in many situations, RCTs are not feasible or ethical and the presence of **confounders** can bias our estimates.
+
+::: {.center}
+
+![](unobservable_confounders.png){width=60%}
+:::
+
+
+2. **Instrumental Variables (IV)**: use an external variable (instrument) that affects the treatment but is not directly related to the outcome, removing the bias from unobserved confounders.
+
+
+---
+
+## Instrumental Variables (IV)
+
+
+- Assumptions for a valid instrument:
+  1. Relevance: $Cov(Z, X) \neq 0$
+  2. Exogeneity: $Cov(Z, u) = 0$
+
+::: {.center}
+
+![](instrumental_variables.png){width=60%}
+:::
+
+So when we critize IV, we usually focus on these two assumptions.
+
+---
+
+
+## Two-Stage Least Squares (2SLS)
+
+
+1. First Stage: regress the endogenous variable X on the instrument Z and other exogenous variables to obtain the predicted values of X
+   $$X = \delta_0 + \delta_1Z + v$$
+2. Second Stage: regress the dependent variable Y on the predicted values $\hat{X}$ and other exogenous variables.
+    $$Y = \beta_0 + \beta_1\hat{X} + \epsilon $$
+
+
+- Statistical software that supports 2SLS estimation directly (e.g., `ivreg` in R, `ivregress` in Stata, in python `linearmodels.iv`).
+
+---
+
+### Returns of Education 
+
+We want to estimate the effect of education on wages. 
+
+$$\begin{equation}
+\begin{split}
+\texttt{lwage}_i &= \beta_1 + \beta_2\texttt{exper}_i + \beta_3\texttt{expersq}_i 
+\\ &\quad  + \beta_4\texttt{educ}_i + \varepsilon_i
+\end{split}
+\end{equation}$$
+
+
+
+However, $\texttt{educ}$ may be endogenous due to omitted ability bias.
+
+::: {.center}
+![](educ_endogenous.png){width=60%}
+:::
+
+
+
+---
+
+
+### Returns of Education - IV
+
+We want to estimate the effect of education on wages. 
+
+$$\begin{equation}
+\begin{split}
+\texttt{lwage}_i &= \beta_1 + \beta_2\texttt{exper}_i + \beta_3\texttt{expersq}_i 
+\\ &\quad  + \beta_4\texttt{educ}_i + \varepsilon_i
+\end{split}
+\end{equation}$$
+
+- We can use `fatheduc` and `motheduc` as instruments for `educ`:
+  - Relevance: Parents' education likely affects child's education.
+  - Exogeneity: Parents' education likely does not directly affect child's wage, except through child's education.
+
+::: {.center}
+![](educ.png){width=60%}
+:::
+
+<!-- education is really a choice, you can force kids to stay in schol and you cant force parents not to send kids to school, this is closely linked to th epersonality and you choice, so you cant randomize you get 3 years, you get 4 of education-->
+
+
+---
+
+### Implementation of 2SLS in Stata
+
+1. First Stage
+
+```stata
+use http://fmwww.bc.edu/ec-p/data/wooldridge/mroz, clear
+regress educ fatheduc motheduc exper expersq if !missing(lwage)
+```
+```{=html}
+<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
+
+      Source |       SS           df       MS      Number of obs   =       428
+-------------+----------------------------------   F(4, 423)       =     28.36
+       Model |  471.620998         4   117.90525   Prob > F        =    0.0000
+    Residual |  1758.57526       423  4.15738833   R-squared       =    0.2115
+-------------+----------------------------------   Adj R-squared   =    0.2040
+       Total |  2230.19626       427  5.22294206   Root MSE        =     2.039
+
+------------------------------------------------------------------------------
+        educ | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    fatheduc |   .1895484   .0337565     5.62   0.000     .1231971    .2558997
+    motheduc |    .157597   .0358941     4.39   0.000      .087044    .2281501
+       exper |   .0452254   .0402507     1.12   0.262    -.0338909    .1243417
+     expersq |  -.0010091   .0012033    -0.84   0.402    -.0033744    .0013562
+       _cons |    9.10264   .4265614    21.34   0.000     8.264196    9.941084
+------------------------------------------------------------------------------
+
+</pre>
+```
+
+---
+
+### Implementation of 2SLS in Stata
+
+2. Second Stage
+
+```stata
+predict educhat
+regress lwage educhat exper expersq
+```
+```{=html}
+<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
+
+      Source |       SS           df       MS      Number of obs   =       428
+-------------+----------------------------------   F(3, 424)       =      7.40
+       Model |  11.1178292         3  3.70594308   Prob > F        =    0.0001
+    Residual |  212.209622       424  .500494392   R-squared       =    0.0498
+-------------+----------------------------------   Adj R-squared   =    0.0431
+       Total |  223.327451       427  .523015108   Root MSE        =    .70746
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     educhat |   .0613966   .0329624     1.86   0.063    -.0033933    .1261866
+       exper |   .0441704   .0140844     3.14   0.002     .0164865    .0718543
+     expersq |   -.000899   .0004212    -2.13   0.033    -.0017268   -.0000711
+       _cons |   .0481003   .4197565     0.11   0.909    -.7769624     .873163
+------------------------------------------------------------------------------
+</pre>
+```
+
+
+
+---
+
+### Implementation of 2SLS in Stata
+
+Or we can use the built-in command for 2SLS:
+
+```stata
+ivregress 2sls lwage exper expersq (educ= fatheduc motheduc)
+```
+
+```{=html}
+<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
+
+Instrumental-variables 2SLS regression            Number of obs   =        428
+                                                  Wald chi2(3)    =      24.65
+                                                  Prob > chi2     =     0.0000
+                                                  R-squared       =     0.1357
+                                                  Root MSE        =     .67155
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        educ |   .0613966   .0312895     1.96   0.050     .0000704    .1227228
+       exper |   .0441704   .0133696     3.30   0.001     .0179665    .0703742
+     expersq |   -.000899   .0003998    -2.25   0.025    -.0016826   -.0001154
+       _cons |   .0481003    .398453     0.12   0.904    -.7328532    .8290538
+------------------------------------------------------------------------------
+Endogenous: educ
+Exogenous:  exper expersq fatheduc motheduc
+
+</pre>
+```
+
+
+---
+
+## Probit (IV-Probit)
+
+
+We are interested in estimating the effect of household income on female labor force participation.
+
+$$\begin{equation}
+\begin{split}
+\texttt{fem_work}_i &= \beta_1 + \beta_2\texttt{other_inc}_i +  \\ &\quad  \beta_3\texttt{fem_educ}_i 
++ \beta_4\texttt{kids}_i + \varepsilon_i
+\end{split}
+\end{equation}$$
+
+where: 
+
+- $\texttt{fem_work}$: Female labor force participation
+- $\texttt{other_inc}$: Other family income (endogenous)
+- $\texttt{fem_educ}$: Female education level
+- $\texttt{kids}$: Number of kids
+
+But $\text{other_inc}$ is likely endogenous due to omitted variable bias (e.g., family preferences)
+
+
+---
+
+### Endogeneity & Instrument
+
+- `other_inc` correlated with unobserved family attitudes that also affect female labor participation.  
+
+::: {.center}
+![](fem_work.png){width=70%}
+:::
+
+
+- Use `male_educ` as instrument:
+  - $\uparrow$ Education $\rightarrow$ $\uparrow$ Income (**relevance**)
+  - No direct effect on `fem_work` (**exogeneity**)
+- Controls: `fem_educ`, `kids`
+
+
+
+
+---
+
+### Non-Linear Model: Probit
+
+- $\text{fem_work}$ is a binary outcome (1 if working, 0 otherwise).
+
+- OLS is not suitable for binary outcomes $\rightarrow$ may predict probabilities outside [0,1].
+
+- Probit models the probability that $Y=1$ using a normal CDF:
+
+$$P(Y=1|X) = \Phi(Xβ)$$
+
+- Captures the **nonlinear** link between covariates and probability of working.
+
+
+
+--- 
+
+## Stata code for IV-Probit
+```stata
+clear all 
+webuse laborsup, clear
+ivprobit fem_work fem_educ kids (other_inc = male_educ)
+```
+
+```{=html}
+<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
+
+Probit model with endogenous regressors                 Number of obs =    500
+                                                        Wald chi2(3)  = 163.88
+Log likelihood = -2368.2062                             Prob > chi2   = 0.0000
+
+----------------------------------------------------------------------------------------------
+                             | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+                   other_inc |  -.0542756   .0060854    -8.92   0.000    -.0662028   -.0423485
+                    fem_educ |    .211111   .0268648     7.86   0.000     .1584569    .2637651
+                        kids |  -.1820929   .0478267    -3.81   0.000    -.2758315   -.0883542
+                       _cons |   .3672086   .4480724     0.82   0.412    -.5109971    1.245414
+-----------------------------+----------------------------------------------------------------
+ corr(e.other_inc,e.fem_work)|   .3720375   .1300518                      .0946562    .5958136
+              sd(e.other_inc)|   16.66621   .5270318                      15.66461    17.73186
+----------------------------------------------------------------------------------------------
+Wald test of exogeneity (corr = 0): chi2(1) = 6.70        Prob > chi2 = 0.0096
+Endogenous: other_inc
+Exogenous:  fem_educ kids male_educ
+
+</pre>
+```
+
+---
+
+### Interpretation of `kids = -0.18`
+
+- A one-child increase reduces the **latent propensity** to work by **0.18 SD**, holding other factors constant.  
+- This is **not yet** a change in probability because the Probit model is **nonlinear**.
+
+$$P(\text{fem_work}=1|X) = \Phi(X\beta)$$
+
+The **marginal effect** of one more child on that probability is:
+
+$$\frac{\partial P(\text{fem_work}=1|X)}{\partial \text{kids}} 
+= \phi(X\beta) \cdot \beta_{\text{kids}}$$
+
+where $\Phi(\cdot)$ and $\phi(\cdot)$ are the CDF and PDF of the standard normal.  
+
+<!-- At the mean, $X\beta \approx 0 \Rightarrow \phi(0)=0.3989\approx0.4$.
+
+$$
+\Delta P \approx 0.4 \times (-0.182) = -0.073
+$$
+
+ **Each additional child lowers the probability of working by about 7 pp**, on average. -->
+
+
+<!-- 
+- The coefficients in a Probit model represent the change in the z-score (the standard normal deviate) for a one-unit change in the predictor variable. To interpret these coefficients in terms of probabilities, we can compute the marginal effects.
+
+To compute the marginal effects:
+$$\frac{∂P(Y=1|X)}{∂X_j} = φ(Xβ) * β_j$$
+ where $φ$ is the probability density function of the standard normal distribution. -->
+
+
+---
+
+## Marginal Effects
+
+- **Treatment variable continuous**, we can compute the marginal effects to understand the impact of a one-unit increase in the treatment on the probability of the outcome.
+
+
+```stata
+margins, at(kids=(1(1)4)) predict(pr)
+marginsplot
+```
+::: {.center}
+![](marginal_effects.png){width=80%}
+:::
+
+
+--- 
+
+
+## Local Average Treatment Effect (LATE)
+
+:auto-animate:
+
+::: {.callout-note title="LATE" icon="false"}
+The IV estimate identifies the causal effect for compliers, i.e., those whose treatment decision responds to the instrument.
+:::
+
+<!-- Paso 1 -->
+<div>
+
+|                | **Z = 0**                      | **Z = 1**                      |
+|----------------|--------------------------------|--------------------------------|
+| **D(0)**       | complier o never-taker         | defier o never-taker           |
+| **D(1)**       | defier o always-taker          | complier o always-taker        |
+
+</div>
+
+---
+
+## Local Average Treatment Effect (LATE)
+:auto-animate:
+
+::: {.callout-note title="LATE" icon="false"}
+The IV estimate identifies the causal effect for compliers, i.e., those whose treatment decision responds to the instrument.
+:::
+
+<!-- Paso 2 -->
+<div>
+
+|                | **Z = 0**                              | **Z = 1**                              |
+|----------------|----------------------------------------|----------------------------------------|
+| **D(0)**       | complier o never-taker                 | ~~defier~~ o never-taker               |
+| **D(1)**       | ~~defier~~ o always-taker              | complier o always-taker                |
+
+</div>
+
+---
+
+## Local Average Treatment Effect (LATE)
+:auto-animate:
+
+::: {.callout-note title="LATE" icon="false"}
+The IV estimate identifies the causal effect for compliers, i.e., those whose treatment decision responds to the instrument.
+
+:::
+
+<!-- Paso 3 -->
+<div>
+
+|                | **Z = 0**                                     | **Z = 1**                                     |
+|----------------|-----------------------------------------------|-----------------------------------------------|
+| **D(0)**       | **complier** o never-taker                    | ~~defier~~ o never-taker                      |
+| **D(1)**       | ~~defier~~ o always-taker                     | **complier** o always-taker                   |
+
+</div>
+
+
+<!-- - **Compliers**: Individuals whose treatment status is influenced by the instrument.
+- **Always-Takers**: Individuals who take the treatment regardless of the instrument.
+- **Never-Takers**: Individuals who never take the treatment regardless of the instrument.
+- **Defiers**: Individuals who do the opposite of what the instrument suggests (usually ruled out by monotonicity assumption). -->
+
+
+
+---
+
+### The Ghana Experiment
+
+*“The Impact of Free Secondary Education: Experimental Evidence from Ghana”*, Duflo, Dupas & Kremer (2021), *QJE*  
+
+- Many students **qualify** for secondary school but **cannot afford to enroll**.
+- Researchers implemented a **scholarship lottery**:
+  - Surveyed students *who qualified for secondary school* but had not yet enrolled.
+  - Randomly offered scholarships that covered school fees.
+
+
+So instead of assigning education randomly, they conducted a randomized controlled trial (RCT) where they assigned scholarships to some students to attend secondary school.
+
+---
+
+### Variables
+
+$$Y_i = \beta_0 + \beta_1 D_i + \varepsilon_i$$
+
+- **Outcome**: 
+
+  $$Y_i = \text{post-intervention cognitive test score}$$
+
+- **Treatment**:  
+
+$$D_i = 1 \text{ if the student actually attended secondary school}$$
+
+- **Instrument**:  
+  
+$$Z_i = 1 \text{ if student was randomly offered a scholarship}$$
+
+
+--- 
+
+### Imperfect Compliance
+
+Getting a scholarship does not translate into **1 to 1** relationship with going to school:
+
+::: {.callout-warning title="Defiers" icon="false"}
+1. Some scholarship winners $(Z=1)$ **still do not enroll** $(D = 0)$
+2. Some students without scholarships $(Z=0)$ **manage to enroll anyway** $(D = 1)$
+:::
+
+
+<!-- , lack of interest, family issues, or other barriers beyond financial constraints.
+, they find alternative funding sources, receive support from family. -->
+ <!-- because most students who receive the scholarship still do not attend (not interested anymore), and on the other side some students that do not get the scholarship manage to find the money to attend secondary school. -->
+<!-- 
+
+- Is very common in Ghana that people who qualify for secondary school do not attend because of financial constraints.
+ -->
+
+Therefore, the instrument $Z_i$ affects schooling  $D_i$ **but imperfectly**, creating the classic compliance groups.
+
+
+
+---
+
+### Compliance Types
+
+- **Always Takers** enroll **with or without** scholarship.
+$$D(1) = 1,\quad D(0) = 1$$
+- **Never Takers** do **not** enroll even if they receive a scholarship.
+$$D(1) = 0,\quad D(0) = 0$$
+- **Compliers (the key group)** enroll **only if** they receive the scholarship, these are the students **whose decisions change because of the instrument**.
+$$D(1) = 1,\quad D(0) = 0$$
+- **Defiers (usually ruled out)** do the **opposite** of the instrument assignment.
+$$D(1) = 0,\quad D(0) = 1$$
+Assumption: **Monotonicity** → no defiers.
+
+---
+
+
+**1. Effect of scholarship offer on enrollment**
+
+$$E[D_i \mid Z_i=1] - E[D_i \mid Z_i=0]$$
+
+- Scholarship increases enrollment  
+- Many students enroll when offered  
+- Few enroll without scholarship
+
+**2. Effect of scholarship offer on cognitive scores.**
+
+$$E[Y_i \mid Z_i=1] - E[Y_i \mid Z_i=0]$$
+
+Using expression for the outcome variable:
+
+$$E[Y_i \mid Z_i=1] - E[Y_i \mid Z_i=0] = \beta_1 (E[D_i \mid Z_i=1] - E[D_i \mid Z_i=0])$$
+
+**Wald Estimator**
+
+$$\hat{\beta}_{IV}= \frac{E[Y_i \mid Z_i = 1] - E[Y_i \mid Z_i = 0]}{E[D_i \mid Z_i = 1] - E[D_i \mid Z_i = 0]}$$
+
+Causal effect of schooling.
+
+
+
+---
+
+## What Does IV Identify?
+
+IV does **not** estimate the average effect for all students.
+
+- Always Takers: scholarship does not change their attendance.  
+- Never Takers: scholarship does not change their attendance.  
+- Defiers: assumed not to exist.  
+- **Compliers**: the only group whose behavior is affected by the instrument → the only source of identifying variation.
+
+Thus IV identifies a **Local** Average Treatment Effect.
+
+$$\text{LATE} =E[Y(1) - Y(0) \mid \text{Compliers}]$$
+
+### Interpretation:
+
+> The causal effect of secondary schooling **for students whose attendance decisions are actually changed by the scholarship offer**.
+
+
+---
+
+## Connection to Duflo-Dupas-Kremer (2021)
+
+They write:
+
+> “Our estimates capture the causal impact of secondary schooling for students whose enrollment decisions are affected by the scholarship offer.”
+
+This is **exactly** the definition of LATE.
