@@ -271,8 +271,8 @@ Lucia Sauer
 <section id="two-stage-least-squares-2sls" class="slide level2">
 <h2>Two-Stage Least Squares (2SLS)</h2>
 <ol type="1">
-<li>First Stage: regress the endogenous variable X on the instrument Z and other exogenous variables to obtain the predicted values of X <span class="math display">\[X = \delta_0 + \delta_1Z + v\]</span></li>
-<li>Second Stage: regress the dependent variable Y on the predicted values <span class="math inline">\(\hat{X}\)</span> and other exogenous variables. <span class="math display">\[Y = \beta_0 + \beta_1\hat{X} + \epsilon \]</span></li>
+<li><p>First Stage: regress the endogenous variable X on the instrument Z and other exogenous variables to obtain the predicted values of X <span class="math display">\[X = \delta_0 + \delta_1Z + v\]</span></p></li>
+<li><p>Second Stage: regress the dependent variable Y on the predicted values <span class="math inline">\(\hat{X}\)</span> and other exogenous variables. <span class="math display">\[Y = \beta_0 + \beta_1\hat{X} + \varepsilon\]</span></p></li>
 </ol>
 <ul>
 <li>Statistical software that supports 2SLS estimation directly (e.g., <code>ivreg</code> in R, <code>ivregress</code> in Stata, in python <code>linearmodels.iv</code>).</li>
@@ -282,12 +282,7 @@ Lucia Sauer
 
 <h3 id="returns-of-education">Returns of Education</h3>
 <p>We want to estimate the effect of education on wages.</p>
-<p><span class="math display">\[\begin{equation}
-\begin{split}
-\texttt{lwage}_i &amp;= \beta_1 + \beta_2\texttt{exper}_i + \beta_3\texttt{expersq}_i
-\\ &amp;\quad  + \beta_4\texttt{educ}_i + \varepsilon_i
-\end{split}
-\end{equation}\]</span></p>
+<p><span class="math display">\[\text{lwage}_i = \beta_1 + \beta_2\text{exper}_i + \beta_3\text{expersq}_i + \beta_4\text{educ}_i + \varepsilon_i\]</span></p>
 <p>However, <span class="math inline">\(\texttt{educ}\)</span> may be endogenous due to omitted ability bias.</p>
 <div class="center">
 <p><img data-src="educ_endogenous.png" style="width:60.0%"></p>
@@ -297,12 +292,7 @@ Lucia Sauer
 
 <h3 id="returns-of-education---iv">Returns of Education - IV</h3>
 <p>We want to estimate the effect of education on wages.</p>
-<p><span class="math display">\[\begin{equation}
-\begin{split}
-\texttt{lwage}_i &amp;= \beta_1 + \beta_2\texttt{exper}_i + \beta_3\texttt{expersq}_i
-\\ &amp;\quad  + \beta_4\texttt{educ}_i + \varepsilon_i
-\end{split}
-\end{equation}\]</span></p>
+<p><span class="math display">\[\text{lwage}_i = \beta_1 + \beta_2\text{exper}_i + \beta_3\text{expersq}_i + \beta_4\text{educ}_i + \varepsilon_i\]</span></p>
 <ul>
 <li>We can use <code>fatheduc</code> and <code>motheduc</code> as instruments for <code>educ</code>:
 <ul>
@@ -397,20 +387,15 @@ Exogenous:  exper expersq fatheduc motheduc
 <section id="probit-iv-probit" class="slide level2">
 <h2>Probit (IV-Probit)</h2>
 <p>We are interested in estimating the effect of household income on female labor force participation.</p>
-<p><span class="math display">\[\begin{equation}
-\begin{split}
-\texttt{fem_work}_i &amp;= \beta_1 + \beta_2\texttt{other_inc}_i +  \\ &amp;\quad  \beta_3\texttt{fem_educ}_i
-+ \beta_4\texttt{kids}_i + \varepsilon_i
-\end{split}
-\end{equation}\]</span></p>
+<p><span class="math display">\[\text{fem\_work}_i = \beta_1 + \beta_2\text{other\_inc}_i + \beta_3\text{fem\_educ}_i + \beta_4\text{kids}_i + \varepsilon_i\]</span></p>
 <p>where:</p>
 <ul>
-<li><span class="math inline">\(\texttt{fem_work}\)</span>: Female labor force participation</li>
-<li><span class="math inline">\(\texttt{other_inc}\)</span>: Other family income (endogenous)</li>
-<li><span class="math inline">\(\texttt{fem_educ}\)</span>: Female education level</li>
-<li><span class="math inline">\(\texttt{kids}\)</span>: Number of kids</li>
+<li><span class="math inline">\(\text{fem\_work}\)</span>: Female labor force participation</li>
+<li><span class="math inline">\(\text{other\_inc}\)</span>: Other family income (endogenous)</li>
+<li><span class="math inline">\(\text{fem\_educ}\)</span>: Female education level</li>
+<li><span class="math inline">\(\text{kids}\)</span>: Number of kids</li>
 </ul>
-<p>But <span class="math inline">\(\text{other_inc}\)</span> is likely endogenous due to omitted variable bias (e.g., family preferences)</p>
+<p>But <span class="math inline">\(\text{other\_inc}\)</span> is likely endogenous due to omitted variable bias (e.g., family preferences)</p>
 </section>
 <section class="slide level2">
 
@@ -434,7 +419,7 @@ Exogenous:  exper expersq fatheduc motheduc
 
 <h3 id="non-linear-model-probit">Non-Linear Model: Probit</h3>
 <ul>
-<li><p><span class="math inline">\(\text{fem_work}\)</span> is a binary outcome (1 if working, 0 otherwise).</p></li>
+<li><p><span class="math inline">\(\text{fem\_work}\)</span> is a binary outcome (1 if working, 0 otherwise).</p></li>
 <li><p>OLS is not suitable for binary outcomes <span class="math inline">\(\rightarrow\)</span> may predict probabilities outside [0,1].</p></li>
 <li><p>Probit models the probability that <span class="math inline">\(Y=1\)</span> using a normal CDF:</p></li>
 </ul>
@@ -478,9 +463,9 @@ Exogenous:  fem_educ kids male_educ
 </li>
 <li>This is <strong>not yet</strong> a change in probability because the Probit model is <strong>nonlinear</strong>.</li>
 </ul>
-<p><span class="math display">\[P(\text{fem_work}=1|X) = \Phi(X\beta)\]</span></p>
+<p><span class="math display">\[P(\text{fem\_work}=1|X) = \Phi(X\beta)\]</span></p>
 <p>The <strong>marginal effect</strong> of one more child on that probability is:</p>
-<p><span class="math display">\[\frac{\partial P(\text{fem_work}=1|X)}{\partial \text{kids}}
+<p><span class="math display">\[\frac{\partial P(\text{fem\_work}=1|X)}{\partial \text{kids}}
 = \phi(X\beta) \cdot \beta_{\text{kids}}\]</span></p>
 <p>where <span class="math inline">\(\Phi(\cdot)\)</span> and <span class="math inline">\(\phi(\cdot)\)</span> are the CDF and PDF of the standard normal.</p>
 <!-- At the mean, $X\beta \approx 0 \Rightarrow \phi(0)=0.3989\approx0.4$.

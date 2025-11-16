@@ -96,8 +96,9 @@ So when we critize IV, we usually focus on these two assumptions.
 
 1. First Stage: regress the endogenous variable X on the instrument Z and other exogenous variables to obtain the predicted values of X
    $$X = \delta_0 + \delta_1Z + v$$
+   
 2. Second Stage: regress the dependent variable Y on the predicted values $\hat{X}$ and other exogenous variables.
-    $$Y = \beta_0 + \beta_1\hat{X} + \epsilon $$
+    $$Y = \beta_0 + \beta_1\hat{X} + \varepsilon$$
 
 
 - Statistical software that supports 2SLS estimation directly (e.g., `ivreg` in R, `ivregress` in Stata, in python `linearmodels.iv`).
@@ -108,13 +109,7 @@ So when we critize IV, we usually focus on these two assumptions.
 
 We want to estimate the effect of education on wages. 
 
-$$\begin{equation}
-\begin{split}
-\texttt{lwage}_i &= \beta_1 + \beta_2\texttt{exper}_i + \beta_3\texttt{expersq}_i 
-\\ &\quad  + \beta_4\texttt{educ}_i + \varepsilon_i
-\end{split}
-\end{equation}$$
-
+$$\text{lwage}_i = \beta_1 + \beta_2\text{exper}_i + \beta_3\text{expersq}_i + \beta_4\text{educ}_i + \varepsilon_i$$
 
 
 However, $\texttt{educ}$ may be endogenous due to omitted ability bias.
@@ -132,12 +127,9 @@ However, $\texttt{educ}$ may be endogenous due to omitted ability bias.
 
 We want to estimate the effect of education on wages. 
 
-$$\begin{equation}
-\begin{split}
-\texttt{lwage}_i &= \beta_1 + \beta_2\texttt{exper}_i + \beta_3\texttt{expersq}_i 
-\\ &\quad  + \beta_4\texttt{educ}_i + \varepsilon_i
-\end{split}
-\end{equation}$$
+
+$$\text{lwage}_i = \beta_1 + \beta_2\text{exper}_i + \beta_3\text{expersq}_i + \beta_4\text{educ}_i + \varepsilon_i$$
+
 
 - We can use `fatheduc` and `motheduc` as instruments for `educ`:
   - Relevance: Parents' education likely affects child's education.
@@ -257,21 +249,16 @@ Exogenous:  exper expersq fatheduc motheduc
 
 We are interested in estimating the effect of household income on female labor force participation.
 
-$$\begin{equation}
-\begin{split}
-\texttt{fem_work}_i &= \beta_1 + \beta_2\texttt{other_inc}_i +  \\ &\quad  \beta_3\texttt{fem_educ}_i 
-+ \beta_4\texttt{kids}_i + \varepsilon_i
-\end{split}
-\end{equation}$$
+$$\text{fem\_work}_i = \beta_1 + \beta_2\text{other\_inc}_i + \beta_3\text{fem\_educ}_i + \beta_4\text{kids}_i + \varepsilon_i$$
 
-where: 
+where:
 
-- $\texttt{fem_work}$: Female labor force participation
-- $\texttt{other_inc}$: Other family income (endogenous)
-- $\texttt{fem_educ}$: Female education level
-- $\texttt{kids}$: Number of kids
+- $\text{fem\_work}$: Female labor force participation
+- $\text{other\_inc}$: Other family income (endogenous)
+- $\text{fem\_educ}$: Female education level
+- $\text{kids}$: Number of kids
 
-But $\text{other_inc}$ is likely endogenous due to omitted variable bias (e.g., family preferences)
+But $\text{other\_inc}$ is likely endogenous due to omitted variable bias (e.g., family preferences)
 
 
 ---
@@ -297,7 +284,7 @@ But $\text{other_inc}$ is likely endogenous due to omitted variable bias (e.g., 
 
 ### Non-Linear Model: Probit
 
-- $\text{fem_work}$ is a binary outcome (1 if working, 0 otherwise).
+- $\text{fem\_work}$ is a binary outcome (1 if working, 0 otherwise).
 
 - OLS is not suitable for binary outcomes $\rightarrow$ may predict probabilities outside [0,1].
 
@@ -306,7 +293,6 @@ But $\text{other_inc}$ is likely endogenous due to omitted variable bias (e.g., 
 $$P(Y=1|X) = \Phi(Xβ)$$
 
 - Captures the **nonlinear** link between covariates and probability of working.
-
 
 
 --- 
@@ -350,11 +336,11 @@ Exogenous:  fem_educ kids male_educ
 - A one-child increase reduces the **latent propensity** to work by **0.18 SD**, holding other factors constant.  
 - This is **not yet** a change in probability because the Probit model is **nonlinear**.
 
-$$P(\text{fem_work}=1|X) = \Phi(X\beta)$$
+$$P(\text{fem\_work}=1|X) = \Phi(X\beta)$$
 
 The **marginal effect** of one more child on that probability is:
 
-$$\frac{\partial P(\text{fem_work}=1|X)}{\partial \text{kids}} 
+$$\frac{\partial P(\text{fem\_work}=1|X)}{\partial \text{kids}} 
 = \phi(X\beta) \cdot \beta_{\text{kids}}$$
 
 where $\Phi(\cdot)$ and $\phi(\cdot)$ are the CDF and PDF of the standard normal.  
