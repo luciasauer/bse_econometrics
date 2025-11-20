@@ -1,0 +1,1064 @@
+---
+title: "Econometrics"
+subtitle: "<span class='subtitle-text'>TA Session 8</span>"
+author: "Lucia Sauer"
+institute: "<em>Barcelona School of Economics</em>"
+date: "2025-11-20"
+format:
+  revealjs:
+    chalkboard: true
+    
+    slide-width: 1800
+    transition: fade
+    slide-number: true
+    progress: true
+    title-slide-attributes:
+      data-background-position: "95% 90%"
+      data-background-size: "100px"
+editor:
+  render-on-save: true
+
+---
+
+## Overview
+
+- Regression Discontinuity Design
+- Examples
+- Sharp RD
+- Fuzzy RD
+- Assignment 7
+
+---
+
+## The soul of RDD
+
+RDD is all about finding “jumps” in the probability of treatment as we move along some running variable. So where do we find these jumps? Where do we find these discontinuities?
+
+From **policies or rules** that switch treatment on/off at a specific threshold:
+
+::: {.fragment}
+- Arrest for drunk driving jumps when **BAC ≥ 0.08**  
+  *(Hansen, 2015)*  
+:::
+::: {.fragment}  
+- Medicare eligibility jumps at **Age 65**  
+  *(Card, Dobkin & Maestas, 2008)*
+:::
+::: {.fragment}  
+- Neonatal intensive care jumps when **birthweight < 1500g**  
+  *(Almond et al., 2010; Barreca et al., 2011)*
+:::
+
+
+::: {.fragment}  
+- R&D subsidies jump when **project scores exceed funding threshold**  
+  *(Bronzini & Iachini, 2014)*
+:::
+
+---
+
+## How RDD Works
+
+RDD requieres a **running variable**, a **cutoff**, and a **treatment** to measure the causal effect on **outcome**.
+
+::: {.fragment}
+- The **running variable** is a continuous variable assigning units to treatment.
+:::
+::: {.fragment}
+- The **cutoff** is a specific value of the running variable that separates treated and control
+    units.
+    <!-- This assignment of units to treatment is based on a “cutoff” score such that any unit with a score above the cutoff gets placed into the treatment group, and units below do not -->
+:::
+
+::: {.fragment}
+- The **treatment** is an intervention that is expected to drive a change in outcome.
+:::
+
+::: {.fragment}
+- The **outcome** is the variable of interest that we want to measure the effect on due to treatment.
+:::
+
+::: {.fragment}
+- **Causal effect**: is known as the Local Average Treatment Effect (LATE) at the cutoff, since it is measured using the units around the cutoff.
+
+:::
+
+
+--- 
+
+## Assumptions:
+
+::: {.fragment}
+**1. Local Relevance**
+The probability of receiving treatment jumps at the cutoff.
+$$ lim_{z \to z_0^{+}} P(D=1|Z=z) \neq lim_{z \to z_0^{-}} P(D=1|Z=z) $$
+
+Small differences in the running variable near the cutoff must change treatment uptake.
+
+:::
+
+::: {.fragment}
+**2. Exogeneity**
+In the absence of treatment, potential outcomes must be smooth through the cutoff
+$$ lim_{z \to z_0^{+}} P(Y_{ij}\leq r|Z_i=z_0) = lim_{z \to z_0^{-}} P(Y_{ij}\leq r|Z_i=z_0) $$
+No other factor should change discontinuously at the cutoff.
+:::
+
+--- 
+
+## 2 types of RDD
+
+- In sharp RD, treatment assignment is **deterministic** at the threshold, so the RD estimand equals the **ATE** for all units at the cutoff. 
+- In fuzzy RD, assignment is only **probabilistic**, so we recover a **LATE** for compliers at the cutoff.
+
+
+```{python}
+#|echo: false
+#|fig-align: center
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set_style("white")
+sns.set_context("talk")
+
+np.random.seed(42)
+
+# Running variable
+Z = np.linspace(-1, 1, 2000)
+cutoff = 0
+
+# SHARP RD: deterministic treatment rule
+D_sharp = (Z >= cutoff).astype(int)
+
+# FUZZY RD: smooth compliance w/jump at cutoff
+prob_fuzzy = 0.15 + 0.6*(1/(1+np.exp(-8*(Z-cutoff))))  # S-shape but with jump
+prob_fuzzy = np.clip(prob_fuzzy, 0, 1)  # keep valid probabilities
+
+# Plot setup
+fig, axes = plt.subplots(1, 2, figsize=(14,6), sharey=True)
+
+# --- Sharp RD Plot ---
+axes[0].plot(Z, D_sharp, color="black", linewidth=2)
+axes[0].axvline(cutoff, linestyle="--", color="gray")
+axes[0].set_title("Sharp Design", fontsize=20)
+axes[0].set_xlabel("Running Variable")
+axes[0].set_ylabel("Proportion Treated")
+axes[0].set_ylim(-0.05, 1.05)
+axes[0].set_xticks([])
+axes[0].set_yticks([0, .25, .5, .75, 1])
+axes[0].spines["right"].set_visible(False)
+axes[0].spines["top"].set_visible(False)
+
+# --- Fuzzy RD Plot ---
+axes[1].plot(Z, prob_fuzzy, color="black", linewidth=2)
+axes[1].axvline(cutoff, linestyle="--", color="gray")
+axes[1].set_title("Fuzzy Design", fontsize=20)
+axes[1].set_xlabel("Running Variable")
+axes[1].set_xticks([])
+axes[1].set_ylim(-0.05, 1.05)
+axes[1].spines["right"].set_visible(False)
+axes[1].spines["top"].set_visible(False)
+
+plt.tight_layout()
+plt.show()
+```
+
+
+---
+
+# Mortality Risk and the MLDA {style="margin-top:0.1em"}
+
+::: {.columns}
+
+:::: {.column width="55%"}
+- Age 21 is the **legal drinking age** in the U.S.
+- A tiny change in age → **big jump** in legal access
+- Mortality **spikes exactly at 21**, not a generic "party-hardy" birthday effect.
+
+::::
+
+:::: {.column width="45%" .center}
+![](imgs/birthday_funerals.png){width=85%}
+::::
+
+:::
+> **Causal question**:  
+> Does legal access to alcohol **increase mortality**?
+
+---
+
+
+## Sharp RD
+
+The effects of MLDA on mortality is a sharp RD, because the treatment swithches cleanly off or on as the running variable crosses the cutoff.
+
+The treatment is defined as:
+$$
+D_a =
+\begin{cases}
+1 & \text{if } a \geq 21 \\
+0 & \text{if } a < 21
+\end{cases}
+$$
+where $D_a$ is the treatment indicator at age $a$ and 1 means that the individual is legally allowed to purchase alcohol.
+
+
+<!--
+This representation highlights two important features of sharp RDDs:
+
+ - Treatment status is a deterministic function of $a$, so that once we know $a$, we know $D_a$.
+- Treatment status is a discontinuous function of $a$, because no matter how close $a$ gets to the cutoff, $D_a$ remains unchanged until the cutoff is reached. -->
+
+---
+
+## Sharp RD visualization
+
+```{python}
+
+#|echo: false
+#| fig-align: center
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set(style="whitegrid", context="talk")
+df = pd.read_stata('MLDA/AEJfigs.dta')
+left = df[df["agecell"] < 21]
+right = df[df["agecell"] >= 21]
+# STEP 1: Plot scatter
+fig, ax = plt.subplots(figsize=(8,6))
+ax.scatter(left["agecell"], left["all"], alpha=0.6, color="darkgreen", label="a<21")
+ax.scatter(right["agecell"], right["all"], alpha=0.6, color="darkred", label="a≥21")
+
+# STEP 2: Highlight cutoff
+ax.axvline(21, linestyle="--", color="gray")
+
+ax.set_ylabel("Mortality rate (per 100k)")
+ax.set_xlabel("Age")
+ax.yaxis.set_major_locator(plt.MultipleLocator(5))
+ax.xaxis.set_major_locator(plt.MaxNLocator(5))
+ax.set_ylim(80,115)
+
+ax.set_title("Discontinuity at the MLDA cutoff")
+ax.legend(["Fitted: <21","Fitted: ≥21"], loc="upper left")
+plt.legend(frameon=False, loc="upper left")
+
+# Hide top and right spines
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+
+# Set bottom and left spines to black
+ax.spines["bottom"].set_color("black")
+ax.spines["left"].set_color("black")
+# Set tick color to black
+ax.tick_params(axis="x", colors="black")
+ax.tick_params(axis="y", colors="black")
+plt.tight_layout()
+plt.show()
+```
+
+
+---
+
+## Sharp RD equation:
+
+
+$$
+\bar M_a = \beta_0 
+          + \beta_1 (a - a_0)
+          + \alpha_{RD} D_a 
+          + \beta_2 (a - a_0) D_a
+          + e_a
+$$
+
+where:
+
+- $\bar M_a$ is the average mortality rate in month $a$ (each month is a 30-day interval relative to the 21st birthday),
+- $a$ is age in months and $a_0$ is the cutoff (the month in which individuals turn 21), so $(a - a_0) = 0$ at the threshold,
+- $D_a = 1(a \ge a_0)$ is an indicator for being above the MLDA,
+- $\alpha_{RD}$ is the RD parameter of interest, capturing the causal jump in mortality at the cutoff,
+- $\beta_1$ captures the age-related trend in mortality below the cutoff,
+- $\beta_2$ allows the slope of mortality with respect to age to differ above the cutoff.
+
+---
+
+## Visualization of RD fit
+
+
+```{python}
+#| echo: false
+#| eval: true
+#| fig-align: center
+#| fig-show: true
+#| fig-width: 12
+#| fig-height: 10
+
+import statsmodels.formula.api as smf
+import numpy as np
+df["age"] = df["agecell"] - 21
+
+df["over21"] = (df["agecell"] >= 21).astype(int)
+# STEP 1: Estimate linear regression on each side of the cutoff
+left = df[df["agecell"] < 21]
+right = df[df["agecell"] >= 21]
+
+mod_left = smf.ols("all ~ agecell", data=left).fit()
+mod_right = smf.ols("all ~ agecell", data=right).fit()
+
+# Generate fitted lines
+left_sorted = left.sort_values("agecell")
+right_sorted = right.sort_values("agecell")
+
+left_pred = mod_left.predict(left_sorted)
+right_pred = mod_right.predict(right_sorted)
+
+# STEP 2: Plot scatter + fitted lines
+fig, ax = plt.subplots(figsize=(8,6))
+ax.scatter(left["agecell"], left["all"], alpha=0.6, color="darkgreen", label="a<21")
+ax.scatter(right["agecell"], right["all"], alpha=0.6, color="darkred", label="a≥21")
+
+ax.plot(left_sorted["agecell"], left_pred, color="darkgreen", linewidth=2)
+ax.plot(right_sorted["agecell"], right_pred, color="darkred", linewidth=2)
+
+# STEP 3: Highlight cutoff
+ax.axvline(21, linestyle="--", color="gray")
+
+ax.set_ylabel("Mortality rate (per 100k)")
+ax.set_xlabel("Age")
+ax.yaxis.set_major_locator(plt.MultipleLocator(5))
+ax.xaxis.set_major_locator(plt.MaxNLocator(5))
+ax.set_ylim(80,115)
+
+ax.set_title("Discontinuity at the MLDA cutoff")
+ax.legend(["Fitted: <21","Fitted: ≥21"], loc="upper left")
+plt.legend(frameon=False, loc="upper left")
+
+# Hide top and right spines
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+
+# Set bottom and left spines to black
+ax.spines["bottom"].set_color("black")
+ax.spines["left"].set_color("black")
+# Set tick color to black
+ax.tick_params(axis="x", colors="black")
+ax.tick_params(axis="y", colors="black")
+
+plt.tight_layout()
+plt.show()
+
+```
+
+
+
+* **Turning 21 increases mortality by ~7.7 deaths per 100k** at the cutoff.
+* In a **sharp RD**, this jump is the **ATE at age 21**.
+
+
+
+---
+
+## Is this causal?
+
+- Yes — if age trends are correctly modeled.
+- In a sharp RD, treatment is fully determined by the running variable (age), so once we control for age trends, there is no omitted variable bias.
+- The causal identifying assumption is that mortality would have been smooth in age in the absence of the MLDA cutoff. The jump we see at 21 is then the ATE at the cutoff.
+
+<!-- - The causal effect is **the jump right at the cutoff** (ATE at age 21).
+- Effects far from 21 require **extrapolation** → not credible.
+- Those just below 21 are the best **counterfactual** for those just above 21. -->
+
+
+:::{.callout-tip title="Linear age trend"}
+
+- So the **key question** becomes whether our model captures the age–mortality relationship well enough. 
+
+- If the trend is truly linear near the cutoff, this is a credible causal estimate.
+:::
+
+---
+
+## Dealing with Nonlinear Trends in RD
+
+- So far we’ve assumed a **linear** age–mortality relationship.
+- But if trends are nonlinear, a simple linear RD may **mistake nonlinearity for a discontinuity** $\rightarrow$ biased estimates.
+
+
+**Two common solutions:**
+
+::: callout-note
+#### 1. Local linear regression
+Focus on observations **close to the cutoff**, where linearity is more credible.
+:::
+
+::: callout-note
+#### 2. Flexible polynomials
+Allow curvature using **quadratic or higher-order** functions of the running variable.
+:::
+
+
+---
+
+## Quadratic RD
+
+The figure shown before suggests the possibility of **mild curvature** in the relationship between $\bar{M}_a$ and $a$, at least for the points to the right of the cutoff. 
+
+
+$$
+\bar M_a = \beta_0 + \beta_1 (a - a_0) + \beta_2 (a - a_0)^2 + \alpha_{RD} D_a \\
+\qquad\;\;\;\; + \beta_3 (a - a_0) D_a + \beta_4 (a - a_0)^2 D_a + e_a
+$$
+
+- Below 21: drinking is restricted → mortality tends to **decline** as youth mature.
+- Above 21: legal access may **change the trend** (more drinking risk or faster maturity).
+- RD lets the **slope differ** on each side of the cutoff instead of assuming a single trend.
+
+
+---
+
+## Quadratic RD Fit
+
+- The effect is still there and is stronger: turning 21 increases mortality by about 9.5 deaths per 100K.
+- The estimated trend function generated has some curvature, mildly concave to the left of age 21 and markedly convex thereafter.
+<!-- - Many newly legalized drinkers seem eventually to tire of getting trashed every night -->
+
+
+```{python}
+#| echo: false
+#| eval: true
+#| fig-align: center
+df["age2"] = df["age"]**2
+# RD regression with different slopes on each side
+model_q = smf.ols("all ~ age + age2 + over21 + age*over21 + age2*over21", data=df).fit()
+# Fitted values for visualization
+df["fit_q"] = model_q.fittedvalues
+
+fig, ax = plt.subplots(figsize=(8,6))
+
+
+# Scatter separated by treatment status
+ax.scatter(df[df["agecell"] < 21]["agecell"],
+           df[df["agecell"] < 21]["all"],
+           alpha=0.7, color="darkgreen", label="a < 21")
+
+ax.scatter(df[df["agecell"] >= 21]["agecell"],
+           df[df["agecell"] >= 21]["all"],
+           alpha=0.7, color="darkred", label="a ≥ 21")
+
+
+# Fitted RD lines
+ax.plot(df[df["agecell"] < 21]["agecell"],
+        df[df["agecell"] < 21]["fit_q"],
+        linewidth=3, color="darkgreen")
+
+ax.plot(df[df["agecell"] >= 21]["agecell"],
+        df[df["agecell"] >= 21]["fit_q"],
+        linewidth=3, color="darkred")
+
+
+# RD cutoff
+ax.axvline(21, linestyle="--", color="grey")
+
+ax.set_xlabel("Age")
+ax.set_ylabel("Mortality rate per 100k")
+ax.set_title("Quadratic RD at the MLDA cutoff")
+
+# Cleaner style
+ax.spines["right"].set_visible(False)
+ax.spines["top"].set_visible(False)
+
+# Set bottom and left spines to black
+ax.spines["bottom"].set_color("black")
+ax.spines["left"].set_color("black")
+# Set tick color to black
+ax.tick_params(axis="x", colors="black")
+ax.tick_params(axis="y", colors="black")
+
+ax.yaxis.set_major_locator(plt.MultipleLocator(5))
+ax.xaxis.set_major_locator(plt.MaxNLocator(5))
+ax.set_ylim(80,115)
+
+plt.legend(frameon=False, loc="upper left")
+plt.tight_layout()
+plt.show()
+```
+
+
+---
+
+## What drives the effect?
+
+- If the MLDA truly causes the mortality jump at 21...
+- ...we should see the largest increase in **alcohol-related deaths**.
+
+::: callout-tip
+### Validation strategy
+Compare causes:
+
+- **Motor vehicle accidents** $\rightarrow$ strongly alcohol-related
+
+- **Internal causes** $\rightarrow$ unrelated to drinking
+
+:::
+
+> **Prediction**: A real alcohol effect → a discontinuity only in MVA deaths.
+
+<!-- This is a mechanism test. We are checking if the discontinuity behaves like an alcohol-caused effect should. -->
+
+
+---
+
+
+## Cause-specific RD effects
+
+- Large jump in **motor vehicle deaths**
+- Little to no jump in deaths from **internal causes**
+
+
+```{python}
+#| echo: false
+#| eval: true
+#| fig-align: center
+import matplotlib.lines as mlines
+
+# Estimated curve: Quadratic RD for MVA + Internal
+mva_qi = smf.ols("mva ~ age + age2 + over21 + over21*age + over21*age2", data=df).fit()
+int_qi = smf.ols("internal ~ age + age2 + over21 + over21*age + over21*age2", data=df).fit()
+
+df["mvafitqi"] = mva_qi.fittedvalues
+df["intfitqi"] = int_qi.fittedvalues
+
+# Plot
+fig, ax = plt.subplots(figsize=(8,6))
+
+# Scatter 
+#ax.scatter(df["agecell"], df["mva"], alpha=0.6, label="Motor Vehicle Deaths")
+ax.scatter(df[df["agecell"] < 21]["agecell"],
+           df[df["agecell"] < 21]["mva"],
+           alpha=0.7, color="darkgreen", label="Motor Vehicle Deaths")
+
+ax.scatter(df[df["agecell"] >= 21]["agecell"],
+           df[df["agecell"] >= 21]["mva"],
+           alpha=0.7, color="darkred", label="Motor Vehicle Deaths")
+
+
+
+#ax.scatter(df["agecell"], df["internal"], alpha=0.6, label="Internal Causes", marker="x")
+
+ax.scatter(df[df["agecell"] < 21]["agecell"],
+           df[df["agecell"] < 21]["internal"],
+           alpha=0.7, color="darkgreen", label="Internal Causes", marker="x")
+
+ax.scatter(df[df["agecell"] >= 21]["agecell"],
+           df[df["agecell"] >= 21]["internal"],
+           alpha=0.7, color="darkred", label="Internal Causes", marker="x")
+
+# Smoothed RD lines (quadratic on each side)
+left = df[df["agecell"] < 21]
+right = df[df["agecell"] >= 21]
+
+ax.plot(left["agecell"], left["mvafitqi"], linewidth=2, color="darkgreen")
+ax.plot(right["agecell"], right["mvafitqi"], linewidth=2, color="darkred")
+
+ax.plot(left["agecell"], left["intfitqi"], linewidth=2, linestyle="--", color="darkgreen")
+ax.plot(right["agecell"], right["intfitqi"], linewidth=2, linestyle="--", color="darkred")
+
+# Vertical RD cutoff
+ax.axvline(21, color="grey", linestyle="--")
+
+ax.set_xlabel("Age")
+ax.set_ylabel("Mortality rate per 100k")
+ax.set_title("Cause-specific RD effects")
+
+# Cleaner style
+ax.spines["right"].set_visible(False)
+ax.spines["top"].set_visible(False)
+
+# Set bottom and left spines to black
+ax.spines["bottom"].set_color("black")
+ax.spines["left"].set_color("black")
+
+ax.yaxis.set_major_locator(plt.MultipleLocator(5))
+ax.xaxis.set_major_locator(plt.MaxNLocator(5))
+ax.set_ylim(10,40)
+
+
+# Custom legend markers
+mva_marker = mlines.Line2D([], [], color='black', marker='o', linestyle='None',
+                           markersize=8, label='Motor Vehicle Accidents')
+internal_marker = mlines.Line2D([], [], color='black', marker='x', linestyle='None',
+                                markersize=8, label='Internal Causes')
+
+# Legend below the x-axis, centered
+ax.legend(handles=[mva_marker, internal_marker],
+          loc='upper center',
+          bbox_to_anchor=(0.5, -0.15),
+          ncol=2, frameon=False)
+
+plt.tight_layout()
+plt.show()
+```
+
+
+
+
+
+Deaths rise exactly where alcohol matters most: on the road.
+
+
+---
+
+## Robustness:
+
+- **Reliable findings** must survive:
+  - changes in functional form (linear $\rightarrow$ quadratic)
+  - changes in the sample window (global $\rightarrow$ local)
+  - changes in the outcome (alcohol-related vs. placebo)
+
+::: callout-note
+**Takeaway:**  
+- Effects on **all causes** and **MVA deaths** are large & significant  
+- **Internal causes** show $\approx 0$ effect $\rightarrow$ placebo passed  
+:::
+
+
+---
+
+## Results
+
+```{python}
+#|echo: false
+causes = {
+    "all": "All Causes",
+    "mva": "Motor Vehicle",
+    "suicide": "Suicide",
+    "homicide": "Homicide",
+   
+    "internal": "Internal Causes",
+    "alcohol": "Alcohol"
+}
+
+rows = []
+
+for var, label in causes.items():
+    # Model 1: Linear (Global)
+    m1 = smf.ols(f"{var} ~ age + over21", data=df).fit()
+    # Model 2: Quadratic (Global)
+    m2 = smf.ols(f"{var} ~ age + age2 + over21 + over21*age + over21*age2", data=df).fit()
+    
+    # Local (20–22)
+    subset = df[(df["agecell"] >= 20) & (df["agecell"] <= 22)]
+    m3 = smf.ols(f"{var} ~ age + over21 + over21*age", data=subset).fit()
+    m4 = smf.ols(f"{var} ~ age + age2 + over21 + over21*age + over21*age2", data=subset).fit()
+    
+    rows.append({
+        "Cause": label,
+        "Linear (Global)": f"{m1.params['over21']:.2f} ({m1.bse['over21']:.2f})",
+        "Quadratic (Global)": f"{m2.params['over21']:.2f} ({m2.bse['over21']:.2f})",
+        "Linear (20-22)": f"{m3.params['over21']:.2f} ({m3.bse['over21']:.2f})",
+        "Quadratic (20-22)": f"{m4.params['over21']:.2f} ({m4.bse['over21']:.2f})"
+    })
+
+table41 = pd.DataFrame(rows)
+styled_table41 = (
+    table41.style
+    .set_caption("RD Estimates of MLDA on Mortality")
+    .set_table_styles([
+        {'selector': 'th', 'props': [('font-size', '12pt'), ('font-weight', 'bold')]},
+        {'selector': 'caption', 'props': [('caption-side', 'top'), ('font-size', '14pt'), ('font-weight', 'bold')]}
+    ])
+    .background_gradient(cmap="Greys", axis=None)
+)
+
+styled_table41
+
+```
+
+---
+
+# Uber Surge Pricing
+
+- Many riders request trips but too few drivers are active, the **market becomes imbalanced**.
+- Uber activates **surge pricing** to restore equilibrium: fares increase temporarily.
+<!-- - Surge creates:
+  - **More supply** (drivers are incentivized)
+  - **Less demand** (some riders delay/cancel) -->
+
+:::: {.center}
+![](imgs/uber_map.png){width=50%}
+::::
+
+> **Causal question**:  
+>  Does surge pricing causally increase driver supply?
+
+---
+
+## How Uber Activates Surge Pricing
+
+- Uber's algorithms monitor supply and demand in real time, by dividing the city into [**hyper-local zones**](https://github.com/uber/h3), and calculates a **market imbalance score** for each zone.
+- If **demand > supply beyond a threshold**, surge activates in that cell → **price jump**.
+
+
+::: {.center}
+![](imgs/uber_h3.png){width=50%}
+:::
+
+> The threshold creates **price discontinuities** that enable causal inference.
+
+
+---
+
+
+
+## Why Fuzzy?
+
+  - Treatment: $D$ = **surge price received**
+  - Outcome: $Y$ = **driver supply** (number of drivers)
+  - Running variable: $Z$ = **market imbalance score**
+  - Cutoff: $z_0$ = surge threshold
+  - The instrument: $1\{ Z \geq z_0\}$ eligibility for higher prices
+
+But the probability of receiving a surge price is not deterministic at the cutoff:
+
+$$0<P(D = 1 | Z \geq z_0)<1$$
+
+- Not all drivers that receive surge work more (defiers).
+- Some work regardless of surge (always-takers)
+- Some never work (never-takers)
+
+
+---
+
+## Fuzzy Illustration:
+
+Orange dots: drivers that receive surge pricing (T=1) and gray dots: drivers that do not (T=0).
+
+```{python}
+#|echo: false
+#| fig-align: center
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+
+# -----------------------------
+# 1. Parameters
+# -----------------------------
+n_points = 500
+cutoff = 5
+jump = 3      
+sigma = 0.6     
+
+# -----------------------------
+# 2. Simulation running variable Z
+# -----------------------------
+Z = np.random.uniform(1, 10, size=n_points)
+
+# -----------------------------
+# 3. Treatment probability (fuzzy)
+# -----------------------------
+# Sigmoid function to smoothly increase probability around the cutoff
+def sigmoid_prob(x, cutoff, min_p=0.1, max_p=0.8, steepness=1.5):
+    return min_p + (max_p - min_p) / (1 + np.exp(-steepness*(x - cutoff)))
+
+prob_T = sigmoid_prob(Z, cutoff)
+T = np.random.binomial(1, prob_T)
+
+# -----------------------------
+# 4. Outcome Y 
+# -----------------------------
+
+Y_base = np.sin(Z/1.5) + 0.5*Z
+Y = Y_base + jump*T + np.random.normal(0, sigma, size=n_points)
+
+# -----------------------------
+# 5. Plot
+# -----------------------------
+fig, ax = plt.subplots(figsize=(10,6))
+
+plt.scatter(Z[(T==0) & (Z<7)], Y[(T==0) & (Z<7)], color='gray', alpha=0.6, edgecolor='k', label='(T=0)')
+plt.scatter(Z[(T==1) & (Z>3.5)], Y[(T==1) & (Z>3.5)], color='darkorange', alpha=0.7, edgecolor='k', label='(T=1)')
+plt.axvline(cutoff, color='black', linestyle='--')
+plt.xlabel("Demand Index")
+plt.ylabel("Supply drivers per 1000")
+plt.title("Fuzzy RD - Uber Surge Pricing")
+# Cleaner style
+ax.spines["right"].set_visible(False)
+ax.spines["top"].set_visible(False)
+
+# Set bottom and left spines to black
+ax.spines["bottom"].set_color("black")
+ax.spines["left"].set_color("black")
+
+plt.legend(frameon=False)
+plt.show()
+```
+
+---
+
+## RD Fuzzy estimation
+
+$$Y = \beta_0 + \beta_1 Z' + \alpha_{FRD} 1\{Z \geq z_0\} + \beta_2 Z' \cdot 1\{Z \geq z_0\} + \epsilon$$
+
+```{python}
+#|echo: false
+import pandas as pd
+import numpy as np
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
+from scipy import stats
+import seaborn as sns
+from linearmodels.iv import IV2SLS
+
+#set seaborn style talk
+sns.set_context("talk")
+
+df = pd.DataFrame({
+    "Z": Z,
+    "T": T,
+    "Y": Y
+})
+
+```
+
+```{python}
+#|echo: true
+#| eval: false
+cutoff = 5
+df['Instr'] = (df['Z'] >= cutoff).astype(int)
+# Center running variable at the cutoff
+df['Z_centered'] = df['Z'] - cutoff
+
+bandwidth = 2  # ej. ±2 units around cutoff
+df_local = df[np.abs(df['Z_centered']) <= bandwidth]
+
+# exogenous: constant + running variable centered
+exog = sm.add_constant(df_local['Z_centered'])
+# Endogenous: treatment T
+endog = df_local['T']
+# Instrument: crossing the cutoff
+instr = df_local['Instr']
+
+iv_model = IV2SLS(dependent=df_local['Y'],exog=exog,endog=endog,instruments=instr)
+result = iv_model.fit(cov_type='robust')
+print(result.summary)
+
+```
+
+---
+
+## Wald Estimator
+
+
+$$\alpha_{FRD} = \frac{lim_{Z \to 5^{+}} E[Y|Z=z_0] - lim_{Z \to 5^{-}} E[Y|Z=z_0]}{lim_{Z \to 5^{+}}E[T|Z=z_0] - lim_{Z \to 5^{-}}E[T|Z=z_0]} $$
+
+$$\alpha_{FRD} = \frac{\alpha_{SRD}}{\delta}$$
+
+where $\delta$ is the proportion of drivers that receive surge pricing when demand crosses the threshold (compliers)
+
+```{python}
+#|echo: false
+#| eval: false
+cutoff = 5
+df['Instr'] = (df['Z'] >= cutoff).astype(int)
+# Center running variable at the cutoff
+df['Z_centered'] = df['Z'] - cutoff
+
+bandwidth = 2  # ej. ±2 units around cutoff
+df_local = df[np.abs(df['Z_centered']) <= bandwidth]
+
+# exogenous: constant + running variable centered
+exog = sm.add_constant(df_local['Z_centered'])
+# Endogenous: treatment T
+endog = df_local['T']
+# Instrument: crossing the cutoff
+instr = df_local['Instr']
+
+iv_model = IV2SLS(dependent=df_local['Y'],exog=exog,endog=endog,instruments=instr)
+result = iv_model.fit(cov_type='robust')
+print(result.summary)
+
+```
+
+
+```{python}
+#| echo: true
+#| eval: false
+
+#First stage
+fs = smf.ols("T ~ Instr + Z_centered", data=df_local).fit()
+#Second stage
+ss = smf.ols("Y ~ Instr + Z_centered", data=df_local).fit()
+
+pi1 = fs.params["Instr"]
+tau = ss.params["Instr"]
+alpha_FRD = tau / pi1
+
+```
+
+---
+
+
+# Assignment 7
+
+*Estimating Average and Local Average Treatment Effects of Education When Compulsory Schooling Laws Really Matter*, Oreopoulos (2006)
+
+- What is the effect of **compulsory schooling laws** on **earnings** and **labor market outcomes**?
+- Previous studies use compulsory schooling laws as IV, but they only affect small portion of the population because many students stayed in school beyond compulsory age. 
+- UK school-leaving age change in 1947 from 14 to 15 affected almost half of students.
+
+
+---
+
+### Methodology
+
+- Regression Discontinuity (RD): compares student cohort turning 15 just before and after the reforms in 1947 (UK). 
+
+::: {.columns .no-gap}
+::: {.column width="48%"}
+![](imgs/figure_4.png){width=100%}
+:::
+::: {.column width="48%"}
+![](imgs/figure_6.png){width=100%}
+:::
+:::
+
+
+---
+
+## Data
+
+- UK General Household Survey (1983-1998) and Northern Ireland Household Survey (1985-1998).
+- It contains information on 30,487 individuals who were aged 14 between 1935 and 1965, and 32 to 64 years old at the time of the survey.
+
+```{python}
+#| echo: false
+#| eval: true
+
+import numpy as np
+import pandas as pd
+import warnings
+warnings.filterwarnings('ignore')
+import matplotlib.pyplot as plt        
+import seaborn as sns
+sns.set(style="darkgrid")
+colors = sns.color_palette("viridis", n_colors=10)
+
+
+df = pd.read_stata("assignment7.dta")
+
+df[['sex', 'age', 'agelfted', 'nireland', 'yearat14', 'wght', 'learn', 'drop15','yearat14', 'yearat14_2', 'yearat14_3', 'yearat14_4', 'age', 'age2', 'age3', 'age4']].head(8)
+```
+
+---
+
+### Exercise 1 - tips
+
+*"Replicate" Figures 4 and Figure 6*
+
+- Restrict sample: **British-born**, **age 32–64**, **earnings > 0**
+- Compute **weighted cohort averages**:
+  $$
+  \bar{Y}_{t} = \frac{\sum w_i Y_i}{\sum w_i}
+  $$
+- Fit **separate quartic polynomials** on each side of the cutoff (z = 1947):
+
+$$
+\bar{Y} =
+\begin{cases}
+\beta_0 + \beta_1 z + \beta_2 z^2 + \beta_3 z^3 + \beta_4 z^4 + \varepsilon, & z < 1947 \\
+\gamma_0 + \gamma_1 z + \gamma_2 z^2 + \gamma_3 z^3 + \gamma_4 z^4 + \varepsilon, & z \ge 1947
+\end{cases}
+$$
+
+
+```{python}
+#| echo: true
+#| eval: false
+import statsmodels.api as sm
+import numpy as np
+
+coef_before_1947 = np.polyfit(df_before_1947['yearat14'], df_before_1947['weighted_avg_outcome'], 4)
+poly_before_1947 = np.poly1d(coef_before_1947)
+
+
+x_before_1947 = np.linspace(df_before_1947['yearat14'].min(), df_before_1947['yearat14'].max(), 200)
+y_before_1947 = poly_before_1947(x_before_1947)
+```
+
+
+---
+
+### Exercise 2 - tips
+
+*Replicate Table 1 for GB.*
+
+::: {.center}
+
+![](imgs/table_1.png){width=60%}
+:::
+
+Hint: use the person weight and cluster standard errors by birth cohort and region.
+
+```{python}
+#| echo: true
+#| eval: false
+import statsmodels.api as sm
+X = df[regression_vars]
+y = df[outcome_var]
+model = sm.WLS(y, sm.add_constant(X), weights=weights)
+results = model.fit(cov_type='cluster', cov_kwds={'groups': df[yobirthvar]})
+```
+
+---
+
+
+
+### Exercise 3 - tips
+
+*Estimate RD-IV as in Table 2 for Great Britain*
+
+
+::: {.center}
+
+![](imgs/table_2.jpg){width=60%}
+:::
+
+
+
+```{python}
+#| echo: true
+#| eval: false
+from linearmodels.iv import IV2SLS
+iv_model = "outcome ~ yearat14 + yearat14_2 + yearat14_3 + yearat14_4 + [agelfted ~ instrument] "
+iv_result = IV2SLS.from_formula(iv_model, df, weights=df['wght']).fit(cov_type='kernel')
+```
+
+
+---
+
+## References
+
+<div style="font-size: 0.9em; line-height: 1.3;">
+
+**Books**
+- Angrist, J. D., & Pischke, J.-S. (2014). *Mastering ’Metrics: The Path from Cause to Effect*. Princeton University Press.
+
+**Alcohol Policy & Mortality RD**
+- Carpenter, C., & Dobkin, C. (2009). *The Effect of Alcohol Consumption on Mortality: Regression Discontinuity Evidence from the Minimum Drinking Age*. American Economic Journal: Applied Economics, 1(1), 164–182.
+
+**Surge Pricing & Uber**
+- Chen, M. K., & Sheldon, M. (2016). *Dynamic Pricing in a Labor Market: Surge Pricing and Flexible Work on the Uber Platform*. American Economic Review Papers & Proceedings, 106(5), 177–182.
+- Cohen, P., Hahn, R., Hall, J., Levitt, S., & Metcalfe, R. (2016). *Using Big Data to Estimate Consumer Surplus: The Case of Uber*. NBER Working Paper No. 22627.
+
+**Web Resources (for background on surge pricing)**
+- “How does Uber do surge pricing using location data?”  
+  <https://anubpattnaik.medium.com/how-does-uber-do-price-surge-using-location-data-cfee03415022>
+- “Surge Pricing.” Uber Marketplace  
+  <https://www.uber.com/us/en/marketplace/pricing/surge-pricing/>
+
+</div>
