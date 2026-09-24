@@ -1,27 +1,55 @@
 ---
 title: "Econometrics"
-subtitle: "<span class=\"subtitle-text\">TA Session 1</span>"
+subtitle: |
+  <span class="subtitle-text">TA Session 1</span>
 author: "Lucia Sauer"
-institute: "<em>Barcelona School of Economics</em>"
+institute: |
+  <p class="cover-affiliation"><em>Barcelona School of Economics</em></p>
+  <p class="cover-contact"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/></svg> <a href="mailto:lucia.sauer@bse.eu">lucia.sauer@bse.eu</a></p>
 date: "2025-09-25"
 format:
   revealjs:
-    #theme: metropolis
+    theme: [default, ../theme/bse-theme.scss]
+    width: 1280
+    height: 720
     transition: fade
     slide-number: true
     progress: true
     title-slide-attributes:
-      data-background-position: "95% 90%"
-      data-background-size: "100px"
+      data-background-color: "#0396A6"
+      data-background-image: "../theme/assets/cover-graphic.svg"
+      data-background-size: "34%"
+      data-background-position: "92% 50%"
+      data-background-repeat: "no-repeat"
+    include-after-body:
+      text: |
+        <script src="../theme/print-lazyload-fix.js"></script>
 editor:
   render-on-save: true
 ---
 
+```{python}
+#| echo: false
+#| output: false
+import sys
+sys.path.insert(0, "../theme")
+import bse_style
+_ = bse_style.apply()
+```
+
 ## TA Materials
 
-All the material for this course — slides, code, and some LaTeX utilities for referencing assignments — will be hosted in the [GitHub repository](https://github.com/luciasauer/bse_econometrics#).
+All the material for this course — slides, code, and some LaTeX utilities for referencing assignments — will be hosted in the [GitHub repository](https://github.com/luciasauer/bse_econometrics/tree/main).
 
+::: columns
 
+::: {.column width="55%"}
+
+<div class="browser-mockup"><div class="browser-mockup-bar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="browser-mockup-url">github.com/luciasauer/bse_econometrics</span></div><div class="browser-mockup-body"><a href="https://github.com/luciasauer/bse_econometrics/tree/main" target="_blank"><img src="../theme/assets/github-repo-full.png"></a></div></div>
+
+:::
+
+::: {.column width="45%"}
 
 > <code>git clone HHTPS</code>
 
@@ -31,9 +59,13 @@ Install uv
 
 Pull the repository and get the updated materials for each session.
 
+:::
+
+:::
+
 ---
 
-## Overview
+## Overview {background-color="#0396A6"}
 
 - Matrix Algebra with Python and R
 - Derivatives with vectors
@@ -44,18 +76,21 @@ Pull the repository and get the updated materials for each session.
 
 ## Why These Topics?
 
-::: {.callout-tip title = "Matrix Algebra" icon=false}
+::: {.callout-tip icon=false}
+#### <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3H4v18h2M18 3h2v18h-2"/><circle cx="9" cy="8" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="16" r="1"/><circle cx="15" cy="8" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="16" r="1"/></svg> Matrix Algebra
 - Compact notation for regression & multivariate models
 - Solve systems efficiently with Python
 :::
 
-::: {.callout-tip title = "Derivatives with Vectors" icon=false}
+::: {.callout-tip icon=false}
+#### <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg> Derivatives with Vectors
 
 - Gradients for optimization & ML
 - Key for regression, loss functions
 :::
 
-::: {.callout-tip title = "Histograms & KDE" icon=false}
+::: {.callout-tip icon=false}
+#### <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg> Histograms & KDE
 
 - Explore data shape: skewness, modality, outliers
 - Nonparametric distribution estimation & model checks
@@ -127,17 +162,17 @@ print(x)
 ## Derivatives of a vector
 
 ::: {.callout-note title="Gradient with respect to a vector" appearance="default" icon="false"}
-- In single-variable calculus:  
+- In single-variable calculus:
 
-    $\frac{d}{dx} f(x)$ is the slope of a scalar function of one variable.  
+    $\frac{d}{dx} f(x)$ is the slope of a scalar function of one variable.
 
-- In multivariable calculus: 
+- In multivariable calculus:
 
     If $f(z_1, z_2)$, we can group the variables into a vector:
-    
+
     $$ z = \begin{bmatrix} z_1 \\ z_2 \end{bmatrix} $$
 
-  then the derivative with respect to a vector is the **gradient**:  
+  then the derivative with respect to a vector is the **gradient**:
 
     $$
     \nabla_z f(z) =
@@ -183,15 +218,75 @@ $$
 :::
 ---
 
+## Histograms & Kernel Density Estimation {.section-divider-centered background-color="#0396A6"}
+
+---
+
 ## Density Estimation - Introduction
 Given some observations from some variable $X$, we would like to obtain an estimate of its density.
 
+::: columns
+
+::: {.column width="42%"}
 ::: {.callout-note title="*Parametric vs Nonparametric*" icon="false"}
-- **Parametric approach**: we would choose a parametric density function (normal, exponential, uniform, etc) and use data to estimate the parameters of this density.
+- **Parametric**: choose a density family (normal, exponential, uniform...) and estimate its parameters from data.
 
-<span style="color:blue">*Problem: what if $X$ doesn’t follow a normal distribution?*</span>
+<span style="color:#F28627">*Problem: what if $X$ doesn't follow that family?*</span>
 
-- **Nonparametric approach** like histograms and KD estimate the distribution of a variable $X$ without strong parametric assumptions.
+- **Nonparametric** (histograms, KDE) estimates the distribution without strong assumptions.
+:::
+:::
+
+::: {.column width="58%"}
+```{python}
+#| echo: false
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import stats
+
+np.random.seed(3)
+
+# 1. Generar datos con asimetría positiva
+data = np.random.gamma(shape=1.2, scale=2.0, size=500)
+
+# Grilla estrictamente positiva para ambos gráficos
+xs = np.linspace(0, data.max(), 300)
+
+fig, axes = plt.subplots(1, 2, figsize=(9, 4.2), sharey=True)
+
+# --- PANEL IZQUIERDO: Paramétrico (Normal) ---
+mu, sigma = data.mean(), data.std()
+norm_pdf = stats.norm.pdf(xs, mu, sigma)
+
+axes[0].hist(data, bins=20, density=True, color="gray", alpha=0.5, edgecolor="white")
+axes[0].plot(xs, norm_pdf, color="#F28627", linewidth=3, label="Normal fit")
+axes[0].set_title("Parametric (Normal)")
+axes[0].set_xlabel("X")
+axes[0].set_ylabel("Density")
+axes[0].legend(loc="upper right")
+
+# --- PANEL DERECHO: No Paramétrico (KDE con corrección de borde en 0) ---
+# Se duplican los datos reflejándolos en 0 para corregir el desborde (boundary bias)
+data_reflected = np.concatenate([-data, data])
+kde_reflected = stats.gaussian_kde(data_reflected)
+kde_pdf = 2 * kde_reflected(xs)  # Se multiplica por 2 para conservar el área = 1
+
+axes[1].hist(data, bins=20, density=True, color="gray", alpha=0.5, edgecolor="white")
+axes[1].plot(xs, kde_pdf, color="#008080", linewidth=3, label="KDE")
+axes[1].set_title("Nonparametric (KDE)")
+axes[1].set_xlabel("X")
+axes[1].legend(loc="upper right")
+
+# Formato final
+for ax in axes:
+    ax.set_xlim(0, data.max())
+    ax.set_ylim(0, None)
+
+plt.tight_layout()
+plt.show()
+```
+:::
+
 :::
 
 ---
@@ -204,48 +299,27 @@ Given some observations from some variable $X$, we would like to obtain an estim
 ::: column
 
 
-- A **nonparametric method** to estimate the probability density function (PDF)  
-- Groups data into **intervals (bins)**  
-- Plots the **frequency** of data points in each bin  
+- A **nonparametric method** to estimate the probability density function (PDF)
+- Groups data into **intervals (bins)**
+- Plots the **frequency** of data points in each bin
 
 :::
 
 ::: column
 ```{python}
 #| echo: false
-import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-
-sns.set(style="whitegrid", context="talk")
 
 # Example data
 np.random.seed(42)
 x = np.random.normal(0, 1, 500)
 
-# Create figure and axes
 fig, ax = plt.subplots(figsize=(6,5))
-
-# Plot histogram
-sns.histplot(x, bins=15, color='purple', edgecolor='black', stat='density', ax=ax)
-
-# Labels
+sns.histplot(x, bins=15, color=bse_style.TEAL, edgecolor='black', stat='density', ax=ax)
 ax.set_xlabel('X')
 ax.set_ylabel('Density')
-
-# Hide top and right spines
-ax.spines["top"].set_visible(False)
-ax.spines["right"].set_visible(False)
-
-# Set bottom and left spines to black
-ax.spines["bottom"].set_color("black")
-ax.spines["left"].set_color("black")
-
-# Set tick color to black
-ax.tick_params(axis="x", colors="black")
-ax.tick_params(axis="y", colors="black")
-
 plt.tight_layout()
 plt.show()
 
@@ -257,54 +331,215 @@ plt.show()
 
 ## Concept of Density
 
-Let's first differentiate between frequency histograms and density histograms.
+Let's differentiate between frequency histograms and density histograms, using a dataset with 12 observations: `[2, 3, 5, 5, 6, 8, 8, 8, 10, 12, 15, 17]`
 
-Suppose a dataset with 12 observations:
+<div class="step-indicator"><span class="step active">1</span><span class="step-line"></span><span class="step">2</span><span class="step-line"></span><span class="step">3</span><span class="step-label">Binwidth</span></div>
 
-`[2, 3, 5, 5, 6, 8, 8, 8, 10, 12, 15, 17]`
+::: {.column width="100%"}
+### If we fix the number of bins ex-ante, we must derive the binwidth:
 
-### Step 1: Calculate the binwidth of each bin
+<div class="eq-box-wrap"><div class="eq-box" style="padding: 8px 18px; font-size: 0.75em;">
 
-If we want to create a histogram with 3 bins:
+$$
+n_{bins} = 3 \;\Longrightarrow\; \text{binwidth} = h = \frac{\max(x) - \min(x)}{n_{bins}} = \frac{17 - 2}{3} = 5
+$$
 
-- $\text{min value} = 2$
-- $\text{max value} = 17$
-- $\text{range} = \text{max value} - \text{min value} = 15$
-- $\text{binwidth} = \frac{\text{range}}{n\_bins} = \frac{15}{3} = 5$
+</div></div>
+
+```{python}
+#| echo: false
+import matplotlib.pyplot as plt
+from collections import Counter
+
+data = [2, 3, 5, 5, 6, 8, 8, 8, 10, 12, 15, 17]
+bin_edges = [2, 7, 12, 17]
+bin_labels = ["Bin 1", "Bin 2", "Bin 3"]
+
+fig, ax = plt.subplots(figsize=(9.5, 2.15))
+counts = Counter(data)
+max_stack = max(counts.values())
+
+for val, c in counts.items():
+    for i in range(c):
+        ax.scatter(val, i + 1, s=150, color=bse_style.TEAL, edgecolor="white", zorder=3)
+
+for edge in bin_edges:
+    ax.axvline(edge, color=bse_style.ORANGE, linestyle="--", linewidth=1.3, zorder=2, ymin=0.1, ymax=0.85)
+
+# min / max labels
+ax.annotate("min = 2", xy=(2, max_stack + 0.6), ha="center", fontsize=11,
+            color=bse_style.PURPLE, fontweight="bold")
+ax.annotate("max = 17", xy=(17, max_stack + 0.6), ha="center", fontsize=11,
+            color=bse_style.PURPLE, fontweight="bold")
+
+# underbrace-style bracket + label under each bin
+brace_y = -0.75
+tick = 0.15
+for i in range(3):
+    x1, x2 = bin_edges[i], bin_edges[i + 1]
+    ax.plot([x1, x2], [brace_y, brace_y], color=bse_style.TEAL, lw=2, zorder=1)
+    ax.plot([x1, x1], [brace_y - tick, brace_y + tick], color=bse_style.TEAL, lw=2)
+    ax.plot([x2, x2], [brace_y - tick, brace_y + tick], color=bse_style.TEAL, lw=2)
+    ax.text((x1 + x2) / 2, brace_y - 0.45, bin_labels[i], ha="center", fontsize=10,
+            color=bse_style.TEAL, fontweight="bold")
+
+ax.set_yticks([])
+ax.set_xticks(bin_edges)
+ax.set_xticklabels([str(e) for e in bin_edges], color=bse_style.ORANGE, fontweight="bold", fontsize=10)
+ax.set_xlabel("X")
+ax.set_ylim(brace_y - 1.1, max_stack + 1.1)
+ax.set_xlim(0, 19)
+for spine in ["left", "top", "right"]:
+    ax.spines[spine].set_visible(False)
+
+plt.tight_layout()
+plt.show()
+```
+:::
 
 ---
 
 ## Concept of Density
 
-Let's first differentiate between frequency histograms and density histograms.
+<div class="step-indicator"><span class="step">1</span><span class="step-line"></span><span class="step active">2</span><span class="step-line"></span><span class="step">3</span><span class="step-label">Bin limits</span></div>
 
-### Step 2: Define the limits of each bin
+::: columns
 
-| Bins         | Frequency  | 
+::: {.column width="40%"}
+| Bins         | Frequency  |
 |--------------|------------|
 | [2-7)        | 5          |
 | [7-12)       | 4          |
 | [12-17]      | 3          |
+:::
 
+::: {.column width="60%"}
+```{python}
+#| echo: false
+import matplotlib.pyplot as plt
+
+bins_labels = ["[2-7)", "[7-12)", "[12-17]"]
+freq = [5, 4, 3]
+colors = [bse_style.TEAL, bse_style.PURPLE, bse_style.ORANGE]
+
+fig, ax = plt.subplots(figsize=(5.5, 3.8))
+ax.bar(bins_labels, freq, color=colors, edgecolor="black")
+ax.set_ylabel("Frequency")
+ax.set_xlabel("Bins")
+plt.tight_layout()
+plt.show()
+```
+:::
+
+:::
 
 ---
 
 ## Concept of Density
 
-Let's first differentiate between frequency histograms and density histograms.
+<div class="step-indicator"><span class="step">1</span><span class="step-line"></span><span class="step">2</span><span class="step-line"></span><span class="step active">3</span><span class="step-label">Density</span></div>
 
-### Step 3: Add Density
+::: columns
 
+::: {.column width="48%"}
 | Bins         | Frequency  | Width | Density |
 |--------------|------------|-------|---------|
 | [2-7)        | 5          | 5     | $5 / (12*5) = 0.0833$ |
 | [7-12)       | 4          | 5     | $4 / (12*5) = 0.0667$ |
 | [12-17]      | 3          | 5     | $3 / (12*5) = 0.05$ |
 
-
 ::: {.fragment}
+Mathematically, for bin width $h$ and number of observations $n$:
 
-Mathematically, for bin width $h$ and number of observations $n$: <div style="text-align: center;"> <div style="border:2px solid #9d03c4ff; padding:10px; border-radius:8px; background-color:#f5e6ff; display:inline-block;"> $$ \hat{f(x)} = \frac{1}{nh} \sum_{i=1}^n \mathbf{1}\{x_i \in \text{bin}(x)\} $$ </div> </div>
+<div class="eq-box-wrap"><div class="eq-box">
+
+$$ \hat{f(x)} = \frac{1}{nh} \sum_{i=1}^n \mathbf{1}\{x_i \in \text{bin}(x)\} $$
+
+</div></div>
+:::
+:::
+
+::: {.column width="58%"}
+```{python}
+#| echo: false
+import matplotlib.pyplot as plt
+
+bins_labels = ["[2-7)", "[7-12)", "[12-17]"]
+density = [5 / (12 * 5), 4 / (12 * 5), 3 / (12 * 5)]
+colors = [bse_style.TEAL, bse_style.PURPLE, bse_style.ORANGE]
+
+fig, ax = plt.subplots(figsize=(5.5, 3.8))
+ax.bar(bins_labels, density, color=colors, edgecolor="black")
+ax.set_ylabel("Density")
+ax.set_xlabel("Bins")
+plt.tight_layout()
+plt.show()
+```
+:::
+
+:::
+
+---
+
+## Density ≠ Probability
+
+::: {.callout-warning title="Exam question" icon=false}
+*Could the range of values of the vertical axis in a histogram be greater than 1? Justify your answer.*
+:::
+
+::: columns
+
+::: {.column width="42%"}
+Imagine the following data, **narrower range** (0.10 to 0.35):
+
+`[0.10, 0.15, 0.15, 0.20, 0.20, 0.20, 0.25, 0.30, 0.30, 0.35]`
+
+We set 5 bins ($h = 0.25/5 = 0.05$), usual estimator:
+
+<div class="eq-box-wrap"><div class="eq-box" style="padding: 4px 12px; font-size: 0.52em;">
+
+$$\hat f(x) = \frac{1}{nh}\sum_{i=1}^n \mathbf{1}\{x_i \in \text{bin}(x)\}, \; nh = 0.5$$
+
+</div></div>
+
+:::
+
+::: {.column width="58%"}
+```{python}
+#| echo: false
+import matplotlib.pyplot as plt
+
+data = [0.10, 0.15, 0.15, 0.20, 0.20, 0.20, 0.25, 0.30, 0.30, 0.35]
+n = len(data)
+edges = [0.10, 0.15, 0.20, 0.25, 0.30, 0.35]
+h = 0.05
+
+labels, densities = [], []
+for lo, hi in zip(edges[:-1], edges[1:]):
+    freq = sum(1 for d in data if (lo <= d < hi) or (hi == edges[-1] and d == hi))
+    labels.append(f"[{lo:.2f}-{hi:.2f}{']' if hi == edges[-1] else ')'}")
+    densities.append(freq / (n * h))
+
+colors = [bse_style.TEAL, bse_style.PURPLE, bse_style.ORANGE, bse_style.TEAL_LIGHT, bse_style.PURPLE]
+
+fig, ax = plt.subplots(figsize=(7, 4.4))
+ax.bar(labels, densities, color=colors, edgecolor="black")
+
+ax.axhline(1, color=bse_style.ORANGE, linestyle="--", linewidth=1.5)
+ax.text(-0.45, 1.25, "height = 1", color=bse_style.ORANGE, fontsize=10, fontweight="bold")
+
+for i, d in enumerate(densities):
+    ax.text(i, d + 0.2, f"{d:.0f}", ha="center", fontsize=11, color=bse_style.BLACK, fontweight="bold")
+
+ax.set_xlabel("")
+ax.set_ylabel("Density")
+for spine in ["top", "right"]:
+    ax.spines[spine].set_visible(False)
+
+plt.tight_layout()
+plt.show()
+```
+:::
 
 :::
 
@@ -312,6 +547,11 @@ Mathematically, for bin width $h$ and number of observations $n$: <div style="te
 
 ### Coding Example in Python
 Important parameters <code>bins</code>, <code>stat</code>, <code>binwidth</code>, <code>binrange</code>
+
+::: {.panel-tabset}
+
+#### Code
+
 ```{python}
 #| echo: true
 #| eval: false
@@ -321,6 +561,8 @@ bins = [15, 30, 70]
 for bin in bins:
   sns.histplot(x,bins=bin, stat='density', binwidth=None, binrange=None)
 ```
+
+#### Output
 
 ```{python}
 #| echo: false
@@ -336,28 +578,29 @@ fig, axes = plt.subplots(1, 3, figsize=(15, 6), sharey=True)
 
 # Different bin settings
 bin_settings = [15, 30, 70]
-colors = ['purple', 'darkblue', 'orange']
-for ax, bins,color in zip(axes, bin_settings, colors):
+colors = [bse_style.TEAL, bse_style.PURPLE, bse_style.ORANGE]
+for ax, bins, color in zip(axes, bin_settings, colors):
     sns.histplot(x, bins=bins, stat="density", color=color, edgecolor="black", ax=ax)
     ax.set_title(f"bins = {bins}")
     ax.set_xlabel("Total Bill")
     ax.set_ylabel("Density")
-    
-    # Hide top and right spines
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    ax.spines["bottom"].set_color("black")
-    ax.spines["left"].set_color("black")
 
 plt.tight_layout()
 plt.show()
 
 ```
 
+:::
+
 ---
 
 ### Coding Example in Python
 Important parameters <code>bins</code>, <code>stat</code>, <code>binwidth</code>, <code>binrange</code>
+
+::: {.panel-tabset}
+
+#### Code
+
 ```{python}
 #| echo: true
 #| eval: false
@@ -367,6 +610,8 @@ bin_widths = [3, 7, 14]
 for bin_w in bin_widths:
   sns.histplot(x,bins=None, stat='density', binwidth=bin_w, binrange=None)
 ```
+
+#### Output
 
 ```{python}
 #| echo: false
@@ -382,26 +627,23 @@ fig, axes = plt.subplots(1, 3, figsize=(15, 6), sharey=True)
 
 # Different bin settings
 bin_widths = [3, 7, 14]
-colors = ['purple', 'darkblue', 'orange']
+colors = [bse_style.TEAL, bse_style.PURPLE, bse_style.ORANGE]
 for ax, bin_w, color in zip(axes, bin_widths, colors):
     sns.histplot(x, bins=None, stat="density", color=color, edgecolor="black", ax=ax, binwidth=bin_w)
     ax.set_title(f"bin width = {bin_w}")
     ax.set_xlabel("Total Bill")
     ax.set_ylabel("Density")
-    
-    # Hide top and right spines
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    ax.spines["bottom"].set_color("black")
-    ax.spines["left"].set_color("black")
 
 plt.tight_layout()
 plt.show()
 
 ```
 
+:::
+
 
 ---
+
 ### Coding Example in R
 Important parameters: <code>bins</code>, <code>aes(y = ..stat..)</code>, <code>binwidth</code>, <code>xlim()</code>
 ```{python}
@@ -432,10 +674,11 @@ for (bin in bins) {
 
 ::: column
 
-
 - Instead of counting frequencies in bins, KDE places a smooth kernel function (usually Gaussian) centered at each data point, and then averages them.
 
-
+::: {.callout-warning title="The limitation KDE fixes" icon=false}
+A histogram is **discrete**: it jumps abruptly at every bin edge. KDE is **continuous by construction** — no bins, no edges, just a smooth curve.
+:::
 
 :::
 
@@ -446,36 +689,15 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
-sns.set(style="whitegrid", context="talk")
-
 # Example data
 np.random.seed(42)
 x = np.random.normal(0, 1, 500)
 
-# Create figure and axes
 fig, ax = plt.subplots(figsize=(6,5))
-
-# Plot histogram with KDE
-sns.histplot(x, bins=15, color='purple', edgecolor='black', stat='density', kde=True, ax=ax)
-
-# Labels
+sns.histplot(x, bins=15, color=bse_style.TEAL, edgecolor='black', stat='density', kde=True, ax=ax)
 ax.set_xlabel('X')
 ax.set_ylabel('Density')
-
-# Hide top and right spines
-ax.spines["top"].set_visible(False)
-ax.spines["right"].set_visible(False)
-
-# Set bottom and left spines to black
-ax.spines["bottom"].set_color("black")
-ax.spines["left"].set_color("black")
-
-# Set tick color to black
-ax.tick_params(axis="x", colors="black")
-ax.tick_params(axis="y", colors="black")
-
 plt.tight_layout()
-
 plt.show()
 
 ```
@@ -484,24 +706,62 @@ plt.show()
 
 ---
 
-**Mathematical formulation:**
+## The Kernel Function
 
-<div style="text-align: center;">
-  <div style="border:2px solid #9d03c4ff; padding:10px; border-radius:8px; background-color:#f5e6ff; display:inline-block;">
-  $$\hat{f}_h(x) = \frac{1}{nh} \sum_{i=1}^n K\left(\frac{x - x_i}{h}\right)  $$
-  </div>
-</div>
+<div class="eq-box-wrap"><div class="eq-box" style="padding: 6px 18px; font-size: 0.8em;">
 
+$$\hat{f}_h(x) = \frac{1}{nh} \sum_{i=1}^n K\left(\frac{x - x_i}{h}\right)$$
 
-- $N$ is the number of observations
-- $h$ is the bandwidth (controls how
-much the influence of each observation expands)
-- and, $K$ is the Kernel, a function that defines the
-shape and distribution of influence associated with each observation.
+</div></div>
+
+::: columns
+
+::: {.column width="40%"}
+- $n$ is the number of observations
+- $h$ is the bandwidth (controls how much each observation's influence spreads)
+- $K$ is the **kernel** — any symmetric function integrating to 1. Gaussian is the most common choice, but not the only one:
+:::
+
+::: {.column width="60%"}
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+
+u = np.linspace(-2, 2, 400)
+
+gaussian = (1 / np.sqrt(2 * np.pi)) * np.exp(-u**2 / 2)
+epanechnikov = np.where(np.abs(u) <= 1, 0.75 * (1 - u**2), 0)
+triangular = np.where(np.abs(u) <= 1, 1 - np.abs(u), 0)
+uniform = np.where(np.abs(u) <= 1, 0.5, 0)
+
+fig, ax = plt.subplots(figsize=(6.5, 4.0))
+ax.plot(u, gaussian, color=bse_style.TEAL, linewidth=2.5, label="Gaussian")
+ax.plot(u, epanechnikov, color=bse_style.PURPLE, linewidth=2.5, label="Epanechnikov")
+ax.plot(u, triangular, color=bse_style.ORANGE, linewidth=2.5, label="Triangular")
+ax.plot(u, uniform, color="#888888", linewidth=2.5, label="Uniform (box)")
+
+ax.set_xlabel(r"$u = (x - x_i)/h$")
+ax.set_ylabel("K(u)")
+ax.legend(fontsize=10, frameon=False)
+for spine in ["top", "right"]:
+    ax.spines[spine].set_visible(False)
+
+plt.tight_layout()
+plt.show()
+```
+:::
+
+:::
 
 ---
 
 ### Coding Example in Python
+
+::: {.panel-tabset}
+
+#### Code
+
 ```{python}
 #| echo: true
 #| eval: false
@@ -511,115 +771,37 @@ for bw in [0.3, 2, 10]:
     sns.kdeplot(x, bw_adjust=bw, label=f"Bandwidth = {bw}")
 ```
 
+#### Output
+
 ```{python}
 #| echo: false
 #| eval: true
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-sns.set(style="whitegrid", context="talk")
-
 # Load data
 x = sns.load_dataset("tips")["total_bill"]
 
-# Create figure and axes
-fig, ax = plt.subplots(figsize=(10,6))
+fig, ax = plt.subplots(figsize=(8, 3.3))
 
 # Different bandwidths (smaller → more wiggly, larger → smoother)
-for color, bw in zip(['purple', 'darkblue', 'darkorange'], [0.3, 2, 10]):
-    sns.kdeplot(x, bw_adjust=bw, label=f"Bandwidth = {bw}", color=color, fill=True, ax=ax)
+tags = ["too wiggly", "reasonable", "oversmoothed"]
+for color, bw, tag in zip([bse_style.TEAL, bse_style.PURPLE, bse_style.ORANGE], [0.3, 2, 10], tags):
+    sns.kdeplot(x, bw_adjust=bw, label=f"h = {bw}  ({tag})", color=color, fill=True, ax=ax)
 
-# Labels and legend
 ax.set_xlabel("Total Bill")
 ax.set_ylabel("Density")
-ax.legend()
-
-# Hide top and right spines
-ax.spines["top"].set_visible(False)
-ax.spines["right"].set_visible(False)
-
-# Set bottom and left spines to black
-ax.spines["bottom"].set_color("black")
-ax.spines["left"].set_color("black")
-
-# Set tick color to black
-ax.tick_params(axis="x", colors="black")
-ax.tick_params(axis="y", colors="black")
-
+ax.legend(fontsize=10)
 plt.tight_layout()
 plt.show()
 
 ```
 
-- Small $h$: very wiggly estimate (low bias, high variance).
-- Large $h$: oversmoothed estimate (high bias, low variance).
+:::
 
----
-
-### Bandwidth in KDE with Python
-```{python}
-#| echo: false
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import numpy as np
-from scipy.stats import gaussian_kde
-
-# Generate random variables from N(0,1)
-np.random.seed(0)
-data = np.random.randn(1000)
-
-# Create x values for smooth curves
-x_range = np.linspace(data.min() - 1, data.max() + 1, 200)
-
-# Different bandwidth values
-bandwidths = [0.01, 0.03, 0.5, 0.8, 2.0]
-colors = ['rgba(0,128,0,0.8)', 'rgba(255,0,0,0.8)', 'rgba(0,0,255,0.8)', 
-          'rgba(255,165,0,0.8)', 'rgba(128,0,128,0.8)']
-
-fig = go.Figure()
-
-for i, bw in enumerate(bandwidths):
-    # Create KDE with specified bandwidth
-    kde = gaussian_kde(data, bw_method=bw)
-    kde_values = kde(x_range)
-    
-    fig.add_trace(go.Scatter(
-        x=x_range,
-        y=kde_values,
-        mode='lines',
-        name=f'Bandwidth: {bw}',
-        line=dict(color=colors[i], width=3),
-        fill='tozeroy',
-        visible=True if i == 2 else False  # Show middle option by default
-    ))
-
-# Add dropdown menu for interactivity
-fig.update_layout(
-    title='Interactive KDE - Bandwidth Selection',
-    xaxis_title='Value',
-    yaxis_title='Density',
-    updatemenus=[
-        dict(
-            buttons=list([
-                dict(label=f"Bandwidth: {bw}",
-                     method="update",
-                     args=[{"visible": [i == j for j in range(len(bandwidths))]}])
-                for i, bw in enumerate(bandwidths)
-            ]),
-            direction="down",
-            showactive=True,
-            x=0.01,
-            xanchor="left",
-            y=1.02,
-            yanchor="top"
-        ),
-    ],
-    width=800,
-    height=500
-)
-
-fig.show()
-```
+- **Small $h$**: very wiggly estimate (low bias, high variance).
+- **Large $h$**: oversmoothed estimate (high bias, low variance).
+- Same bias-variance trade-off as the **binwidth** $h$ in a histogram — just for a smooth curve instead of bars.
 
 ---
 
@@ -635,11 +817,225 @@ tips <- read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/
 x <- tips$total_bill
 
 for (bw in c(0.3, 1, 2)) {
-  print(ggplot(data.frame(x = x), aes(x = x)) + 
+  print(ggplot(data.frame(x = x), aes(x = x)) +
           geom_density(adjust = bw, color = "blue") +
           ggtitle(paste("Bandwidth =", bw)))
 }
 ```
 
+## Quick LaTeX Guide {.section-divider-centered background-color="#0396A6"}
 
-# Thanks!
+---
+
+## What is LaTeX (and why use it)?
+
+::: columns
+
+::: {.column width="52%"}
+LaTeX is a **typesetting system**, not a word processor: you write plain-text markup, and it *compiles* into a professional PDF — like code, but for documents.
+
+::: {.callout-tip title="Why for assignments" icon=false}
+- Clean, consistent math notation
+- Regression tables & figures exported **directly** from Python/Stata — no manual formatting
+- The same source always reproduces the same PDF
+:::
+
+
+:::
+
+::: {.column width="50%"}
+<div class="doc-scroll"><img src="../theme/assets/latex-template-full.png"></div>
+:::
+
+:::
+
+---
+
+## Key Commands: Structuring a Document {.smaller}
+
+::: columns
+
+::: {.column width="50%"}
+```{.tex}
+\section{Introduction}
+This is the introduction to the assignment.
+
+\subsection{Motivation}
+Here we explain why this analysis matters.
+
+\subsection{Data}
+We describe the dataset used.
+
+\section{Results}
+We now present our findings.
+```
+
+- `\section{}` numbers top-level headings; `\subsection{}` nests one level in
+- Numbering, spacing, and the table of contents update **automatically**
+- No manual "1.2" typing, no forgetting to renumber after edits
+:::
+
+::: {.column width="50%"}
+<img src="../theme/assets/latex-sections-render.png" class="doc-preview">
+:::
+
+:::
+
+---
+
+## Key Commands: Math Notation {.smaller}
+
+::: columns
+
+::: {.column width="48%"}
+```{.tex}
+\begin{equation}
+y_i = \beta_0 + \beta_1 x_i + \varepsilon_i
+\end{equation}
+
+Matrices use the bmatrix environment:
+\[
+X =
+\begin{bmatrix}
+1 & x_{11} & x_{12} \\
+1 & x_{21} & x_{22} \\
+\vdots & \vdots & \vdots \\
+1 & x_{n1} & x_{n2}
+\end{bmatrix}, \ \beta =
+\begin{bmatrix}
+\beta_0 \\ \beta_1 \\ \beta_2
+\end{bmatrix}
+\]
+
+\[
+\hat{\beta} = (X'X)^{-1} X'Y
+\]
+```
+
+- `equation` numbers the line; `\[...\]` (or `$...$`) doesn't
+- rows separated by `\\`, entries by `&`
+:::
+
+::: {.column width="52%"}
+<img src="../theme/assets/latex-math-render.png" class="doc-preview">
+:::
+
+:::
+
+---
+
+## From Python to a Rendered Table {.smaller}
+
+::: {.columns style="align-items:flex-start;"}
+
+::: {.column width="45%"}
+```{.python}
+import statsmodels.formula.api as smf
+from stargazer.stargazer import Stargazer
+
+m1 = smf.ols("tip ~ total_bill", tips).fit()
+m2 = smf.ols("tip ~ total_bill + size", tips).fit()
+
+sg = Stargazer([m1, m2])
+sg.rename_covariates({"total_bill": "Total Bill", "size": "Party Size"})
+
+with open("regression.tex", "w") as f:
+    f.write(sg.render_latex())
+```
+Then in LaTex you just call the .tex file 
+
+```{.tex}
+\input{regression.tex}
+```
+:::
+
+::: {.column width="55%"}
+<img src="../theme/assets/latex-table-render.png" class="doc-preview" style="max-height:420px;">
+:::
+
+:::
+
+---
+
+## Working in Overleaf
+
+::: {.columns style="align-items:flex-start;"}
+
+::: {.column width="50%"}
+::: {.callout-tip title="Free plan" icon=false}
+- Nothing to install — compiles in the browser
+- Real-time collaborative editing
+- **Free tier: only 2 named editors** per project
+:::
+
+::: {.callout-note title="Beyond 2 editors: link sharing" icon=false}
+*Share* → **Turn on link sharing** → set the link to **Can edit**. Anyone with that link can now edit — no named-collaborator limit applies.
+:::
+
+<div class="share-mockup">
+<div class="share-mockup-header">Share "Assignment 1 · Econometrics"</div>
+<div class="share-mockup-body">
+<div class="share-mockup-row"><span>Invite by email</span><span class="share-mockup-note">2 / 2 editors</span></div>
+<div class="share-mockup-divider">or</div>
+<div class="share-mockup-row"><span>🔗 Turn on link sharing</span><span class="share-mockup-toggle"></span></div>
+<div class="share-mockup-link"><span class="share-mockup-permission">Can edit</span><code>overleaf.com/2847…</code></div>
+</div>
+</div>
+:::
+
+::: {.column width="50%"}
+<img src="../theme/assets/overleaf-editor.png" class="doc-preview" style="max-height:420px;">
+:::
+
+:::
+
+---
+
+## A Wilder Option: Tectonic + GitHub in VS Code
+
+::: {.columns style="align-items:flex-start;"}
+
+::: {.column width="50%"}
+::: {.callout-note title="Why bother?" icon=false}
+Overleaf's free tier caps you at 2 editors. Git doesn't cap anything — and you get real **pull requests, diffs, and code review** on your `.tex` source, the same workflow you already use for code.
+:::
+
+Compile straight from the terminal, as many times as you want, in seconds:
+
+> <code>tectonic main.tex</code>
+:::
+
+::: {.column width="50%"}
+<img src="../theme/assets/vscode-latex-preview.jpeg" class="doc-preview" style="max-height:420px;">
+:::
+
+:::
+
+<div class="workflow-steps compact">
+<div class="workflow-step">
+<div class="workflow-icon">📝</div>
+<div class="workflow-title">VS Code</div>
+<div class="workflow-caption">Edit <code>.tex</code> locally — no account, no editor limit</div>
+</div>
+<div class="workflow-arrow">→</div>
+<div class="workflow-step">
+<div class="workflow-icon">⚡</div>
+<div class="workflow-title"><code>tectonic main.tex</code></div>
+<div class="workflow-caption">Compiles to PDF in seconds, right in the terminal</div>
+</div>
+<div class="workflow-arrow">→</div>
+<div class="workflow-step">
+<div class="workflow-icon">🔀</div>
+<div class="workflow-title">git push</div>
+<div class="workflow-caption">Branches, PRs, real diffs on your <code>.tex</code></div>
+</div>
+<div class="workflow-arrow">→</div>
+<div class="workflow-step">
+<div class="workflow-icon">👥</div>
+<div class="workflow-title">Team review</div>
+<div class="workflow-caption">Comments & merges, same as code</div>
+</div>
+</div>
+
+
+# Thanks! {background-color="#0396A6"}
