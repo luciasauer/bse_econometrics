@@ -1,3 +1,25 @@
 /.quarto/
 *.png
 *_files
+*assignments
+
+# Solutions / exam material: never publish to students, no matter which TA folder it's in
+*solucion*
+*solution*
+*SolutionKey*
+*exam_model*
+*exam_question*
+*exam_review*
+*Samplefinal*
+*SampleFinal*
+TA8/assignment7.dta
+TA8/A7.ipynb
+*teaching_guide*
+
+# Personal R practice files
+/TA2/r_practice/
+/TA2/.Rhistory
+/TA2/hprice1_data.xlsx
+/TA2/ols_residual_orthogonality.md
+
+/theme/__pycache__/

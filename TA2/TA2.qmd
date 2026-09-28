@@ -1,29 +1,53 @@
 ---
 title: "Econometrics"
-subtitle: "<span class=\"subtitle-text\">TA Session 2</span>"
+subtitle: |
+  <span class="subtitle-text">TA Session 2</span>
 author: "Lucia Sauer"
-institute: "<em>Barcelona School of Economics</em>"
+institute: |
+  <p class="cover-affiliation"><em>Barcelona School of Economics</em></p>
+  <p class="cover-contact"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/></svg> <a href="mailto:lucia.sauer@bse.eu">lucia.sauer@bse.eu</a></p>
 date: "2025-10-03"
 format:
   revealjs:
     df-print: paged
-    #theme: metropolis
+    theme: [default, ../theme/bse-theme.scss]
+    width: 1280
+    height: 720
     transition: fade
     slide-number: true
     progress: true
+    controls: true
+    controls-tutorial: true
+    menu: true
+    navigation-mode: linear
+    preview-links: auto
     title-slide-attributes:
-      data-background-position: "95% 90%"
-      data-background-size: "100px"
+      data-background-color: "#0396A6"
+      data-background-image: "../theme/assets/cover-graphic.svg"
+      data-background-size: "34%"
+      data-background-position: "92% 50%"
+      data-background-repeat: "no-repeat"
+    include-after-body:
+      text: |
+        <script src="../theme/print-lazyload-fix.js"></script>
 editor:
   render-on-save: true
-
 ---
 
-## Overview
+```{python}
+#| echo: false
+#| output: false
+import sys
+sys.path.insert(0, "../theme")
+import bse_style
+_ = bse_style.apply()
+```
+
+## Overview {background-color="#0396A6"}
 
 - Conditional means
 - OLS in matrix algebra
-- OLS using R and Python preset functions
+- OLS using Python preset functions
 - Plotting observations and fitted lines
 - Verify some numerical property
 
@@ -31,17 +55,24 @@ editor:
 
 ## Why These Topics?
 
-::: {.callout-tip title = "Conditional means" icon=false}
-Foundation of regression: OLS estimates the conditional mean of $Y$ given $X$.
+::: {.callout-tip icon=false}
+#### <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Conditional Means
+- Foundation of regression: OLS estimates the conditional mean of $Y$ given $X$
 :::
 
-::: {.callout-tip title = "OLS in matrix algebra" icon=false}
-Build intuition for how OLS works beyond formulas and preset functions.
+::: {.callout-tip icon=false}
+#### <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3H4v18h2M18 3h2v18h-2"/><circle cx="9" cy="8" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="16" r="1"/><circle cx="15" cy="8" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="16" r="1"/></svg> OLS in Matrix Algebra
+- Build intuition for how OLS works beyond formulas and preset functions
 :::
 
-::: {.callout-tip title = "Numerical Conditions" icon=false}
-Check core properties of OLS to validate results and understand residual behavior.
+::: {.callout-tip icon=false}
+#### <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Numerical Conditions
+- Check core properties of OLS to validate results and understand residual behavior
 :::
+
+---
+
+## From averages to regression {.section-divider-centered background-color="#0396A6"}
 
 ---
 
@@ -49,13 +80,13 @@ Check core properties of OLS to validate results and understand residual behavio
 
 
 ::: {.callout-note title="Conditional Mean" appearance="default" icon="false"}
-**Population concept:**  
-The *conditional mean* of $Y$ given $X=x$ is the expected value of $Y$ in the sub-population where $X=x$:  
+**Population concept:**
+The *conditional mean* of $Y$ given $X=x$ is the expected value of $Y$ in the sub-population where $X=x$:
 
 $$E[Y|X=x]$$
 
-**Sample estimate:**  
-The *sample conditional mean* is the average of all observed $Y_i$ for which $X_i = x$:  
+**Sample estimate:**
+The *sample conditional mean* is the average of all observed $Y_i$ for which $X_i = x$:
 $$
 \hat{E}[Y|X=x] = \frac{1}{N_x} \sum_{i: X_i = x} Y_i
 $$
@@ -67,28 +98,30 @@ where $N_x$ is the number of observations with $X_i = x$.
 
 ---
 
-### Example: House Prices and Size
+## Example: House Prices and Size
 
 [Description dataset](http://fmwww.bc.edu/ec-p/data/wooldridge/datasets.list.html)
 
-```{r, message=FALSE, warning=FALSE}
+```{python}
 #| echo: true
 #| eval: true
-library(wooldridge)
-library(dplyr)
-df <- wooldridge::hprice1
-# Sample of 8 observations
-df[sample(nrow(df), 8), ]
+import wooldridge as woo
+import pandas as pd
+
+df = woo.dataWoo("hprice1")
+df.sample(8, random_state=1)
 ```
 ---
 
-### Compute Conditional Mean in R
-```{r}
+## Compute Conditional Mean in Python
+```{python}
 #| echo: true
 #| eval: true
-df_grouped <- df %>%
-  group_by(bdrms) %>%
-  summarise(mean_price = mean(price))
+df_grouped = (
+    df.groupby("bdrms", as_index=False)["price"]
+    .mean()
+    .rename(columns={"price": "mean_price"})
+)
 df_grouped
 ```
 
@@ -96,60 +129,54 @@ df_grouped
 
 
 
-### Plot Conditional Mean in R
-```{r}
+## Plot Conditional Mean in Python
+```{python}
 #| echo: true
 #| eval: false
-library(ggplot2)
-ggplot() +
-  geom_point(data = df, aes(x = bdrms, y = price),
-             color = 'orange', alpha = 0.6, size = 3) +
-  geom_line(data = df_grouped, aes(x = bdrms, y = mean_price),
-            color = 'orange', size = 1) +
-  labs(title = expression(hat(E)[price ~ "|" ~ bdrms]),
-       x = "Number of bedrooms",
-       y = "Average house price")
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(9, 4.5))
+ax.scatter(df["bdrms"], df["price"], color=bse_style.TEAL, alpha=0.6, s=45)
+ax.plot(df_grouped["bdrms"], df_grouped["mean_price"], color=bse_style.TEAL, linewidth=1.8)
+ax.set_title(r"$\hat{E}[price \mid bdrms]$")
+ax.set_xlabel("Number of bedrooms")
+ax.set_ylabel("Average house price")
+plt.show()
 ```
-```{r}
+```{python}
 #| echo: false
 #| eval: true
-library(ggplot2)
-#initialize the plot
-ggplot() +
-  # Scatter of raw data
-  geom_point(data = df, aes(x = bdrms, y = price),
-             color = "orange", size = 3, alpha = 0.6) +
-  
-  # Line plot of conditional means
-  geom_line(data = df_grouped, aes(x = bdrms, y = mean_price),
-            color = "orange", linewidth = 1) +
-  
-  # Titles and labels
-  labs(
-    title = expression(hat(E)*"["*price*"|"* bdrms*"]"),
-    x = "Number of bedrooms",
-    y = "House price"
-  ) +
-  
-  # Styling similar to your Python example
-  theme_minimal(base_size = 14) +
-  theme(
-    panel.grid.minor = element_blank(),
-    panel.grid.major = element_line(color = "grey80"),
-    axis.line = element_line(color = "black"),
-    axis.ticks = element_line(color = "black"),
-    plot.title = element_text(size = 16, face = "bold")
-  )
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(9, 4.2))
+
+# Scatter of raw data
+ax.scatter(df["bdrms"], df["price"], color=bse_style.TEAL, s=45, alpha=0.6)
+
+# Line plot of conditional means
+ax.plot(df_grouped["bdrms"], df_grouped["mean_price"], color=bse_style.TEAL, linewidth=1.8)
+
+# Titles and labels
+ax.set_title("Conditional mean of house price by bedrooms")
+ax.set_xlabel("Number of bedrooms")
+ax.set_ylabel("House price")
+ax.set_xticks(sorted(df["bdrms"].unique()))
+plt.tight_layout()
+plt.show()
 ```
 
 ---
 
 
-## OLS in Matrix Algebra
-Using our dataset, we can write the model as:
-$$price\_i = \beta_1 + \beta_2 \cdot bdrms_i + \beta_3 \cdot sqrft_i + \beta_4 \cdot colonial_i + \varepsilon_i $$
+## From averages to a fitted model {.section-divider-centered background-color="#0396A6"}
 
-We can express this model in matrix form as:
+---
+
+## OLS in Matrix Algebra
+Using our dataset, we can write the model for a representative observation $i$:
+$$price_i = \beta_1 + \beta_2 \cdot bdrms_i + \beta_3 \cdot sqrft_i + \beta_4 \cdot colonial_i + \varepsilon_i $$
+
+We can express this model for a set of $n$ representative observations in matrix form as:
 
 $${y} = {X} {\beta} + \varepsilon$$
 
@@ -187,7 +214,8 @@ $$
 
 ---
 
-### Exercise: OLS in Matrix Algebra
+
+## Exercise: OLS in Matrix Algebra
 ::: {.callout-warning title="Exercises" icon="false"}
 1. Estimate the OLS coefficients using matrix algebra.
 2. Compute the fitted values and OLS residuals.
@@ -197,31 +225,47 @@ $$
 
 ---
 
-#### 1. Estimate the OLS Coefficients
+## 1. Estimate the OLS Coefficients
 Starting from the OLS objective function:
+$$ \min_{{\tilde{\beta}}} SSE(\tilde\beta) = \min_{{\tilde{\beta}}} \sum_{i=1}^n (y_i - x_i'\tilde\beta)^2 = \min_{{\tilde{\beta}}} ({y} - {X}{\tilde{\beta}})'({y} - {X}{\tilde{\beta}}) $$
 
-$$ \min_{{\tilde{\beta}}} {\tilde{\varepsilon}}'{\tilde{\varepsilon}} = \min_{{\tilde{\beta}}} ({y} - {X}{\tilde{\beta}})'({y} - {X}{\tilde{\beta}}) $$
-The solution is given by:
+Taking FOC and solving gives $\hat\beta$:
 
-<div style="text-align: center;"> <div style="border:2px solid #9d03c4ff; padding:10px; border-radius:8px; background-color:#f5e6ff; display:inline-block;"> $$\hat{\beta} = ({X}'{X})^{-1}{X}'{y}$$ </div> </div>
+<div class="eq-box-wrap"><div class="eq-box">
+
+$$\hat{\beta} = \left(\sum_{i=1}^{n} x_i x_i'\right)^{-1} \sum_{i=1}^{n} x_i y_i$$
+
+</div></div>
+
+Or equivalently, in matrix form:
+
+<div class="eq-box-wrap"><div class="eq-box">
+
+$$\hat{\beta} = \; ({X}'{X})^{-1}{X}'{y}$$
+
+</div></div>
 
 
 ---
 
-```{r}
+## Compute OLS coefficients in Python
+
+```{python}
 #| echo: true
 #| eval: true
-df$intercept <- 1
-X <- as.matrix(df[, c("intercept", "bdrms", "sqrft", "colonial")])
-y <-df$price
+import numpy as np
 
-#define X_tX and X_ty
-X_tX <- t(X)%*%X
-X_ty <- t(X)%*%y
+df["intercept"] = 1
+X = df[["intercept", "bdrms", "sqrft", "colonial"]].to_numpy()
+y = df["price"].to_numpy()
+n = X.shape[0]
 
-#solve the system
-beta_hat<- solve(X_tX)%*%X_ty
-round(beta_hat, 2)
+# matrix form: X'X and X'y
+X_tX = X.T @ X
+X_ty = X.T @ y
+beta_hat = np.linalg.solve(X_tX, X_ty)
+
+print(np.round(beta_hat, 2))
 ```
 
 Fitted model:
@@ -236,33 +280,33 @@ where the dependent variable `price` is in **$1000s**.
 
 ---
 
-#### 2. Compute the fitted values and OLS residuals.
- $${\hat{y}} = {X}\hat{\beta}$$ 
+## 2. Compute the fitted values and OLS residuals
+ $${\hat{y}} = {X}\hat{\beta}$$
 
 
-```{r}
+```{python}
 #| echo: true
 #| eval: true
 # Fitted values
-y_hat <- X %*% beta_hat
+y_hat = X @ beta_hat
 ```
 
 $$ \hat{\varepsilon} = {y} - {\hat{y}} $$
-```{r}
+```{python}
 #| echo: true
 #| eval: true
 # Residuals
-epsilon_hat <- y - y_hat
+epsilon_hat = y - y_hat
 ```
 ::: {.callout-warning title="Units" icon="false"}
-1. In what units are the fitted values ${\hat{y}}$?  
+1. In what units are the fitted values ${\hat{y}}$?
 2. In what units are the residuals ${\hat{\varepsilon}}$?
 
 :::
 
 ---
 
-#### 3. Calculate the Sum of Squared Errors (SSE).
+## 3. Calculate the Sum of Squared Errors (SSE)
 
 $$SSE = {\hat{\varepsilon}}'{\hat{\varepsilon}}$$
 
@@ -270,11 +314,11 @@ Note that this is exactly the same as:
 
 $$ SSE = \sum_{i=1}^{n} (\hat{\varepsilon}_{i})^{2} = \sum_{i=1}^n (y_i - \hat{y}_i)^2$$
 
-```{r}
+```{python}
 #| echo: true
 #| eval: true
-#Sum of Squared Errors
-SSE <- t(epsilon_hat) %*% epsilon_hat
+# Sum of Squared Errors
+SSE = epsilon_hat.T @ epsilon_hat
 round(SSE, 2)
 ```
 ::: {.callout-warning title = "SSE Units" icon=false}
@@ -283,191 +327,192 @@ round(SSE, 2)
 
 ---
 
-#### 4. Compute the $R^2$ statistic.
+## 4. Compute the $R^2$ statistic
 
 $$R^2 = 1 - \frac{SSE}{SST}$$
 
 where
 $$SST = ({y} - \bar{y}{1})'({y} - \bar{y}{1})$$
 
-```{r}
+```{python}
 #| echo: true
 #| eval: true
 # Total Sum of Squares
-y_bar <- mean(y)
-SST <- t(y - y_bar) %*% (y - y_bar)
-r2 <- 1 - SSE/SST
+y_bar = y.mean()
+SST = (y - y_bar).T @ (y - y_bar)
+r2 = 1 - SSE / SST
 round(r2, 4)
 ```
-::: {.callout-warning title = "$R^2$ Units" icon=false}
-**Note:** The $R^2$ is unit free, and tells us that about 64\% of the variation in house price is captured by the model.
+::: {.callout-warning title = "$R^2$ interpretation" icon=false}
+**Note:** The $R^2$ is unit free. It tells us that about 64\% of the sample variation in house price is explained by the model.
 :::
- 
+
 ---
 
-### 3. Python and R Preset Functions
+## Same model, shorter code {.section-divider-centered background-color="#0396A6"}
+
+---
+
+## 3. Python Preset Functions
 
 ::: {.callout-note title = "Preset Functions" icon=false}
-All the operations we did in matrix algebra can be done using preset functions in Python and R.
+All the operations we did in matrix algebra can be done using preset functions in Python.
 
 - Python: `statsmodels` library, specifically the `OLS` class from `statsmodels.api`.
-- R: `lm()` function.
 
 :::
 
 ---
 
-#### Code example in R
+## Code example in Python
 
-```{r}
+```{python}
 #| echo: true
 #| eval: true
-#Estimate the model with lm function 
-model <- lm(price ~ bdrms + sqrft + colonial, data = df)
-beta_hat <- coef(model)
-y_hat <- fitted(model)
-epsilon_hat <- residuals(model)
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
 
-sse <- sum(epsilon_hat^2)
-r2 <- summary(model)$r.squared
-cat("Coefficients (betas):\n", beta_hat)
+# Estimate the model with the ols formula API
+model = ols("price ~ bdrms + sqrft + colonial", data=df).fit()
+beta_hat = model.params
+y_hat = model.fittedvalues
+epsilon_hat = model.resid
 
-cat("\nSSE:", round(sse, 2), "\n")
-cat("R^2:", round(r2, 4), "\n")
+sse = (epsilon_hat**2).sum()
+r2 = model.rsquared
+print("Coefficients (betas):\n", beta_hat)
+
+print("\nSSE:", round(sse, 2))
+print("R^2:", round(r2, 4))
 ```
 
 ---
 
-### 4. Plotting Observations and Fitted Line
+## 4. Plotting Observations and Fitted Line
 
 For a simple model of $K=2$, estimate the model and plot the observations and the fitted line.
 
 $$ price_i = \beta_1 + \beta_2 \cdot sqrft_i + \epsilon_i $$
 
-```{r}
+```{python}
 #| echo: true
 #| eval: true
-#estimate the model
-#first we need to estimate simple model
-model <- lm(price ~ sqrft, data = df)
-y_hat <- fitted(model)
-beta_hat <- coef(model)
+# estimate the model
+# first we need to estimate the simple model
+model = ols("price ~ sqrft", data=df).fit()
+y_hat = model.fittedvalues
+beta_hat = model.params
 beta_hat
 ```
 ---
 
-```{r}
+## Fitted line for house size and price
+
+```{python}
 #| echo: true
 #| eval: false
-#plot observations with scatter and fitted line
-ggplot() + 
-    #scatter with raw data
-    geom_point(data = df, aes(x = sqrft, y = price),
-    color = '#00518b') +
+# plot observations with scatter and fitted line
+fig, ax = plt.subplots(figsize=(9, 4.5))
 
-    geom_abline(intercept= beta_hat[1], slope = beta_hat[2],
-    color = 'black', linewidth = 1) +
-    #labels and styling
-    labs(
-        title = 'House size and price',
-        x = 'sqrft',
-        y='house price in 1000 usd'
-    )
+# scatter with raw data
+ax.scatter(df["sqrft"], df["price"], color=bse_style.TEAL, s=40, alpha=0.65)
 
+# fitted line
+x_vals = np.array(ax.get_xlim())
+ax.plot(x_vals, beta_hat["Intercept"] + beta_hat["sqrft"] * x_vals,
+        color=bse_style.PURPLE, linewidth=1.8)
+
+# labels and styling
+ax.set_title("House size and price")
+ax.set_xlabel("sqrft")
+ax.set_ylabel("house price in 1000 usd")
+plt.show()
 ```
 
-```{r}
+```{python}
 #| echo: false
 #| eval: true
-eq <- paste0("price = ", round(beta_hat[1], 2), " + ", round(beta_hat[2], 2), " * sqrft")
+fig, ax = plt.subplots(figsize=(9, 4.2))
 
-ggplot(df, aes(x = sqrft, y = price)) +
-  geom_point(color = "#00518b", size = 3, alpha = 0.6) +
-  geom_abline(intercept = beta_hat[1], slope = beta_hat[2], color = "black", linewidth = 1) +
-  annotate("text", x = min(df$sqrft), y = max(df$price), label = eq, hjust = 0, size = 5) +
-  labs(title = "House Size and House Price", x = "House Size (Sqrft)", y = "House Price (1000 USD)") +
-  theme_minimal(base_size = 14) +
-  theme(
-    panel.grid.minor = element_blank(),
-    panel.grid.major = element_line(color = "grey80"),
-    axis.line = element_line(color = "black"),
-    axis.ticks = element_line(color = "black"),
-    plot.title = element_text(size = 16, face = "bold")
-  )
+eq = f"price = {beta_hat['Intercept']:.2f} + {beta_hat['sqrft']:.2f} * sqrft"
 
+ax.scatter(df["sqrft"], df["price"], color=bse_style.TEAL, s=45, alpha=0.6)
+
+x_vals = np.array([df["sqrft"].min(), df["sqrft"].max()])
+ax.plot(x_vals, beta_hat["Intercept"] + beta_hat["sqrft"] * x_vals,
+        color=bse_style.PURPLE, linewidth=1.8)
+
+ax.text(df["sqrft"].min(), df["price"].max(), eq, ha="left", va="top",
+        fontsize=13, color=bse_style.BLACK)
+
+ax.set_title("House Size and House Price")
+ax.set_xlabel("House Size (Sqrft)")
+ax.set_ylabel("House Price (1000 USD)")
+plt.tight_layout()
+plt.show()
 ```
 
 ---
 
-### 5. Numerical Property of OLS
+## Reading the residuals {.section-divider-centered background-color="#0396A6"}
+
+---
+
+## 5. Numerical Properties of OLS
 
 ::: {.callout-note title = "Numerical Property of OLS" icon=false}
 These properties are independent of the statistical assumptions, they are purely mathematical properties of the OLS estimator, that hold given a sample.
 
 1. $$\sum_{i=1}^{n} \hat{\varepsilon_i} = 0$$
 
-2. OLS is unitdependent, hence SSE is also unit independent.
+2. OLS is unit-dependent, hence SSE is also unit-dependent.
 
 :::
 
 ---
 
-#### 1. Sum of residuals is zero
-```{r}
+## 1. Sum of residuals is zero
+```{python}
 #| echo: true
 #| eval: true
-epsilon_hat <- residuals(model)
-round(sum(epsilon_hat),2)
+epsilon_hat = model.resid
+round(epsilon_hat.sum(), 2)
 ```
 
 Illustration:
-```{r}
+```{python}
 #| echo: false
 #| eval: true
 # 1) Residuals vs index (sum of residuals = 0)
-# Create a data frame with index and residuals
-residuals_df <- data.frame(
-  index = 1:length(epsilon_hat),
-  residuals = epsilon_hat
-)
-#inspect visually this property
-ggplot(residuals_df, aes(x = index, y = residuals)) +
-  geom_point(color = "darkgreen", size = 3, alpha = 0.6) +   # scatter points
-  geom_hline(yintercept = 0, color = "black", linetype = "dashed") +  # horizontal line at 0
-  labs(
-    x = "Observation index",
-    y = expression(hat(epsilon)),
-    title = expression(hat(epsilon) ~ "vs Observation Index")
-  ) +
-  theme_minimal(base_size = 14) +
-  theme(
-    panel.grid.minor = element_blank(),
-    panel.grid.major = element_line(color = "grey80"),
-    axis.line = element_line(color = "black"),
-    axis.ticks = element_line(color = "black"),
-    plot.title = element_text(size = 16, face = "bold")
-  )
+fig, ax = plt.subplots(figsize=(9, 4.2))
 
+ax.scatter(range(len(epsilon_hat)), epsilon_hat, color=bse_style.TEAL, s=45, alpha=0.6)
+ax.axhline(0, color=bse_style.PURPLE, linestyle="--")
+
+ax.set_xlabel("Observation index")
+ax.set_ylabel("Residual")
+ax.set_title("Residuals versus observation index")
+plt.tight_layout()
+plt.show()
 ```
 ---
 
-#### 2. OLS unit dependent, hence SSE also unit dependent.
+## 2. OLS is unit-dependent, hence SSE is unit-dependent
 
 Our dependent variable is expressed in \$1000s, so let's scale it to actual dollars and see how the SSE changes.
 
 
-```{r}
-#| echo: true
+```{python}
+#| echo: false
 #| eval: true
-df$price <- df$price * 1000
-model_dollars <- lm(price ~ sqrft, data = df)
-beta_hat_dollars <- coef(model_dollars)
-sse_dollars <- sum(residuals(model_dollars)^2)
-cat("Coefficients in thousands of dollars:", round(beta_hat, 4), "\n")
-cat("Coefficients in dollars:", round(beta_hat_dollars, 4), "\n")
+df["price"] = df["price"] * 1000
+model_dollars = ols("price ~ sqrft", data=df).fit()
+beta_hat_dollars = model_dollars.params
+sse_dollars = (model_dollars.resid**2).sum()
 
-cat("SSE in thousands of dollars:", round(sse, 2), "\n")
-cat("SSE in dollars:", round(sse_dollars, 2), "\n")
+print("Coefficients in thousands of dollars:", [round(b, 4) for b in beta_hat])
+print("Coefficients in dollars:", [round(b, 4) for b in beta_hat_dollars])
 
+print(f"\nSSE in thousands of dollars: {sse:,.2f}")
+print(f"SSE in dollars: {sse_dollars:,.2f}")
 ```
-

@@ -1,0 +1,685 @@
+/*-- scss:defaults --*/
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Archivo+Black&display=swap');
+
+// ---- BSE Econometrics palette ----
+$bse-teal:        #0396A6;
+$bse-teal-light:  #79BAC8;
+$bse-purple:      #3E2259;
+$bse-mauve:       #826F93; // softened $bse-purple (~35% white) for full-slide backgrounds
+$bse-orange:      #F28627;
+$bse-black:       #0D0D0D;
+$bse-gray:        #E9EAEA;
+
+// Cover / section-divider background. Change this one variable to try a
+// different color — text contrast below adapts automatically.
+$bse-cover-bg: $bse-teal;
+$bse-cover-text: if(lightness($bse-cover-bg) > 60%, $bse-black, #ffffff);
+$bse-cover-accent: $bse-purple;
+
+// Bold display face for the big cover title only — body stays Source Serif 4.
+$bse-display-font: "Archivo Black", "Arial Black", sans-serif;
+
+$body-bg: #ffffff;
+$body-color: $bse-black;
+$link-color: $bse-teal;
+$link-color-hover: darken($bse-teal, 12%);
+$selection-bg: rgba($bse-teal, 0.25);
+
+$presentation-heading-color: $bse-purple;
+$presentation-heading-font: "Source Serif 4", Georgia, serif;
+$presentation-heading-font-weight: 600;
+$presentation-font-size-root: 30px;
+$presentation-line-height: 1.45;
+
+$code-block-bg: #F4F5F5;
+$code-block-border-color: $bse-gray;
+
+/*-- scss:rules --*/
+
+// ---- Base typography ----
+// Same typeface everywhere (headings and body) for a single, consistent voice.
+.reveal,
+.reveal .slides {
+  font-family: "Source Serif 4", Georgia, serif;
+  color: $bse-black;
+}
+
+// Slide titles share the cover's bold display face (not uppercase / not the
+// giant cover size — that would be too shouty repeated across ~20 slides).
+.reveal h1, .reveal h2, .reveal h3 {
+  font-family: $bse-display-font;
+  color: $bse-purple;
+  font-weight: 400; // Archivo Black ships a single (heavy) weight
+  letter-spacing: 0;
+}
+
+.reveal h2 {
+  font-size: 1.15em;
+  border-bottom: 3px solid $bse-teal;
+  padding-bottom: 0.25em;
+  margin-bottom: 0.6em;
+  display: block;
+  width: fit-content;
+}
+
+.reveal h3 {
+  color: $bse-teal;
+  font-size: 0.75em;
+}
+
+// ---- Title slide ----
+// Left-aligned text block; decorative scatter graphic docked on the right.
+.reveal .slides section#title-slide {
+  text-align: left !important;
+  padding-left: 7% !important;
+  padding-right: 40% !important;
+}
+
+.reveal .slides section#title-slide h1.title {
+  color: $bse-cover-text !important;
+  font-family: $bse-display-font;
+  font-weight: 400; // Archivo Black only ships one (heavy) weight
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  font-size: 2.1em;
+  line-height: 1.05;
+  width: fit-content; // so the ::after rule below can match the text width
+}
+
+.reveal .slides section#title-slide .subtitle-text {
+  color: $bse-cover-accent !important;
+  font-family: $bse-display-font;
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: 1.0em;
+  letter-spacing: 0.03em;
+}
+
+// Date sits next to "TA Session 1" on the subtitle line; the auto-generated
+// .date paragraph further down is hidden since its content moved up here.
+.reveal .slides section#title-slide .subtitle-date {
+  color: rgba($bse-cover-text, 0.85) !important;
+  font-size: 0.55em;
+  letter-spacing: 0.02em;
+  margin-left: 0.6em;
+}
+.reveal .slides section#title-slide .subtitle-date::before {
+  content: "•";
+  margin-right: 0.6em;
+  color: $bse-cover-accent;
+}
+.reveal .slides section#title-slide p.date {
+  display: none;
+}
+
+// Reorder: affiliation, then name, then email — overriding Quarto's fixed
+// name-then-affiliation template order via flexbox.
+.reveal .slides section#title-slide .quarto-title-authors {
+  display: block;
+  margin-top: 0.8em;
+}
+.reveal .slides section#title-slide .quarto-title-author {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.reveal .slides section#title-slide .quarto-title-affiliation {
+  display: none; // empty wrapper once institute: uses its own <p> tags
+}
+
+.reveal .slides section#title-slide .cover-affiliation {
+  order: 1;
+  color: rgba($bse-cover-text, 0.85) !important;
+  font-style: italic;
+  margin: 0;
+}
+
+.reveal .slides section#title-slide .quarto-title-author-name {
+  order: 2;
+  color: rgba($bse-cover-text, 0.85) !important;
+  text-align: left;
+}
+
+.reveal .slides section#title-slide .cover-contact {
+  order: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.6em;
+  margin: 0.3em 0 0;
+  color: $bse-cover-accent !important;
+  font-weight: 600;
+}
+.reveal .slides section#title-slide .cover-contact a {
+  color: inherit;
+  text-decoration: none;
+}
+.reveal .slides section#title-slide .cover-contact a:hover {
+  text-decoration: underline;
+}
+
+.reveal .slides section#title-slide h1.title::after {
+  content: "";
+  display: block;
+  width: 100%; // matches h1.title's fit-content width, i.e. the text width
+  height: 5px;
+  margin: 0.7em 0 0.5em;
+  background: $bse-orange;
+}
+
+// ---- Links, selection, code ----
+.reveal a { color: $link-color; }
+.reveal a:hover { color: $link-color-hover; }
+
+.reveal code {
+  background: $code-block-bg;
+  color: $bse-purple;
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  font-size: 0.85em;
+}
+
+.reveal pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+.reveal pre {
+  border: 1px solid $code-block-border-color;
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+// ---- Blockquotes ----
+.reveal blockquote {
+  border-left: 4px solid $bse-teal-light;
+  padding-left: 0.8em;
+  margin-left: 0;
+  background: transparent;
+  font-style: normal;
+  color: $bse-black;
+}
+
+// ---- Step indicator (e.g. Concept of Density, Step N of 3) ----
+.reveal .step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0.2em 0 0.7em;
+}
+.reveal .step-indicator .step {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  border-radius: 50%;
+  border: 2px solid $bse-teal;
+  color: $bse-teal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: $bse-display-font;
+  font-size: 0.5em;
+  background: #fff;
+}
+.reveal .step-indicator .step.active {
+  background: $bse-teal;
+  color: #fff;
+}
+.reveal .step-indicator .step-line {
+  width: 34px;
+  height: 2px;
+  background: $bse-gray;
+}
+.reveal .step-indicator .step-label {
+  margin-left: 10px;
+  font-size: 0.55em;
+  color: $bse-teal;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+// ---- Highlighted equation box (reusable, replaces one-off inline styles) ----
+.reveal .eq-box-wrap { text-align: center; margin: 0.6em 0; }
+.reveal .eq-box {
+  display: inline-block;
+  border: 2px solid $bse-teal;
+  background-color: rgba($bse-teal, 0.07);
+  border-radius: 10px;
+  padding: 14px 24px;
+}
+
+// ---- Callout boxes (tcolorbox-style) ----
+.reveal div.callout {
+  border: none !important;
+  border-left: 5px solid $bse-teal !important;
+  border-radius: 6px;
+  box-shadow: none !important;
+  background-color: rgba($bse-teal, 0.06) !important;
+}
+
+.reveal div.callout .callout-title,
+.reveal div.callout .callout-title p,
+.reveal div.callout .callout-title p strong,
+.reveal div.callout .callout-title h4 {
+  font-family: $bse-display-font;
+  font-weight: 400 !important;
+  color: $bse-teal !important;
+  background-color: transparent !important;
+}
+.reveal div.callout .callout-title svg {
+  vertical-align: -3px;
+  margin-right: 4px;
+}
+
+.reveal div.callout.callout-tip {
+  border-left-color: $bse-teal !important;
+}
+
+.reveal div.callout.callout-note {
+  border-left-color: $bse-purple !important;
+  background-color: rgba($bse-purple, 0.06) !important;
+}
+.reveal div.callout.callout-note .callout-title,
+.reveal div.callout.callout-note .callout-title p,
+.reveal div.callout.callout-note .callout-title p strong,
+.reveal div.callout.callout-note .callout-title h4 { color: $bse-purple !important; }
+
+.reveal div.callout.callout-warning {
+  border-left-color: $bse-orange !important;
+  background-color: rgba($bse-orange, 0.08) !important;
+}
+.reveal div.callout.callout-warning .callout-title,
+.reveal div.callout.callout-warning .callout-title p,
+.reveal div.callout.callout-warning .callout-title p strong,
+.reveal div.callout.callout-warning .callout-title h4 { color: $bse-orange !important; }
+
+// ---- Section-divider slides (heading marked with {background-color="#{$bse-cover-bg}"}) ----
+.reveal .slides section[data-background-color="#{$bse-cover-bg}"] h1,
+.reveal .slides section[data-background-color="#{$bse-cover-bg}"] h2,
+.reveal .slides section[data-background-color="#{$bse-cover-bg}"] li,
+.reveal .slides section[data-background-color="#{$bse-cover-bg}"] p {
+  color: $bse-cover-text;
+}
+.reveal .slides section[data-background-color="#{$bse-cover-bg}"] h2 {
+  border-bottom-color: $bse-cover-accent;
+}
+
+// A pure section-divider slide (just a heading, no body content):
+// vertically center it, keeping the heading left-aligned.
+.reveal .slides section.section-divider-centered {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  height: 100% !important;
+}
+// Same specificity prefix as reveal's own print rule (html.reveal-print .reveal
+// .slides section{display:block!important;...}) plus our class, so this wins
+// the print-pdf export too instead of losing the source-order tiebreak.
+html.reveal-print .reveal .slides section.section-divider-centered {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  height: 100% !important;
+}
+
+// ---- Tables ----
+.reveal table { border-collapse: collapse; font-size: 0.8em; }
+.reveal table th {
+  background-color: $bse-purple;
+  color: #ffffff;
+  font-weight: 600;
+}
+.reveal table td, .reveal table th {
+  border: 1px solid $bse-gray;
+  padding: 0.4em 0.7em;
+}
+.reveal table tr:nth-child(even) td {
+  background-color: rgba($bse-gray, 0.5);
+}
+.reveal table td:first-child, .reveal table th:first-child {
+  white-space: nowrap;
+}
+
+// ---- Columns layout ----
+.reveal .columns {
+  display: flex;
+  gap: 2em;
+  align-items: center;
+}
+.reveal .column { flex: 1; }
+// Columns with an explicit width (e.g. {.column width="48%"}) should keep
+// that exact proportion instead of being equalized by flex-grow.
+.reveal .column[style*="width"] { flex: 0 1 auto; }
+
+// ---- Document preview: a bordered/shadowed screenshot of a PDF page ----
+.reveal .doc-preview {
+  border: 1px solid $bse-gray;
+  border-radius: 4px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  max-height: 420px;
+  width: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+// ---- Scrollable document preview: same pattern as .browser-mockup-body,
+// for a tall stitched image (e.g. several PDF pages stacked) ----
+.reveal .doc-scroll {
+  border: 1px solid $bse-gray;
+  border-radius: 4px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  max-height: 420px;
+  overflow-y: auto;
+  cursor: ns-resize;
+  margin: 0 auto;
+}
+.reveal .doc-scroll img {
+  display: block;
+  width: 100%;
+}
+.reveal .doc-scroll::-webkit-scrollbar { width: 10px; }
+.reveal .doc-scroll::-webkit-scrollbar-track { background: $bse-gray; }
+.reveal .doc-scroll::-webkit-scrollbar-thumb {
+  background: $bse-teal-light;
+  border-radius: 5px;
+}
+
+// In print-pdf, scrolling doesn't exist — fall back to showing just the
+// top of the stitched image at a normal preview height, like .doc-preview.
+@media print {
+  .reveal .doc-scroll {
+    max-height: 420px;
+    overflow: hidden;
+  }
+}
+
+// ---- Illustrative UI mockup: Overleaf's "Share" dialog ----
+.reveal .share-mockup {
+  border: 1px solid $bse-gray;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  background: #ffffff;
+  max-width: 380px;
+  margin: 0 auto;
+}
+.reveal .share-mockup-header {
+  background: $bse-gray;
+  padding: 10px 14px;
+  font-size: 0.5em;
+  font-weight: 600;
+  color: $bse-black;
+}
+.reveal .share-mockup-body {
+  padding: 14px 16px;
+  font-size: 0.48em;
+}
+.reveal .share-mockup-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.reveal .share-mockup-note {
+  color: $bse-teal;
+  font-size: 0.85em;
+  font-weight: 600;
+}
+.reveal .share-mockup-divider {
+  text-align: center;
+  color: #b0b0b0;
+  font-size: 0.8em;
+  margin: 10px 0;
+}
+.reveal .share-mockup-toggle {
+  width: 34px;
+  height: 18px;
+  border-radius: 9px;
+  background: $bse-teal;
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.reveal .share-mockup-toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 18px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+.reveal .share-mockup-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: $bse-gray;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-top: 4px;
+}
+.reveal .share-mockup-permission {
+  background: $bse-teal;
+  color: #ffffff;
+  font-size: 0.8em;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.reveal .share-mockup-link code {
+  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8em;
+  color: $bse-black;
+  background: transparent;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ---- Workflow diagram: icon + title + caption cards connected by arrows ----
+.reveal .workflow-steps {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0.7em;
+  margin: 2em auto 1em;
+}
+.reveal .workflow-step {
+  flex: 1 1 0;
+  max-width: 250px;
+  border: 1px solid $bse-gray;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  padding: 28px 18px;
+  text-align: center;
+  background: #ffffff;
+}
+.reveal .workflow-icon {
+  font-size: 2.6em;
+  margin-bottom: 6px;
+}
+.reveal .workflow-title {
+  font-family: $bse-display-font;
+  font-size: 0.62em;
+  color: $bse-purple;
+  margin: 8px 0;
+}
+.reveal .workflow-title code {
+  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85em;
+  background: $bse-gray;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: $bse-black;
+  font-weight: normal;
+}
+.reveal .workflow-caption {
+  font-size: 0.5em;
+  color: $bse-black;
+  opacity: 0.75;
+  line-height: 1.35;
+}
+.reveal .workflow-arrow {
+  display: flex;
+  align-items: center;
+  font-size: 2em;
+  color: $bse-teal;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+// Smaller variant, for when the diagram sits below other content
+.reveal .workflow-steps.compact {
+  margin: 0.6em auto 0;
+  gap: 0.4em;
+}
+.reveal .workflow-steps.compact .workflow-step {
+  max-width: 190px;
+  padding: 10px 10px;
+  border-radius: 8px;
+}
+.reveal .workflow-steps.compact .workflow-icon {
+  font-size: 1.5em;
+  margin-bottom: 2px;
+}
+.reveal .workflow-steps.compact .workflow-title {
+  font-size: 0.42em;
+  margin: 3px 0;
+}
+.reveal .workflow-steps.compact .workflow-caption {
+  font-size: 0.36em;
+  line-height: 1.25;
+}
+.reveal .workflow-steps.compact .workflow-arrow {
+  font-size: 1.2em;
+}
+
+// ---- Browser-window mockup: a scrollable screenshot of a live web page ----
+// Use for pages that can't be embedded (X-Frame-Options), e.g. github.com.
+.reveal .browser-mockup {
+  border: 1px solid $bse-gray;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  background: #ffffff;
+}
+
+.reveal .browser-mockup-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: $bse-gray;
+}
+
+.reveal .browser-mockup-bar .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.reveal .browser-mockup-bar .dot-red { background: #FF5F57; }
+.reveal .browser-mockup-bar .dot-yellow { background: #FEBC2E; }
+.reveal .browser-mockup-bar .dot-green { background: #28C840; }
+
+.reveal .browser-mockup-url {
+  margin-left: 8px;
+  flex: 1;
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 3px 12px;
+  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+  font-size: 0.42em;
+  color: $bse-black;
+  text-align: left;
+}
+
+.reveal .browser-mockup-body {
+  max-height: 430px;
+  overflow-y: auto;
+  cursor: ns-resize;
+}
+.reveal .browser-mockup-body img {
+  display: block;
+  width: 100%;
+}
+.reveal .browser-mockup-body::-webkit-scrollbar { width: 10px; }
+.reveal .browser-mockup-body::-webkit-scrollbar-track { background: $bse-gray; }
+.reveal .browser-mockup-body::-webkit-scrollbar-thumb {
+  background: $bse-teal-light;
+  border-radius: 5px;
+}
+
+// ---- Observable JS input widgets (Inputs.range, etc.) ----
+.reveal form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.reveal form label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  font-size: 0.75em;
+  color: $bse-black;
+}
+.reveal form input[type="range"] {
+  width: 100%;
+}
+.reveal form input[type="number"] {
+  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9em;
+  width: 4em;
+}
+
+// ---- Progress bar / slide number ----
+.reveal .progress { color: $bse-teal; }
+.reveal .slide-number {
+  background: transparent;
+  color: $bse-purple;
+}
+
+// ---- Code/Output tabsets: show both panels stacked when printing to PDF ----
+// (in the live HTML only the active tab is visible; a PDF has no clicking)
+@media print {
+  .panel-tabset-tabby { display: none !important; }
+  .panel-tabset .tab-content {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start;
+    gap: 1em;
+  }
+  .panel-tabset .tab-content > div {
+    display: block !important;
+    flex: 1 1 50%;
+    min-width: 0;
+    margin-bottom: 0;
+  }
+  .panel-tabset .tab-content > div img {
+    max-width: 100%;
+    height: auto;
+  }
+  .panel-tabset .tab-content .sourceCode {
+    font-size: 0.7em;
+  }
+  .panel-tabset .tab-content > div::before {
+    display: block;
+    font-family: $bse-display-font;
+    font-size: 0.6em;
+    color: $bse-teal;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.3em;
+  }
+  .panel-tabset .tab-content > div:nth-child(1)::before { content: "Code"; }
+  .panel-tabset .tab-content > div:nth-child(2)::before { content: "Output"; }
+}
