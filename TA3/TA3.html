@@ -96,7 +96,8 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="TA3_files/libs/revealjs/dist/theme/quarto-f563837468303362081e247dddd440d0.css">
+  <link rel="stylesheet" href="TA3_files/libs/revealjs/dist/theme/quarto-7f3deb6ae4601429a8f92596a36d44fa.css">
+  <link rel="stylesheet" href="ta3-widgets.css">
   <link href="TA3_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="TA3_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="TA3_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -196,9 +197,9 @@
   <div class="reveal">
     <div class="slides">
 
-<section id="title-slide" data-background-position="95% 90%" data-background-size="100px" class="quarto-title-block center">
+<section id="title-slide" data-background-color="#0396A6" data-background-image="../theme/assets/cover-graphic.svg" data-background-position="92% 50%" data-background-repeat="no-repeat" data-background-size="34%" class="quarto-title-block center">
   <h1 class="title">Econometrics</h1>
-  <p class="subtitle"><span class="subtitle-text">TA Session 3</span></p>
+  <p class="subtitle"></p><p><span class="subtitle-text">TA Session 3</span></p><p></p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -206,130 +207,658 @@
 Lucia Sauer 
 </div>
         <p class="quarto-title-affiliation">
+            </p><p class="cover-affiliation">
             <em>Barcelona School of Economics</em>
-          </p>
+            </p>
+            <p class="cover-contact">
+            <svg width="13" height="13" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 5h18v14H3z"></path><path d="M3 6l9 7 9-7"></path>
+            </svg>
+            <a href="mailto:lucia.sauer@bse.eu">lucia.sauer@bse.eu</a>
+            </p>
+          <p></p>
     </div>
 </div>
 
   <p class="date">2025-10-10</p>
 </section>
-<section id="overview" class="slide level2">
+<section id="overview" class="slide level2" data-background-color="#0396A6">
 <h2>Overview</h2>
 <ul>
-<li>Review of A1</li>
-<li>Regression Analysis</li>
-<li>Standard Error Calculation</li>
-<li>Introduction to Stata</li>
-<li>Hypothesis Testing</li>
-<li>Export Regression output to LaTeX</li>
+<li>Monte Carlo experiments: the sampling distribution of OLS</li>
+<li>How the DGP shapes that distribution</li>
+<li>A full regression output: estimates, standard errors, <span class="math inline">\(t\)</span>-values, <span class="math inline">\(p\)</span>-values</li>
+<li>Regression tables with <code>stargazer</code> and export to LaTeX</li>
 </ul>
 </section>
-<section id="how-i-grade-and-why-im-tough" class="slide level2">
-<h2>How I Grade (and Why I’m Tough 😅)</h2>
-<div style="text-align: center;">
-<p><img src="tronchatoro_gif.gif" width="70%"></p>
-</div>
-</section>
-<section class="slide level2">
-
-<div title="Correction Principles">
+<section id="why-these-topics" class="slide level2">
+<h2>Why These Topics?</h2>
 <div class="callout callout-tip no-icon callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
-<p><strong>Correction Principles</strong></p>
+<p><strong><svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"></rect><circle cx="8" cy="8" r="1.4"></circle><circle cx="16" cy="8" r="1.4"></circle><circle cx="12" cy="12" r="1.4"></circle><circle cx="8" cy="16" r="1.4"></circle><circle cx="16" cy="16" r="1.4"></circle></svg> Monte Carlo Experiments</strong></p>
 </div>
 <div class="callout-content">
-<p>When grading, I focus on three things:</p>
-<p><strong>1. Rigor:</strong></p>
-<p>Be precise with <strong>notation</strong> and <strong>concepts</strong>.</p>
-<p><strong>2. Clarity:</strong></p>
-<p>Each line should have a clear purpose. Avoid algebraic noise.</p>
-<blockquote>
-<p>“If your reader has to guess what you mean — rewrite it.”</p>
-</blockquote>
-<p><strong>3. Conciseness:</strong></p>
-<p>Prove what’s asked, no more, no less.</p>
-<blockquote>
-<p>“If you can prove something in 3 clean steps, don’t use 10.”</p>
-</blockquote>
-</div>
-</div>
-</div>
-</div>
-</section>
-<section id="common-mistakes-1" class="slide level2">
-<h2>Common Mistakes (1)</h2>
-<blockquote>
-<p>“Expectations are over populations, not individuals.”</p>
-</blockquote>
-<p><span class="math display">\[E(y_i|d_i = 1)\]</span> captures the expected <code>variable_name</code> for individuals with <code>treatment_name</code> = 1.</p>
-<p>❌ It is <strong>not</strong>:</p>
 <ul>
-<li>the expectation of an individual outcome, nor<br>
-</li>
-<li>the average of the observed <span class="math inline">\(y_i\)</span>’s in the sample.</li>
+<li><span class="math inline">\(\hat\beta\)</span> is a <strong>random variable</strong>: a new sample gives a new estimate</li>
+<li>Simulation lets us <em>see</em> its distribution when we know the true DGP</li>
 </ul>
+</div>
+</div>
+</div>
+<div class="callout callout-tip no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong><svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg> Changing the DGP</strong></p>
+</div>
+<div class="callout-content">
+<ul>
+<li>Noise, sample size, collinearity: what makes an estimator <strong>precise</strong>?</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="callout callout-tip no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong><svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="9" x2="9" y2="21"></line></svg> Regression Output</strong></p>
+</div>
+<div class="callout-content">
+<ul>
+<li>Every number in a regression table is a statistic of that sampling distribution</li>
+</ul>
+</div>
+</div>
+</div>
 </section>
-<section id="common-mistakes-2" class="slide level2">
-<h2>Common Mistakes (2)</h2>
-<p>Best linear approximation can be written as:</p>
-<p><span class="math display">\[E^{*}(Y|X) = \beta_1 + \beta_2X\]</span> or just</p>
-<p><span class="math display">\[\beta_1 + \beta_2X\]</span></p>
+<section id="monte-carlo-experiments-1" class="slide level2 section-divider-centered" data-background-color="#0396A6">
+<h2>Monte Carlo Experiments</h2>
+</section>
+<section id="an-estimator-is-a-random-variable" class="slide level2">
+<h2>An estimator is a random variable</h2>
+<p>In practice we observe <strong>one</strong> sample and compute <strong>one</strong> estimate:</p>
+<div class="eq-box-wrap">
+<div class="eq-box">
+<p><span class="math display">\[\hat{\beta} = (X'X)^{-1}X'y\]</span></p>
+</div>
+</div>
+<p>But the sample is random: a <strong>different sample</strong> from the same population gives a <strong>different</strong> <span class="math inline">\(\hat\beta\)</span>.</p>
+
+<img data-src="TA3_files/figure-revealjs/cell-3-output-1.png" class="r-stretch"></section>
+<section id="the-sampling-distribution" class="slide level2">
+<h2>The sampling distribution</h2>
+<p>The <strong>sampling distribution</strong> of <span class="math inline">\(\hat\beta\)</span> is its distribution across <strong>all possible samples</strong> of size <span class="math inline">\(n\)</span> drawn from the same DGP. It tells us two things:</p>
+<ul>
+<li><strong>Centre</strong>: is <span class="math inline">\(\hat\beta\)</span> <strong>unbiased</strong>, <span class="math inline">\(\;E(\hat\beta) = \beta\)</span>?</li>
+<li><strong>Spread</strong>: how <strong>precise</strong> is it, <span class="math inline">\(\;Var(\hat\beta)\)</span>?</li>
+</ul>
+<p><span style="color:#F28627; font-weight:600;">The problem:</span> we never <em>see</em> it. With real data we have a single sample, and the true <span class="math inline">\(\beta\)</span> is unknown.</p>
+<div title="The Monte Carlo idea">
+<div class="callout callout-tip no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>The Monte Carlo idea</strong></p>
+</div>
+<div class="callout-content">
+<p>Play the role of <em>nature</em>: <strong>choose</strong> the DGP (so we know the true <span class="math inline">\(\beta\)</span>), draw many samples from it on the computer, and look at the estimates.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="seeing-it-the-sample-mean" class="slide level2">
+<h2>Seeing it: the sample mean</h2>
+<div id="mc-widget" class="columns" style="align-items:flex-start;">
+<div class="column" style="width:36%;">
+<div class="widget-controls">
+  <div class="widget-step">1 · Population</div>
+  <p>Choose a probability distribution: the population (DGP) we sample from.</p>
+  <select id="mc-dist">
+    <option value="uniform">Uniform</option>
+    <option value="normal" selected="">Normal</option>
+    <option value="studentt">Student T</option>
+    <option value="chisquare">Chi Squared</option>
+    <option value="exponential">Exponential</option>
+    <option value="centralF">Fisher–Snedecor</option>
+  </select>
+  <div class="widget-step">2 · One sample</div>
+  <p>Choose a sample size \(n\) and sample once.</p>
+  <div class="slider-row">
+    <label for="mc-n">\(n\) = <span id="mc-n-value">10</span></label>
+    <input id="mc-n" type="range" min="0" max="10" step="1" value="2" data-values="3,5,10,20,30,50,100,200,300,500,1000">
+  </div>
+  <div class="btn-row"><button class="widget-btn primary" id="mc-sample">Sample</button></div>
+  <div class="widget-step">3 · Repeat the experiment</div>
+  <p>Draw new samples from the population and average each one.</p>
+  <!-- Bootstrap mode: hidden today, remove style="display:none" to show it (next session) -->
+  <div class="mc-mode" style="display:none">
+    <button class="widget-btn" data-mode="montecarlo">Monte Carlo</button>
+    <button class="widget-btn" data-mode="bootstrap">Bootstrap</button>
+  </div>
+  <div class="btn-row">
+    <button class="widget-btn" id="mc-resample">New sample</button>
+    <button class="widget-btn" id="mc-resample-100">100 new samples</button>
+  </div>
+  <div class="widget-credit">Adapted from <a href="https://seeing-theory.brown.edu/frequentist-inference/index.html#section3" target="_blank">Seeing Theory</a> (D. Kunin et al., Brown University).</div>
+</div>
+</div><div class="column" style="width:64%;">
+<div id="mc-svg" style="height:500px;"></div>
+<div class="widget-stats" id="mc-stats">&nbsp;</div>
+</div></div>
+</section>
+
+<section id="what-does-the-monte-carlo-experiment-show" class="slide level2">
+<h2>What does the Monte Carlo experiment show?</h2>
+<p><strong>The steps we just followed</strong></p>
+<div class="mc-steps-list">
+<div class="mc-step-row"><span class="mc-num">1</span><span>Fix a <b>population</b> we know (here: its mean \(\mu\))</span></div>
+<div class="mc-step-row"><span class="mc-num">2</span><span>Draw a random <b>sample</b> of size \(n\)</span></div>
+<div class="mc-step-row"><span class="mc-num">3</span><span>Compute the <b>statistic</b>: \(\bar x\)</span></div>
+<div class="mc-step-row"><span class="mc-num">4</span><span><b>Repeat</b> steps 2–3 many times</span></div>
+<div class="mc-step-row"><span class="mc-num">5</span><span>Plot the <b>histogram</b> of all the \(\bar x\)'s</span></div>
+</div>
+<div title="What we see">
+<div class="callout callout-note no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>What we see</strong></p>
+</div>
+<div class="callout-content">
+<p>The histogram approximates the <strong>sampling distribution</strong> of <span class="math inline">\(\bar x\)</span>:</p>
+<ul>
+<li><strong>Centre</strong> at <span class="math inline">\(\mu\)</span>: <span class="math inline">\(\bar x\)</span> is unbiased</li>
+<li><strong>Spread</strong> shrinks with <span class="math inline">\(n\)</span>: <span class="math inline">\(sd(\bar x) = \sigma/\sqrt{n}\)</span></li>
+<li><strong>Shape</strong> close to normal for large <span class="math inline">\(n\)</span>, even if the population is skewed (CLT)</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="monte-carlo-for-an-estimator" class="slide level2">
+<h2>Monte Carlo for an estimator</h2>
+<p>Same experiment, but the population is a regression DGP and, instead of <span class="math inline">\(\bar{x}\)</span>, each sample gives us the OLS estimate <span class="math inline">\(\hat{\beta_2}\)</span></p>
+
+<img data-src="TA3_files/figure-revealjs/cell-4-output-1.png" class="r-stretch"><div class="mc-steps">
+<div class="mc-step"><span class="mc-num">1</span><div><b>Specify a DGP</b><br>parameters, regressors, errors</div></div>
+<div class="mc-step"><span class="mc-num">2</span><div><b>Generate</b><br>one sample of size \(n\)</div></div>
+<div class="mc-step"><span class="mc-num">3</span><div><b>Estimate</b><br>\(\hat\beta_2\) by OLS, store it</div></div>
+<div class="mc-step"><span class="mc-num">4</span><div><b>Repeat</b><br>steps 2–3, \(R = 10{,}000\) times</div></div>
+<div class="mc-step"><span class="mc-num">5</span><div><b>Summarise</b><br>histogram / KDE: centre, spread, shape</div></div>
+</div>
+</section>
+<section id="data-generating-process-dgp" class="slide level2">
+<h2>Data-Generating Process (DGP)</h2>
+<p>We generate <span class="math inline">\(R = 10{,}000\)</span> samples of size <span class="math inline">\(n = 100\)</span> from:</p>
+<div class="eq-box-wrap">
+<div class="eq-box">
+<p><span class="math display">\[
+y_i = 4 + 2\,x_{i2} + 2\,x_{i3} + \varepsilon_i, \qquad \varepsilon_i \mid X \overset{iid}{\sim} N(0,\ \sigma_\varepsilon^2)
+\]</span></p>
+<p><span class="math display">\[
+x_{i2} \sim U[0, 40], \qquad x_{i3} = x_{i2} + v_i, \quad v_i \sim N(0,\ \sigma_v^2)
+\]</span></p>
+</div>
+</div>
+<ul>
+<li>Baseline values: <span class="math inline">\(\;\sigma_\varepsilon = 32,\;\; \sigma_v = 16\)</span></li>
+<li>True parameter of interest: <span class="math inline">\(\beta_2 = 2\)</span></li>
+<li><span class="math inline">\(x_{i3}\)</span> is <strong>correlated</strong> with <span class="math inline">\(x_{i2}\)</span> through <span class="math inline">\(v_i\)</span></li>
+</ul>
+<div title="Question">
+<div class="callout callout-warning no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Question</strong></p>
+</div>
+<div class="callout-content">
+<p>Under this DGP, is <span class="math inline">\(\hat\beta_2\)</span> unbiased? What should the histogram be centred at?</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="monte-carlo-in-code" class="slide level2">
+<h2>Monte Carlo in code</h2>
+<div id="8b7d65ab" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb1" data-code-line-numbers="1-3|5-9|10-12|13"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href=""></a><span class="kw">def</span> simulate_betas(n<span class="op">=</span><span class="dv">100</span>, sigma_eps<span class="op">=</span><span class="dv">32</span>, sigma_v<span class="op">=</span><span class="dv">16</span>, x2_max<span class="op">=</span><span class="dv">40</span>, reps<span class="op">=</span><span class="dv">10_000</span>, seed<span class="op">=</span><span class="dv">42</span>):</span>
+<span id="cb1-2"><a href=""></a>    rng <span class="op">=</span> np.random.default_rng(seed)</span>
+<span id="cb1-3"><a href=""></a>    betas <span class="op">=</span> np.empty(reps)</span>
+<span id="cb1-4"><a href=""></a>    <span class="cf">for</span> r <span class="kw">in</span> <span class="bu">range</span>(reps):</span>
+<span id="cb1-5"><a href=""></a>        <span class="co"># 2. generate one sample from the DGP</span></span>
+<span id="cb1-6"><a href=""></a>        x2 <span class="op">=</span> rng.uniform(<span class="dv">0</span>, x2_max, n)</span>
+<span id="cb1-7"><a href=""></a>        x3 <span class="op">=</span> x2 <span class="op">+</span> rng.normal(<span class="dv">0</span>, sigma_v, n)</span>
+<span id="cb1-8"><a href=""></a>        eps <span class="op">=</span> rng.normal(<span class="dv">0</span>, sigma_eps, n)</span>
+<span id="cb1-9"><a href=""></a>        y <span class="op">=</span> <span class="dv">4</span> <span class="op">+</span> <span class="dv">2</span> <span class="op">*</span> x2 <span class="op">+</span> <span class="dv">2</span> <span class="op">*</span> x3 <span class="op">+</span> eps</span>
+<span id="cb1-10"><a href=""></a>        <span class="co"># 3. estimate by OLS, (X'X)^{-1} X'y, and keep beta_2</span></span>
+<span id="cb1-11"><a href=""></a>        X <span class="op">=</span> np.column_stack([np.ones(n), x2, x3])</span>
+<span id="cb1-12"><a href=""></a>        betas[r] <span class="op">=</span> np.linalg.solve(X.T <span class="op">@</span> X, X.T <span class="op">@</span> y)[<span class="dv">1</span>]</span>
+<span id="cb1-13"><a href=""></a>    <span class="cf">return</span> betas</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div title="Note">
+<div class="callout callout-note no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p><code>sm.OLS(y, X).fit()</code> gives the same <span class="math inline">\(\hat\beta\)</span>, but solving <span class="math inline">\((X'X)\hat\beta = X'y\)</span> directly is much faster inside a 10,000-iteration loop.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="summarising-the-10000-estimates" class="slide level2">
+<h2>Summarising the 10,000 estimates</h2>
+<div class="panel-tabset">
+<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">Code</a></li><li><a href="#tabset-1-2">Output</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1">
+<div id="248415b6" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href=""></a>betas_base <span class="op">=</span> simulate_betas()</span>
+<span id="cb2-2"><a href=""></a></span>
+<span id="cb2-3"><a href=""></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="fl">4.2</span>))</span>
+<span id="cb2-4"><a href=""></a>sns.histplot(betas_base, bins<span class="op">=</span><span class="dv">50</span>, stat<span class="op">=</span><span class="st">"density"</span>, color<span class="op">=</span>bse_style.TEAL, alpha<span class="op">=</span><span class="fl">0.5</span>, ax<span class="op">=</span>ax)</span>
+<span id="cb2-5"><a href=""></a>sns.kdeplot(betas_base, color<span class="op">=</span>bse_style.PURPLE, linewidth<span class="op">=</span><span class="fl">2.5</span>, ax<span class="op">=</span>ax)</span>
+<span id="cb2-6"><a href=""></a>ax.axvline(<span class="dv">2</span>, color<span class="op">=</span><span class="st">"black"</span>, ls<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="vs">r"True </span><span class="dv">$\b</span><span class="vs">eta_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb2-7"><a href=""></a>plt.show()</span>
+<span id="cb2-8"><a href=""></a></span>
+<span id="cb2-9"><a href=""></a><span class="bu">print</span>(<span class="ss">f"mean = </span><span class="sc">{</span>betas_base<span class="sc">.</span>mean()<span class="sc">:.4f}</span><span class="ss">,  sd = </span><span class="sc">{</span>betas_base<span class="sc">.</span>std()<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-1-2">
+<div id="f257805b" class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div>
+<figure>
+<p><img data-src="TA3_files/figure-revealjs/cell-7-output-1.png"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>mean = 2.0056,  sd = 0.3477</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="reading-the-histogram" class="slide level2">
+<h2>Reading the histogram</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div id="fa12afd3" class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display">
+<div>
+<figure>
+<p><img data-src="TA3_files/figure-revealjs/cell-8-output-1.png"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<ul>
+<li><strong>Centre</strong>: the mean of the 10,000 estimates is ≈ 2, so <span class="math inline">\(\hat\beta_2\)</span> is <strong>unbiased</strong></li>
+<li><strong>Spread</strong>: the sd of the 10,000 estimates ≈ 0.35 tells us how much <span class="math inline">\(\hat\beta_2\)</span> moves from sample to sample</li>
+<li><strong>Shape</strong>: bell-shaped, as expected with normal errors</li>
+</ul>
+</div></div>
+<div title="Exercise">
+<div class="callout callout-warning no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Exercise</strong></p>
+</div>
+<div class="callout-content">
+<p>What fraction of the 10,000 estimates lies within <span class="math inline">\(\beta_2 \pm 1.96 \cdot sd\)</span>? Compute it with <code>np.mean(np.abs(betas_base - 2) &lt; 1.96 * betas_base.std())</code>.</p>
+<p>Why is it close to <strong>95%</strong>? This is the logic behind <strong>confidence intervals</strong> and <strong><span class="math inline">\(t\)</span>-tests</strong>: we will use it in the coming sessions.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="standard-deviation-vs.-standard-error" class="slide level2">
+<h2>Standard deviation vs.&nbsp;standard error</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div title="Standard deviation of the estimator">
+<div class="callout callout-note no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Standard deviation of the estimator</strong></p>
+</div>
+<div class="callout-content">
+<p><span class="math display">\[sd(\hat\beta_2 \mid X) = \sqrt{\sigma^2_\varepsilon\,\big[(X'X)^{-1}\big]_{22}}\]</span></p>
+<p>A <strong>population</strong> quantity: depends on the unknown <span class="math inline">\(\sigma^2_\varepsilon\)</span>. With a Monte Carlo we can approximate it by the sd of the 10,000 estimates.</p>
+</div>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<div title="Standard error">
+<div class="callout callout-tip no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Standard error</strong></p>
+</div>
+<div class="callout-content">
+<p><span class="math display">\[se(\hat\beta_2) = \sqrt{\hat\sigma^2\,\big[(X'X)^{-1}\big]_{22}}, \quad \hat\sigma^2 = \tfrac{SSE}{n-K}\]</span></p>
+<p>An <strong>estimate</strong> of that sd, computed from <strong>one sample</strong>: it is what the regression output reports in the <code>std err</code> column.</p>
+</div>
+</div>
+</div>
+</div>
+</div></div>
+<div id="490a4f93" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href=""></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb4-2"><a href=""></a></span>
+<span id="cb4-3"><a href=""></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">1</span>)                       <span class="co"># ONE sample from the same DGP</span></span>
+<span id="cb4-4"><a href=""></a>x2 <span class="op">=</span> rng.uniform(<span class="dv">0</span>, <span class="dv">40</span>, <span class="dv">100</span>)<span class="op">;</span> x3 <span class="op">=</span> x2 <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">16</span>, <span class="dv">100</span>)</span>
+<span id="cb4-5"><a href=""></a>y <span class="op">=</span> <span class="dv">4</span> <span class="op">+</span> <span class="dv">2</span> <span class="op">*</span> x2 <span class="op">+</span> <span class="dv">2</span> <span class="op">*</span> x3 <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">32</span>, <span class="dv">100</span>)</span>
+<span id="cb4-6"><a href=""></a>one_sample <span class="op">=</span> sm.OLS(y, sm.add_constant(np.column_stack([x2, x3]))).fit()</span>
+<span id="cb4-7"><a href=""></a></span>
+<span id="cb4-8"><a href=""></a><span class="bu">print</span>(<span class="ss">f"Monte Carlo sd of beta_2_hat (10,000 samples): </span><span class="sc">{</span>betas_base<span class="sc">.</span>std()<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb4-9"><a href=""></a><span class="bu">print</span>(<span class="ss">f"Standard error from one sample:                </span><span class="sc">{</span>one_sample<span class="sc">.</span>bse[<span class="dv">1</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Monte Carlo sd of beta_2_hat (10,000 samples): 0.348
+Standard error from one sample:                0.322</code></pre>
+</div>
+</div>
+</section>
+<section id="changing-the-dgp-1" class="slide level2 section-divider-centered" data-background-color="#0396A6">
+<h2>Changing the DGP</h2>
+</section>
+<section id="what-drives-the-spread-of-hatbeta_2" class="slide level2">
+<h2>What drives the spread of <span class="math inline">\(\hat\beta_2\)</span>?</h2>
+<p>Under homoskedasticity, the variance of the OLS estimator (conditional on <span class="math inline">\(X\)</span>) is</p>
+<div class="eq-box-wrap">
+<div class="eq-box">
+<p><span class="math display">\[
+Var(\hat\beta_2 \mid X) = \sigma_\varepsilon^2\,\big[(X'X)^{-1}\big]_{22}
+= \frac{\sigma_\varepsilon^2}{\displaystyle\sum_{i=1}^n (x_{i2}-\bar x_2)^2\,\big(1 - R_2^2\big)}
+\]</span></p>
+</div>
+</div>
+<p>where <span class="math inline">\(R_2^2\)</span> is the <span class="math inline">\(R^2\)</span> of regressing <span class="math inline">\(x_2\)</span> on the other regressors (<span class="math inline">\(x_3\)</span> and a constant).</p>
 <table class="caption-top">
 <colgroup>
-<col style="width: 52%">
-<col style="width: 47%">
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
 </colgroup>
 <thead>
 <tr class="header">
-<th>❌ Wrong</th>
-<th>🚫 Why</th>
+<th>Element of the DGP</th>
+<th>Effect on <span class="math inline">\(\sum (x_{i2}-\bar x_2)^2 (1-R_2^2)\)</span></th>
+<th>Distribution of <span class="math inline">\(\hat\beta_2\)</span></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\(E(Y|X) \approx \beta_1 + \beta_2X\)</span></td>
-<td>Suggests population expectation equals linear approximation</td>
+<td>↑ noise <span class="math inline">\(\sigma_\varepsilon\)</span></td>
+<td>(numerator ↑)</td>
+<td>more <strong>dispersed</strong></td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(Y = \beta_1 + \beta_2X + u\)</span></td>
-<td>Treats the model as exact, not an approximation</td>
+<td>↑ sample size <span class="math inline">\(n\)</span></td>
+<td>↑ more terms in the sum</td>
+<td>more <strong>concentrated</strong></td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(\hat{Y} = \beta_1 + \beta_2X\)</span></td>
-<td>Mixes estimator notation with population relation</td>
+<td>↑ spread of <span class="math inline">\(x_2\)</span> (<span class="math inline">\(U[0, a]\)</span>, larger <span class="math inline">\(a\)</span>)</td>
+<td>↑</td>
+<td>more <strong>concentrated</strong></td>
+</tr>
+<tr class="even">
+<td>↓ <span class="math inline">\(\sigma_v\)</span> (more <strong>collinearity</strong>)</td>
+<td><span class="math inline">\(R_2^2 \uparrow\)</span>, so ↓</td>
+<td>more <strong>dispersed</strong></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="common-mistakes-3" class="slide level2">
-<h2>Common Mistakes (3)</h2>
-<p>When deriving <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span> from the OLS minimization problem, we are deriving the <strong>population parameters</strong>.</p>
-<ul>
-<li>Step 1:</li>
-</ul>
-<p><span class="math display">\[\frac{\partial(.)}{\partial b_1}: \sum_{i=1}^{n} (y_i - b_1 - b_2x_i)\]</span></p>
-<ul>
-<li>Step 2: once I set to 0, the solution is <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span>:</li>
-</ul>
-<p><span class="math display">\[\frac{\partial(.) }{\partial b_1}: \sum_{i=1}^{n} (y_i - \beta_1 - \beta_2x_i)=0\]</span></p>
+<section id="more-noise-sigma_varepsilon" class="slide level2">
+<h2>1. More noise: <span class="math inline">\(\sigma_\varepsilon\)</span></h2>
+<div class="panel-tabset">
+<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">Code</a></li><li><a href="#tabset-2-2">Output</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1">
+<div id="764bb13a" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href=""></a>results <span class="op">=</span> {</span>
+<span id="cb6-2"><a href=""></a>    <span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_</span><span class="ch">\v</span><span class="vs">arepsilon = 16</span><span class="dv">$</span><span class="vs">"</span>: simulate_betas(sigma_eps<span class="op">=</span><span class="dv">16</span>),</span>
+<span id="cb6-3"><a href=""></a>    <span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_</span><span class="ch">\v</span><span class="vs">arepsilon = 32</span><span class="dv">$</span><span class="vs">"</span>: betas_base,</span>
+<span id="cb6-4"><a href=""></a>    <span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_</span><span class="ch">\v</span><span class="vs">arepsilon = 64</span><span class="dv">$</span><span class="vs">"</span>: simulate_betas(sigma_eps<span class="op">=</span><span class="dv">64</span>),</span>
+<span id="cb6-5"><a href=""></a>}</span>
+<span id="cb6-6"><a href=""></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="fl">4.2</span>))</span>
+<span id="cb6-7"><a href=""></a><span class="cf">for</span> label, betas <span class="kw">in</span> results.items():</span>
+<span id="cb6-8"><a href=""></a>    sns.kdeplot(betas, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.35</span>, label<span class="op">=</span>label, ax<span class="op">=</span>ax)</span>
+<span id="cb6-9"><a href=""></a>ax.axvline(<span class="dv">2</span>, color<span class="op">=</span><span class="st">"black"</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb6-10"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-2-2">
+<div id="c2e9e671" class="cell" data-execution_count="10">
+<div class="cell-output cell-output-display">
+<div>
+<figure>
+<p><img data-src="TA3_files/figure-revealjs/cell-11-output-1.png"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div title="Question">
+<div class="callout callout-warning no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Question</strong></p>
+</div>
+<div class="callout-content">
+<p>Doubling <span class="math inline">\(\sigma_\varepsilon\)</span>: by how much does the sd of <span class="math inline">\(\hat\beta_2\)</span> change? Does the centre move?</p>
+</div>
+</div>
+</div>
+</div>
 </section>
-<section class="slide level2">
-
-<p>End of Review of A1…</p>
-<p>you are doing great, keep it up! 😊</p>
+<section id="more-data-n" class="slide level2">
+<h2>2. More data: <span class="math inline">\(n\)</span></h2>
+<div class="panel-tabset">
+<ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-3-1">Code</a></li><li><a href="#tabset-3-2">Output</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1">
+<div id="e6fbad22" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href=""></a>results <span class="op">=</span> {</span>
+<span id="cb7-2"><a href=""></a>    <span class="vs">r"</span><span class="dv">$</span><span class="vs">n = 25</span><span class="dv">$</span><span class="vs">"</span>: simulate_betas(n<span class="op">=</span><span class="dv">25</span>),</span>
+<span id="cb7-3"><a href=""></a>    <span class="vs">r"</span><span class="dv">$</span><span class="vs">n = 100</span><span class="dv">$</span><span class="vs">"</span>: betas_base,</span>
+<span id="cb7-4"><a href=""></a>    <span class="vs">r"</span><span class="dv">$</span><span class="vs">n = 400</span><span class="dv">$</span><span class="vs">"</span>: simulate_betas(n<span class="op">=</span><span class="dv">400</span>),</span>
+<span id="cb7-5"><a href=""></a>}</span>
+<span id="cb7-6"><a href=""></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="fl">4.2</span>))</span>
+<span id="cb7-7"><a href=""></a><span class="cf">for</span> label, betas <span class="kw">in</span> results.items():</span>
+<span id="cb7-8"><a href=""></a>    sns.kdeplot(betas, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.35</span>, label<span class="op">=</span>label, ax<span class="op">=</span>ax)</span>
+<span id="cb7-9"><a href=""></a>ax.axvline(<span class="dv">2</span>, color<span class="op">=</span><span class="st">"black"</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb7-10"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-3-2">
+<div id="918d05e0" class="cell" data-execution_count="12">
+<div class="cell-output cell-output-display">
+<div>
+<figure>
+<p><img data-src="TA3_files/figure-revealjs/cell-13-output-1.png"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div title="Question">
+<div class="callout callout-warning no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Question</strong></p>
+</div>
+<div class="callout-content">
+<p>Multiplying <span class="math inline">\(n\)</span> by 4 divides the sd of <span class="math inline">\(\hat\beta_2\)</span> by …? (Hint: <span class="math inline">\(sd \propto 1/\sqrt{n}\)</span>.)</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="more-collinearity-sigma_v" class="slide level2">
+<h2>3. More collinearity: <span class="math inline">\(\sigma_v\)</span></h2>
+<p>Recall <span class="math inline">\(x_{i3} = x_{i2} + v_i\)</span>: a <strong>smaller</strong> <span class="math inline">\(\sigma_v\)</span> makes <span class="math inline">\(x_3\)</span> almost a copy of <span class="math inline">\(x_2\)</span>.</p>
+<div class="panel-tabset">
+<ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-4-1">Code</a></li><li><a href="#tabset-4-2">Output</a></li></ul>
+<div class="tab-content">
+<div id="tabset-4-1">
+<div id="bc5e841c" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href=""></a>results <span class="op">=</span> {</span>
+<span id="cb8-2"><a href=""></a>    <span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_v = 32</span><span class="dv">$</span><span class="vs"> </span><span class="kw">(</span><span class="vs">low collinearity</span><span class="kw">)</span><span class="vs">"</span>: simulate_betas(sigma_v<span class="op">=</span><span class="dv">32</span>),</span>
+<span id="cb8-3"><a href=""></a>    <span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_v = 16</span><span class="dv">$</span><span class="vs">"</span>: betas_base,</span>
+<span id="cb8-4"><a href=""></a>    <span class="vs">r"</span><span class="dv">$\s</span><span class="vs">igma_v = 4</span><span class="dv">$</span><span class="vs"> </span><span class="kw">(</span><span class="vs">high collinearity</span><span class="kw">)</span><span class="vs">"</span>: simulate_betas(sigma_v<span class="op">=</span><span class="dv">4</span>),</span>
+<span id="cb8-5"><a href=""></a>}</span>
+<span id="cb8-6"><a href=""></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="fl">3.8</span>))</span>
+<span id="cb8-7"><a href=""></a><span class="cf">for</span> label, betas <span class="kw">in</span> results.items():</span>
+<span id="cb8-8"><a href=""></a>    sns.kdeplot(betas, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.35</span>, label<span class="op">=</span>label, ax<span class="op">=</span>ax)</span>
+<span id="cb8-9"><a href=""></a>ax.axvline(<span class="dv">2</span>, color<span class="op">=</span><span class="st">"black"</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb8-10"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-4-2">
+<div id="131c49e5" class="cell" data-execution_count="14">
+<div class="cell-output cell-output-display">
+<div>
+<figure>
+<p><img data-src="TA3_files/figure-revealjs/cell-15-output-1.png"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div title="Note">
+<div class="callout callout-note no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>Collinearity does <strong>not</strong> bias <span class="math inline">\(\hat\beta_2\)</span>: it only makes it imprecise, since there is little independent variation in <span class="math inline">\(x_2\)</span> left to learn from.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="your-turn-play-with-the-dgp" class="slide level2">
+<h2>Your turn: play with the DGP</h2>
+<div id="dgp-widget" class="columns" style="align-items:flex-start;">
+<div class="column" style="width:36%;">
+<div class="widget-controls">
+  <p>\(y_i = 4 + 2x_{i2} + 2x_{i3} + \varepsilon_i\), &nbsp; \(x_{i2}\sim U[0,a]\), &nbsp; \(x_{i3}=x_{i2}+v_i\)</p>
+  <p>Each change re-runs <b>2,000</b> Monte Carlo replications.</p>
+  <div class="slider-row">
+    <label for="dgp-n">\(n\) = <span id="dgp-n-value">100</span></label>
+    <input id="dgp-n" type="range" min="10" max="500" step="10" value="100">
+  </div>
+  <div class="slider-row">
+    <label for="dgp-seps">\(\sigma_\varepsilon\) = <span id="dgp-seps-value">32</span></label>
+    <input id="dgp-seps" type="range" min="2" max="80" step="2" value="32">
+  </div>
+  <div class="slider-row">
+    <label for="dgp-sv">\(\sigma_v\) = <span id="dgp-sv-value">16</span></label>
+    <input id="dgp-sv" type="range" min="1" max="50" step="1" value="16">
+  </div>
+  <div class="slider-row">
+    <label for="dgp-a">\(a\) = <span id="dgp-a-value">40</span></label>
+    <input id="dgp-a" type="range" min="5" max="100" step="5" value="40">
+  </div>
+  <div class="btn-row">
+    <button class="widget-btn secondary" id="dgp-keep">Keep as reference</button>
+    <button class="widget-btn" id="dgp-rerun">Re-run</button>
+    <button class="widget-btn" id="dgp-reset">Reset</button>
+  </div>
+  <p style="font-size:0.85em;">Click <b>Keep as reference</b>, then move one slider: the <span style="color:#F28627;font-weight:600;">orange outline</span> keeps the old distribution.</p>
+</div>
+</div><div class="column" style="width:64%;">
+<div id="dgp-svg" style="height:430px;"></div>
+<div class="widget-stats" id="dgp-stats">&nbsp;</div>
+</div></div>
+</section>
+<section id="summary-concentrate-or-disperse" class="slide level2">
+<h2>Summary: concentrate or disperse?</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Change in the DGP</th>
+<th>Centre</th>
+<th>Spread</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\sigma_\varepsilon\)</span> ↑</td>
+<td><span class="math inline">\(\beta_2\)</span></td>
+<td>↑ dispersed</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(n\)</span> ↑</td>
+<td><span class="math inline">\(\beta_2\)</span></td>
+<td>↓ concentrated</td>
+</tr>
+<tr class="odd">
+<td>range of <span class="math inline">\(x_2\)</span> ↑</td>
+<td><span class="math inline">\(\beta_2\)</span></td>
+<td>↓ concentrated</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\sigma_v\)</span> ↓ (collinearity ↑)</td>
+<td><span class="math inline">\(\beta_2\)</span></td>
+<td>↑ dispersed</td>
+</tr>
+</tbody>
+</table>
+<div title="Take-away">
+<div class="callout callout-tip no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Take-away</strong></p>
+</div>
+<div class="callout-content">
+<p>None of these changes moves the <strong>centre</strong>: as long as <span class="math inline">\(E(\varepsilon \mid X) = 0\)</span>, OLS is unbiased.</p>
+<p>They only change the <strong>precision</strong>, which is exactly what the <em>standard error</em> measures in a regression output.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="a-full-regression-output" class="slide level2 section-divider-centered" data-background-color="#0396A6">
+<h2>A full regression output</h2>
+</section>
+<section id="wooldridge-datasets" class="slide level2">
+<h2>Wooldridge datasets</h2>
+<p>The textbook by <strong>Wooldridge</strong> comes with <strong>100+ real datasets</strong>: wages, education, crime, housing, health, macro time series… All of them are available in Python through the <code>wooldridge</code> package (<code>description=True</code> prints the variables and the source):</p>
+<div class="browser-mockup">
+<div class="browser-mockup-bar">
+<span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="browser-mockup-url">fmwww.bc.edu/ec-p/data/wooldridge/datasets.list.html</span>
+</div>
+<div class="browser-mockup-body">
+<a href="http://fmwww.bc.edu/ec-p/data/wooldridge/datasets.list.html" target="_blank"><img src="imgs/wooldridge-datasets-full.png"></a>
+</div>
+</div>
 </section>
 <section id="birthweight-data" class="slide level2">
 <h2>Birthweight Data</h2>
-<p>The <code>bwght</code> dataset contains information on 1,388 births in the United States.</p>
-<p>It was collected to study the determinants of infant birth weight, particularly the effects of maternal smoking and socioeconomic factors during pregnancy.</p>
-<div id="24c81024" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href=""></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-2"><a href=""></a><span class="im">import</span> wooldridge <span class="im">as</span> woo</span>
-<span id="cb1-3"><a href=""></a>df <span class="op">=</span> woo.data(<span class="st">'bwght'</span>)</span>
-<span id="cb1-4"><a href=""></a>df <span class="op">=</span> df.dropna()</span>
-<span id="cb1-5"><a href=""></a>df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="13">
+<p>The <code>bwght</code> dataset (Wooldridge) contains information on births in the United States, used to study the determinants of birth weight, in particular maternal smoking during pregnancy.</p>
+<div id="c493e242" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href=""></a><span class="im">import</span> wooldridge <span class="im">as</span> woo</span>
+<span id="cb9-2"><a href=""></a></span>
+<span id="cb9-3"><a href=""></a>df <span class="op">=</span> woo.dataWoo(<span class="st">"bwght"</span>).dropna()</span>
+<span id="cb9-4"><a href=""></a>df[[<span class="st">"bwght"</span>, <span class="st">"cigs"</span>, <span class="st">"parity"</span>, <span class="st">"faminc"</span>, <span class="st">"motheduc"</span>, <span class="st">"fatheduc"</span>]].head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="43">
 <div>
 <style scoped="">
     .dataframe tbody tr th:only-of-type {
@@ -349,107 +878,59 @@ Lucia Sauer
 <thead>
 <tr class="header" style="text-align: right;">
 <th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">faminc</th>
-<th data-quarto-table-cell-role="th">cigtax</th>
-<th data-quarto-table-cell-role="th">cigprice</th>
 <th data-quarto-table-cell-role="th">bwght</th>
-<th data-quarto-table-cell-role="th">fatheduc</th>
-<th data-quarto-table-cell-role="th">motheduc</th>
-<th data-quarto-table-cell-role="th">parity</th>
-<th data-quarto-table-cell-role="th">male</th>
-<th data-quarto-table-cell-role="th">white</th>
 <th data-quarto-table-cell-role="th">cigs</th>
-<th data-quarto-table-cell-role="th">lbwght</th>
-<th data-quarto-table-cell-role="th">bwghtlbs</th>
-<th data-quarto-table-cell-role="th">packs</th>
-<th data-quarto-table-cell-role="th">lfaminc</th>
+<th data-quarto-table-cell-role="th">parity</th>
+<th data-quarto-table-cell-role="th">faminc</th>
+<th data-quarto-table-cell-role="th">motheduc</th>
+<th data-quarto-table-cell-role="th">fatheduc</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">0</td>
-<td>13.5</td>
-<td>16.5</td>
-<td>122.300003</td>
 <td>109</td>
-<td>12.0</td>
-<td>12.0</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
 <td>0</td>
-<td>4.691348</td>
-<td>6.8125</td>
-<td>0.0</td>
-<td>2.602690</td>
+<td>1</td>
+<td>13.5</td>
+<td>12.0</td>
+<td>12.0</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">1</td>
-<td>7.5</td>
-<td>16.5</td>
-<td>122.300003</td>
 <td>133</td>
-<td>6.0</td>
-<td>12.0</td>
+<td>0</td>
 <td>2</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>4.890349</td>
-<td>8.3125</td>
-<td>0.0</td>
-<td>2.014903</td>
+<td>7.5</td>
+<td>12.0</td>
+<td>6.0</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">3</td>
-<td>15.5</td>
-<td>16.5</td>
-<td>122.300003</td>
 <td>126</td>
-<td>12.0</td>
-<td>12.0</td>
+<td>0</td>
 <td>2</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>4.836282</td>
-<td>7.8750</td>
-<td>0.0</td>
-<td>2.740840</td>
+<td>15.5</td>
+<td>12.0</td>
+<td>12.0</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">4</td>
-<td>27.5</td>
-<td>16.5</td>
-<td>122.300003</td>
 <td>134</td>
-<td>14.0</td>
-<td>12.0</td>
-<td>2</td>
-<td>1</td>
-<td>1</td>
 <td>0</td>
-<td>4.897840</td>
-<td>8.3750</td>
-<td>0.0</td>
-<td>3.314186</td>
+<td>2</td>
+<td>27.5</td>
+<td>12.0</td>
+<td>14.0</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">5</td>
-<td>7.5</td>
-<td>16.5</td>
-<td>122.300003</td>
 <td>118</td>
-<td>12.0</td>
-<td>14.0</td>
+<td>0</td>
 <td>6</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>4.770685</td>
-<td>7.3750</td>
-<td>0.0</td>
-<td>2.014903</td>
+<td>7.5</td>
+<td>14.0</td>
+<td>12.0</td>
 </tr>
 </tbody>
 </table>
@@ -458,53 +939,41 @@ Lucia Sauer
 </div>
 </div>
 </section>
-<section id="regression-analysis" class="slide level2">
-<h2>Regression Analysis</h2>
-<p><span class="math display">\[\texttt{bwght}_i = \beta_1 + \beta_2 \texttt{cigs}_i + \beta_3 \texttt{parity}_i + \beta_4 \texttt{faminc}_i + \beta_5 \texttt{motheduc}_i + \beta_6 \texttt{fatheduc}_i + \epsilon_i\]</span></p>
+<section id="the-model" class="slide level2">
+<h2>The model</h2>
+<p><span class="math display">\[\texttt{bwght}_i = \beta_1 + \beta_2 \texttt{cigs}_i + \beta_3 \texttt{parity}_i + \beta_4 \texttt{faminc}_i + \beta_5 \texttt{motheduc}_i + \beta_6 \texttt{fatheduc}_i + \varepsilon_i\]</span></p>
 <p>where:</p>
 <ul>
-<li><span class="math inline">\(\texttt{bwght}\)</span>: birth weight, in pounds;</li>
-<li><span class="math inline">\(\texttt{cigs}\)</span>: average number of cigarettes the mother smoked per day during pregnancy;</li>
-<li><span class="math inline">\(\texttt{parity}\)</span>: birth order of the child;</li>
-<li><span class="math inline">\(\texttt{faminc}\)</span>: annual family income;</li>
-<li><span class="math inline">\(\texttt{motheduc}\)</span>: years of schooling of the mother;</li>
-<li><span class="math inline">\(\texttt{fatheduc}\)</span>: years of schooling of the father.</li>
+<li><span class="math inline">\(\texttt{bwght}\)</span>: birth weight, in <strong>ounces</strong></li>
+<li><span class="math inline">\(\texttt{cigs}\)</span>: cigarettes smoked per day by the mother while pregnant</li>
+<li><span class="math inline">\(\texttt{parity}\)</span>: birth order of the child</li>
+<li><span class="math inline">\(\texttt{faminc}\)</span>: annual family income, in $1000s</li>
+<li><span class="math inline">\(\texttt{motheduc}\)</span>, <span class="math inline">\(\texttt{fatheduc}\)</span>: years of schooling of the mother and the father</li>
 </ul>
 </section>
-<section id="results-in-python" class="slide level2">
-<h2>Results in Python</h2>
-<div id="11949f05" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href=""></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
-<span id="cb2-2"><a href=""></a></span>
-<span id="cb2-3"><a href=""></a>X <span class="op">=</span> sm.add_constant(df[[<span class="st">'cigs'</span>, <span class="st">'parity'</span>, <span class="st">'faminc'</span>, <span class="st">'motheduc'</span>, <span class="st">'fatheduc'</span>]])</span>
-<span id="cb2-4"><a href=""></a>model <span class="op">=</span> sm.OLS(df[<span class="st">'bwght'</span>], X).fit()</span>
-<span id="cb2-5"><a href=""></a><span class="bu">print</span>(model.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="regression-output-in-python" class="slide level2">
+<h2>Regression output in Python</h2>
+<div id="0e6059fb" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href=""></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb10-2"><a href=""></a></span>
+<span id="cb10-3"><a href=""></a>model <span class="op">=</span> smf.ols(<span class="st">"bwght ~ cigs + parity + faminc + motheduc + fatheduc"</span>, data<span class="op">=</span>df).fit()</span>
+<span id="cb10-4"><a href=""></a><span class="bu">print</span>(model.summary(slim<span class="op">=</span><span class="va">True</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                            OLS Regression Results                            
 ==============================================================================
 Dep. Variable:                  bwght   R-squared:                       0.039
 Model:                            OLS   Adj. R-squared:                  0.035
-Method:                 Least Squares   F-statistic:                     9.553
-Date:                Fri, 10 Oct 2025   Prob (F-statistic):           5.99e-09
-Time:                        11:26:35   Log-Likelihood:                -5242.2
-No. Observations:                1191   AIC:                         1.050e+04
-Df Residuals:                    1185   BIC:                         1.053e+04
-Df Model:                           5                                         
-Covariance Type:            nonrobust                                         
+No. Observations:                1191   F-statistic:                     9.553
+Covariance Type:            nonrobust   Prob (F-statistic):           5.99e-09
 ==============================================================================
                  coef    std err          t      P&gt;|t|      [0.025      0.975]
 ------------------------------------------------------------------------------
-const        114.5243      3.728     30.716      0.000     107.209     121.839
+Intercept    114.5243      3.728     30.716      0.000     107.209     121.839
 cigs          -0.5959      0.110     -5.401      0.000      -0.812      -0.379
 parity         1.7876      0.659      2.711      0.007       0.494       3.081
 faminc         0.0560      0.037      1.533      0.126      -0.016       0.128
 motheduc      -0.3705      0.320     -1.158      0.247      -0.998       0.257
 fatheduc       0.4724      0.283      1.671      0.095      -0.082       1.027
-==============================================================================
-Omnibus:                      120.762   Durbin-Watson:                   1.938
-Prob(Omnibus):                  0.000   Jarque-Bera (JB):              838.114
-Skew:                          -0.119   Prob(JB):                    1.01e-182
-Kurtosis:                       7.103   Cond. No.                         266.
 ==============================================================================
 
 Notes:
@@ -512,156 +981,151 @@ Notes:
 </div>
 </div>
 </section>
-<section id="standard-error-calculation" class="slide level2">
-<h2>Standard Error Calculation</h2>
-<p>How does the <span class="math inline">\(se(\hat{\beta}_2)\)</span> is calculated?</p>
-<p><span class="math display">\[se(\hat{\beta}_2)=\sqrt{\hat{\sigma}^2(\mathbf{X}'\mathbf{X})^{-1}_{22}}\]</span></p>
-<p>where:</p>
-<ul>
-<li><span class="math inline">\(\hat{\sigma}^2 = \frac{1}{n-K} \hat{\epsilon}'\hat{\epsilon}\)</span> is the estimator of the variance of the error term.</li>
-<li><span class="math inline">\((\mathbf{X}'\mathbf{X})^{-1}_{22}\)</span> is the second diagonal element of the inverse of the matrix <span class="math inline">\(\mathbf{X}'\mathbf{X}\)</span>, which captures the variance of <span class="math inline">\(\texttt{cigs}\)</span> conditional on all other regressors.</li>
-</ul>
-</section>
-<section class="slide level2">
-
-<p>To calculate <span class="math inline">\(\hat{\sigma}^2\)</span></p>
-<div id="dcbbf25a" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href=""></a>sse <span class="op">=</span> model.ssr </span>
-<span id="cb4-2"><a href=""></a>sse</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="15">
-<pre><code>np.float64(464041.13513001957)</code></pre>
-</div>
-</div>
-<p><span class="math display">\[\frac{SSE}{n-K} = \frac{464041.14}{1191-6} \]</span></p>
-<p>To calculate <span class="math inline">\((\mathbf{X}'\mathbf{X})^{-1}_{22}\)</span>:</p>
-<div id="c29ef33d" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href=""></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb6-2"><a href=""></a>XtX <span class="op">=</span> np.dot(X.T, X)</span>
-<span id="cb6-3"><a href=""></a>XtX_inv <span class="op">=</span> np.linalg.inv(XtX)</span>
-<span id="cb6-4"><a href=""></a><span class="bu">round</span>(XtX_inv[<span class="dv">1</span>,<span class="dv">1</span>],<span class="dv">4</span>) <span class="co"># This is (X'X)^{-1}_{22}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="16">
-<pre><code>np.float64(0.0)</code></pre>
-</div>
-</div>
-<p>Now let’s calculate the standard error:</p>
-<div id="df4fb6a1" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href=""></a>n_k <span class="op">=</span> model.df_resid  <span class="co"># n - K</span></span>
-<span id="cb8-2"><a href=""></a>se_beta2 <span class="op">=</span> np.sqrt((sse<span class="op">/</span>n_k) <span class="op">*</span> XtX_inv[<span class="dv">1</span>,<span class="dv">1</span>])</span>
-<span id="cb8-3"><a href=""></a><span class="bu">round</span>(se_beta2,<span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="17">
-<pre><code>np.float64(0.1103)</code></pre>
-</div>
-</div>
-</section>
-<section id="introduction-to-stata" class="slide level2">
-<h2>Introduction to <code>Stata</code></h2>
-<p>Stata is a statistical software widely used in econometrics.</p>
-<ul>
-<li><code>dta.</code> is the format for Stata datasets, but you can also import and export data in various formats like CSV, Excel, and more.</li>
-<li><code>do.</code> files are the native file formats of Stata where you can write and execute commands and share scripts with others.</li>
-<li>Stata’s interface is made up of various windows that can be moved around or closed to optimize the user’s experience.</li>
-</ul>
-<p>To follow best practices, I found this tutorial very useful: <a href="https://sites.google.com/idinsight.org/bootcamp/lessons/1a-intro-to-stata">Stata Tutorial</a></p>
-</section>
-<section class="slide level2">
-
-<p>Useful commands:</p>
-<ul>
-<li><code>use</code> to load a dataset</li>
-<li><code>describe</code> to get a summary of the dataset</li>
-<li><code>regress</code> to run a regression</li>
-<li><code>summarize</code> to get summary statistics</li>
-<li><code>gen</code> to create new variables</li>
-<li><code>browse</code> to view the dataset in a spreadsheet-like format</li>
-<li><code>outreg</code> to export regression results to LaTeX</li>
-</ul>
-</section>
-<section id="example-in-stata" class="slide level2">
-<h2>Example in Stata</h2>
-<p>Let’s load the <code>bwght</code> dataset.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource stata number-lines code-with-copy"><code class="sourceCode stata"><span id="cb10-1"><a href=""></a>**********************************************************</span>
-<span id="cb10-2"><a href=""></a>* 2. Load Dataset</span>
-<span id="cb10-3"><a href=""></a>**********************************************************</span>
-<span id="cb10-4"><a href=""></a></span>
-<span id="cb10-5"><a href=""></a>* Install bcuse <span class="kw">if</span> <span class="kw">not</span> already installed</span>
-<span id="cb10-6"><a href=""></a><span class="kw">ssc</span> install bcuse </span>
-<span id="cb10-7"><a href=""></a></span>
-<span id="cb10-8"><a href=""></a>* Load Wooldridge dataset</span>
-<span id="cb10-9"><a href=""></a>bcuse bwght, <span class="kw">clear</span></span>
-<span id="cb10-10"><a href=""></a></span>
-<span id="cb10-11"><a href=""></a>* Inspect <span class="kw">data</span></span>
-<span id="cb10-12"><a href=""></a>br <span class="kw">in</span> 1/10</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section class="slide level2">
-
-<p>Run the regression:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource stata number-lines code-with-copy"><code class="sourceCode stata"><span id="cb11-1"><a href=""></a>**********************************************************</span>
-<span id="cb11-2"><a href=""></a>* 3. Regression Analysis</span>
-<span id="cb11-3"><a href=""></a>**********************************************************</span>
-<span id="cb11-4"><a href=""></a></span>
-<span id="cb11-5"><a href=""></a>* Model:</span>
-<span id="cb11-6"><a href=""></a>* bwght_i = β1 + β2*cigs_i + β3*parity_i + β4*faminc_i + β5*motheduc_i + β6*fatheduc_i + ε_i</span>
-<span id="cb11-7"><a href=""></a></span>
-<span id="cb11-8"><a href=""></a><span class="kw">regress</span> bwght cigs parity faminc motheduc fatheduc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="hypothesis-testing" class="slide level2">
-<h2>Hypothesis Testing</h2>
-<p>We want to test:</p>
-<ol type="1">
-<li>Whether <span class="math inline">\(\texttt{cigs}\)</span> is statistically significant.</li>
-<li>Whether <span class="math inline">\(\texttt{motheduc}\)</span> and <span class="math inline">\(\texttt{fatheduc}\)</span> are jointly statistically significant.</li>
-</ol>
-<div title="Exercise">
-<div class="callout callout-warning no-icon callout-titled callout-style-default">
+<section id="anatomy-of-a-regression-table" class="slide level2">
+<h2>Anatomy of a regression table</h2>
+<p>For each coefficient <span class="math inline">\(k\)</span> the output reports:</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Formula</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>coef</code></td>
+<td><span class="math inline">\(\hat\beta_k = \big[(X'X)^{-1}X'y\big]_k\)</span></td>
+<td>point estimate</td>
+</tr>
+<tr class="even">
+<td><code>std err</code></td>
+<td><span class="math inline">\(se(\hat\beta_k) = \sqrt{\hat\sigma^2\,\big[(X'X)^{-1}\big]_{kk}}\)</span>, <span class="math inline">\(\;\hat\sigma^2 = \frac{\hat\varepsilon'\hat\varepsilon}{n-K}\)</span></td>
+<td>estimated sd of the sampling distribution</td>
+</tr>
+<tr class="odd">
+<td><code>t</code></td>
+<td><span class="math inline">\(t_k = \dfrac{\hat\beta_k - 0}{se(\hat\beta_k)}\)</span></td>
+<td>test of <span class="math inline">\(H_0: \beta_k = 0\)</span></td>
+</tr>
+<tr class="even">
+<td><code>P&gt;|t|</code></td>
+<td><span class="math inline">\(2\,P\big(t_{n-K} &gt; |t_k|\big)\)</span></td>
+<td>two-sided <span class="math inline">\(p\)</span>-value</td>
+</tr>
+<tr class="odd">
+<td><code>[0.025, 0.975]</code></td>
+<td><span class="math inline">\(\hat\beta_k \pm t_{n-K,\,0.975}\; se(\hat\beta_k)\)</span></td>
+<td>95% confidence interval</td>
+</tr>
+</tbody>
+</table>
+<div title="Link with the Monte Carlo">
+<div class="callout callout-tip no-icon callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
-<p><strong>Exercise</strong></p>
+<p><strong>Link with the Monte Carlo</strong></p>
 </div>
 <div class="callout-content">
-<ol type="1">
-<li>Indicate <strong>null and alternative hypotheses</strong>.</li>
-<li>Write the expression of the <strong>t-test statistic</strong> or <strong>F-test statistic</strong> used for this test, and its assumed distribution.</li>
-<li>Indicate the decision rule.</li>
-<li>Draw the <strong>acceptance and rejection regions</strong> associated with this test. Properly label the axes. Include any relevant value to clearly identify both regions.</li>
-<li>At what <strong>significance level</strong> would the regressors be statistically significant? Draw the <strong>p-value</strong> associated to the test performed. Properly label the axes. What is the minimum significance level that would make this regressor be significant?</li>
-</ol>
+<p>The <code>std err</code> column is our best estimate, from <strong>one</strong> sample, of the spread we just saw across 10,000 simulated samples.</p>
 </div>
 </div>
 </div>
 </div>
 </section>
-<section id="regression-output-with-stargazer" class="slide level2">
-<h2>Regression Output with <code>stargazer</code></h2>
-<p><code>stargazer</code> is a package that creates well-formatted regression tables and exports them to LaTeX, HTML, or text formats.</p>
-<div class="callout callout-caution callout-titled callout-style-default">
+<section id="computing-it-by-hand-cigs" class="slide level2">
+<h2>Computing it by hand: <code>cigs</code></h2>
+<div id="b84a3f96" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb12" data-code-line-numbers="1-5|7-9|11-13|15-17"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href=""></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
+<span id="cb12-2"><a href=""></a></span>
+<span id="cb12-3"><a href=""></a>X <span class="op">=</span> model.model.exog                <span class="co"># design matrix (with constant)</span></span>
+<span id="cb12-4"><a href=""></a>n, K <span class="op">=</span> X.shape</span>
+<span id="cb12-5"><a href=""></a>XtX_inv <span class="op">=</span> np.linalg.inv(X.T <span class="op">@</span> X)</span>
+<span id="cb12-6"><a href=""></a></span>
+<span id="cb12-7"><a href=""></a>sigma2_hat <span class="op">=</span> model.ssr <span class="op">/</span> (n <span class="op">-</span> K)     <span class="co"># SSE / (n - K)</span></span>
+<span id="cb12-8"><a href=""></a>se <span class="op">=</span> np.sqrt(sigma2_hat <span class="op">*</span> np.diag(XtX_inv))</span>
+<span id="cb12-9"><a href=""></a>k <span class="op">=</span> <span class="dv">1</span>                                <span class="co"># position of cigs</span></span>
+<span id="cb12-10"><a href=""></a></span>
+<span id="cb12-11"><a href=""></a>t_stat <span class="op">=</span> model.params.iloc[k] <span class="op">/</span> se[k]</span>
+<span id="cb12-12"><a href=""></a>p_value <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> stats.t.cdf(<span class="bu">abs</span>(t_stat), df<span class="op">=</span>n <span class="op">-</span> K))</span>
+<span id="cb12-13"><a href=""></a>t_crit <span class="op">=</span> stats.t.ppf(<span class="fl">0.975</span>, df<span class="op">=</span>n <span class="op">-</span> K)</span>
+<span id="cb12-14"><a href=""></a></span>
+<span id="cb12-15"><a href=""></a><span class="bu">print</span>(<span class="ss">f"beta = </span><span class="sc">{</span>model<span class="sc">.</span>params<span class="sc">.</span>iloc[k]<span class="sc">:.4f}</span><span class="ss">   se = </span><span class="sc">{</span>se[k]<span class="sc">:.4f}</span><span class="ss">   t = </span><span class="sc">{</span>t_stat<span class="sc">:.3f}</span><span class="ss">   p = </span><span class="sc">{</span>p_value<span class="sc">:.2e}</span><span class="ss">"</span>)</span>
+<span id="cb12-16"><a href=""></a><span class="bu">print</span>(<span class="ss">f"95% CI = [</span><span class="sc">{</span>model<span class="sc">.</span>params<span class="sc">.</span>iloc[k] <span class="op">-</span> t_crit <span class="op">*</span> se[k]<span class="sc">:.4f}</span><span class="ss">, </span><span class="sc">{</span>model<span class="sc">.</span>params<span class="sc">.</span>iloc[k] <span class="op">+</span> t_crit <span class="op">*</span> se[k]<span class="sc">:.4f}</span><span class="ss">]"</span>)</span>
+<span id="cb12-17"><a href=""></a><span class="bu">print</span>(<span class="ss">f"statsmodels: se = </span><span class="sc">{</span>model<span class="sc">.</span>bse<span class="sc">.</span>iloc[k]<span class="sc">:.4f}</span><span class="ss">   t = </span><span class="sc">{</span>model<span class="sc">.</span>tvalues<span class="sc">.</span>iloc[k]<span class="sc">:.3f}</span><span class="ss">   p = </span><span class="sc">{</span>model<span class="sc">.</span>pvalues<span class="sc">.</span>iloc[k]<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>beta = -0.5959   se = 0.1103   t = -5.401   p = 8.02e-08
+95% CI = [-0.8124, -0.3794]
+statsmodels: se = 0.1103   t = -5.401   p = 8.02e-08</code></pre>
+</div>
+</div>
+</section>
+<section id="regression-tables-with-stargazer" class="slide level2 section-divider-centered" data-background-color="#0396A6">
+<h2>Regression tables with <code>stargazer</code></h2>
+</section>
+<section id="why-stargazer" class="slide level2">
+<h2>Why <code>stargazer</code>?</h2>
+<p><code>model.summary()</code> is great for <strong>reading</strong> results, but it is not what goes in a paper or an assignment.</p>
+<div title="stargazer">
+<div class="callout callout-tip no-icon callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Caution</strong></p>
+<p><strong>stargazer</strong></p>
 </div>
 <div class="callout-content">
-<p>You will need to:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href=""></a><span class="ex">uv</span> sync </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>your env because I have installed it <code>Stargazer</code> for this session.</p>
+<p>Builds a <strong>publication-style</strong> regression table from one or several fitted <code>statsmodels</code> models:</p>
+<ul>
+<li>coefficients with <strong>significance stars</strong></li>
+<li><strong>standard errors</strong> (or confidence intervals) in parentheses</li>
+<li><span class="math inline">\(N\)</span>, <span class="math inline">\(R^2\)</span>, adjusted <span class="math inline">\(R^2\)</span>, <span class="math inline">\(\hat\sigma\)</span>, <span class="math inline">\(F\)</span></li>
+<li>rendered as <strong>HTML</strong> (notebook / slides) or <strong>LaTeX</strong> (assignment)</li>
+</ul>
+</div>
 </div>
 </div>
 </div>
 </section>
-<section class="slide level2">
-
-<h3 id="example-usage">Example usage</h3>
-<div id="c2e949d9" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href=""></a><span class="im">from</span> stargazer.stargazer <span class="im">import</span> Stargazer  </span>
-<span id="cb13-2"><a href=""></a>stargazer <span class="op">=</span> Stargazer([model])</span>
-<span id="cb13-3"><a href=""></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"regression_output.tex"</span>, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
-<span id="cb13-4"><a href=""></a>    f.write(stargazer.render_latex())</span>
-<span id="cb13-5"><a href=""></a></span>
-<span id="cb13-6"><a href=""></a><span class="co">#Print the LaTeX code</span></span>
-<span id="cb13-7"><a href=""></a><span class="bu">print</span>(stargazer.render_latex())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="exporting-to-latex-render_latex" class="slide level2">
+<h2>Exporting to LaTeX: <code>render_latex()</code></h2>
+<div class="columns">
+<div class="column" style="width:52%;">
+<div id="1a39349c" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb14" data-code-line-numbers="1|3|4-5|6-15|17|19-20"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href=""></a><span class="im">from</span> stargazer.stargazer <span class="im">import</span> Stargazer</span>
+<span id="cb14-2"><a href=""></a></span>
+<span id="cb14-3"><a href=""></a>sg <span class="op">=</span> Stargazer([model])</span>
+<span id="cb14-4"><a href=""></a>sg.title(<span class="st">"Determinants of birth weight"</span>)</span>
+<span id="cb14-5"><a href=""></a>sg.table_label <span class="op">=</span> <span class="st">"tab:bwght"</span>      <span class="co"># for \ref{}</span></span>
+<span id="cb14-6"><a href=""></a>sg.rename_covariates({</span>
+<span id="cb14-7"><a href=""></a>    <span class="st">"cigs"</span>: <span class="st">"Cigarettes per day"</span>,</span>
+<span id="cb14-8"><a href=""></a>    <span class="st">"parity"</span>: <span class="st">"Birth order"</span>,</span>
+<span id="cb14-9"><a href=""></a>    <span class="st">"faminc"</span>: <span class="st">"Family income"</span>,</span>
+<span id="cb14-10"><a href=""></a>    <span class="st">"motheduc"</span>: <span class="st">"Mother's education"</span>,</span>
+<span id="cb14-11"><a href=""></a>    <span class="st">"fatheduc"</span>: <span class="st">"Father's education"</span>,</span>
+<span id="cb14-12"><a href=""></a>    <span class="st">"Intercept"</span>: <span class="st">"Constant"</span>,</span>
+<span id="cb14-13"><a href=""></a>})</span>
+<span id="cb14-14"><a href=""></a>sg.covariate_order([<span class="st">"cigs"</span>, <span class="st">"parity"</span>, <span class="st">"faminc"</span>,</span>
+<span id="cb14-15"><a href=""></a>                    <span class="st">"motheduc"</span>, <span class="st">"fatheduc"</span>, <span class="st">"Intercept"</span>])</span>
+<span id="cb14-16"><a href=""></a></span>
+<span id="cb14-17"><a href=""></a>latex <span class="op">=</span> sg.render_latex()         <span class="co"># LaTeX code (a string)</span></span>
+<span id="cb14-18"><a href=""></a></span>
+<span id="cb14-19"><a href=""></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"regression_output.tex"</span>, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb14-20"><a href=""></a>    f.write(latex)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p style="font-size:0.6em;">
+Options: <code>sg.show_confidence_intervals(True)</code> (CIs instead of SEs), <code>sg.significant_digits(2)</code>, <code>render_latex(only_tabular=True)</code>.
+</p>
+</div><div class="column" style="width:48%;">
+<p><code>regression_output.tex</code> (first lines):</p>
+<div id="f1749f4d" class="cell" data-execution_count="19">
 <div class="cell-output cell-output-stdout">
 <pre><code>\begin{table}[!htbp] \centering
+  \caption{Determinants of birth weight}
+  \label{tab:bwght}
 \begin{tabular}{@{\extracolsep{5pt}}lc}
 \\[-1.8ex]\hline
 \hline \\[-1.8ex]
@@ -669,42 +1133,82 @@ Notes:
 \cr \cline{2-2}
 \\[-1.8ex] &amp; (1) \\
 \hline \\[-1.8ex]
- cigs &amp; -0.596$^{***}$ \\
+ Cigarettes per day &amp; -0.596$^{***}$ \\
 &amp; (0.110) \\
- const &amp; 114.524$^{***}$ \\
-&amp; (3.728) \\
- faminc &amp; 0.056$^{}$ \\
-&amp; (0.037) \\
- fatheduc &amp; 0.472$^{*}$ \\
-&amp; (0.283) \\
- motheduc &amp; -0.370$^{}$ \\
-&amp; (0.320) \\
- parity &amp; 1.788$^{***}$ \\
+ Birth order &amp; 1.788$^{***}$ \\
 &amp; (0.659) \\
-\hline \\[-1.8ex]
- Observations &amp; 1191 \\
- $R^2$ &amp; 0.039 \\
- Adjusted $R^2$ &amp; 0.035 \\
- Residual Std. Error &amp; 19.789 (df=1185) \\
- F Statistic &amp; 9.553$^{***}$ (df=5; 1185) \\
-\hline
-\hline \\[-1.8ex]
-\textit{Note:} &amp; \multicolumn{1}{r}{$^{*}$p$&lt;$0.1; $^{**}$p$&lt;$0.05; $^{***}$p$&lt;$0.01} \\
-\end{tabular}
-\end{table}</code></pre>
+ Family income &amp; 0.056$^{}$ \\
+&amp; (0.037) \\
+...</code></pre>
+</div>
+</div>
+</div></div>
+</section>
+<section id="using-the-table-in-your-assignment" class="slide level2">
+<h2>Using the table in your assignment</h2>
+<div class="columns" style="align-items:flex-start;">
+<div class="column" style="width:45%;">
+<p>Put <code>regression_output.tex</code> next to your <code>main.tex</code> (in Overleaf: <strong>Upload</strong>), then:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource tex number-lines code-with-copy"><code class="sourceCode latex"><span id="cb16-1"><a href=""></a><span class="bu">\documentclass</span>{<span class="ex">article</span>}</span>
+<span id="cb16-2"><a href=""></a><span class="kw">\begin</span>{<span class="ex">document</span>}</span>
+<span id="cb16-3"><a href=""></a></span>
+<span id="cb16-4"><a href=""></a>As shown in Table~<span class="kw">\ref</span>{<span class="ex">tab:bwght</span>},</span>
+<span id="cb16-5"><a href=""></a>each additional cigarette per day</span>
+<span id="cb16-6"><a href=""></a>is associated with a lower birth weight.</span>
+<span id="cb16-7"><a href=""></a></span>
+<span id="cb16-8"><a href=""></a><span class="fu">\input</span>{regression_output.tex}</span>
+<span id="cb16-9"><a href=""></a></span>
+<span id="cb16-10"><a href=""></a><span class="kw">\end</span>{<span class="ex">document</span>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column" style="width:55%;">
+<p><img src="imgs/stargazer-latex-render.png" class="doc-preview" style="max-height:540px;"></p>
+</div></div>
+</section>
+<section id="the-full-output-in-latex-t-p-values-and-cis" class="slide level2">
+<h2>The full output in LaTeX: <span class="math inline">\(t\)</span>, <span class="math inline">\(p\)</span>-values and CIs</h2>
+<div class="columns" style="align-items:flex-start;">
+<div class="column" style="width:45%;">
+<p><code>statsmodels</code> can export the <strong>whole</strong> <code>summary()</code> to LaTeX:</p>
+<div id="c4baa76b" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href=""></a>latex_full <span class="op">=</span> model.summary(slim<span class="op">=</span><span class="va">True</span>).as_latex()</span>
+<span id="cb17-2"><a href=""></a></span>
+<span id="cb17-3"><a href=""></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"regression_full.tex"</span>, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb17-4"><a href=""></a>    f.write(latex_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In <code>main.tex</code> (it needs <code>booktabs</code>):</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource tex number-lines code-with-copy"><code class="sourceCode latex"><span id="cb18-1"><a href=""></a><span class="bu">\usepackage</span>{<span class="ex">booktabs</span>}   <span class="co">% in the preamble</span></span>
+<span id="cb18-2"><a href=""></a>...</span>
+<span id="cb18-3"><a href=""></a><span class="kw">\begin</span>{<span class="ex">table</span>}[!htbp]</span>
+<span id="cb18-4"><a href=""></a>  <span class="fu">\caption</span>{Determinants of birth weight (OLS)}</span>
+<span id="cb18-5"><a href=""></a>  <span class="kw">\label</span>{<span class="ex">tab:full</span>}</span>
+<span id="cb18-6"><a href=""></a>  <span class="fu">\input</span>{regression_full.tex}</span>
+<span id="cb18-7"><a href=""></a><span class="kw">\end</span>{<span class="ex">table</span>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column" style="width:55%;">
+<p><img src="imgs/full-output-latex-render.png" class="doc-preview" style="max-height:400px;"></p>
+</div></div>
+</section>
+<section id="preview-is-cigs-significant" class="slide level2">
+<h2>Preview: is <code>cigs</code> significant?</h2>
+<div title="Exercise">
+<div class="callout callout-warning no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Exercise</strong></p>
+</div>
+<div class="callout-content">
+<p>Using the output above, test whether <span class="math inline">\(\texttt{cigs}\)</span> is statistically significant at <span class="math inline">\(\alpha = 5\%\)</span>.</p>
+<ol type="1">
+<li>State the <strong>null and alternative hypotheses</strong>.</li>
+<li>Write the <strong><span class="math inline">\(t\)</span>-statistic</strong> and its distribution under <span class="math inline">\(H_0\)</span>.</li>
+<li>State the <strong>decision rule</strong> and draw the acceptance and rejection regions (label the axes, include the critical values).</li>
+<li>Draw the <strong><span class="math inline">\(p\)</span>-value</strong>. What is the minimum significance level at which <span class="math inline">\(\texttt{cigs}\)</span> is significant?</li>
+</ol>
+</div>
+</div>
 </div>
 </div>
 </section>
-<section id="how-to-attach-tables-in-latex" class="slide level2">
-<h2>How to attach tables in LaTeX</h2>
-<p>Two versions:</p>
-<ol type="1">
-<li>You can upload the .tex file to Overleaf and call it in your main .tex file with:</li>
-</ol>
-<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource latex number-lines code-with-copy"><code class="sourceCode latex"><span id="cb15-1"><a href=""></a><span class="fu">\input</span>{regression_output.tex}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ol start="2" type="1">
-<li>You can copy the code from the .tex file and paste it directly in your main .tex file.</li>
-</ol>
+<section id="thanks" class="title-slide slide level1 center" data-background-color="#0396A6">
+<h1>Thanks!</h1>
 
 </section>
     </div>
@@ -735,8 +1239,8 @@ Notes:
       // Full list of configuration options available at:
       // https://revealjs.com/config/
       Reveal.initialize({
-'controlsAuto': true,
-'previewLinksAuto': false,
+'controlsAuto': false,
+'previewLinksAuto': true,
 'pdfSeparateFragments': false,
 'autoAnimateEasing': "ease",
 'autoAnimateDuration': 1,
@@ -746,7 +1250,7 @@ Notes:
 'smaller': false,
  
         // Display controls in the bottom right corner
-        controls: false,
+        controls: true,
 
         // Help the user learn the controls by providing hints, for example by
         // bouncing the down arrow when they first encounter a vertical slide
@@ -888,9 +1392,9 @@ Notes:
         // The "normal" size of the presentation, aspect ratio will be preserved
         // when the presentation is scaled to fit different resolutions. Can be
         // specified using percentage units.
-        width: 1050,
+        width: 1280,
 
-        height: 700,
+        height: 720,
 
         // Factor of the display size that should remain empty around the content
         margin: 0.1,
@@ -1089,6 +1593,13 @@ Notes:
         }
       });
       </script>
+    <script src="../theme/print-lazyload-fix.js"></script>
+    <script src="js/d3.v3.min.js"></script>
+    <script>window.__amdDefine = window.define; window.define = undefined;</script>
+    <script src="js/jstat.min.js"></script>
+    <script>window.define = window.__amdDefine;</script>
+    <script src="js/sampling-widget.js"></script>
+    <script src="js/dgp-widget.js"></script>
     
 
 </body></html>

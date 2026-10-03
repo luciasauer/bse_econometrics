@@ -1,0 +1,127 @@
+/* Styles for the two interactive widgets of TA3 (BSE palette, see theme/bse-theme.scss) */
+
+/* ---- shared controls ---- */
+.widget-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+  font-size: 0.62em;
+}
+.widget-controls p { margin: 0.1em 0; }
+.widget-controls .widget-step {
+  font-family: "Archivo Black", "Arial Black", sans-serif;
+  color: #0396A6;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-top: 0.4em;
+}
+.widget-controls select {
+  font-family: inherit;
+  font-size: 1em;
+  padding: 4px 8px;
+  border: 1px solid #79BAC8;
+  border-radius: 6px;
+  background: #fff;
+  color: #0D0D0D;
+}
+.widget-controls .slider-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+}
+.widget-controls .slider-row label { min-width: 6.5em; white-space: nowrap; }
+.widget-controls .slider-row input[type="range"] { flex: 1; accent-color: #0396A6; }
+.widget-controls .btn-row { display: flex; flex-wrap: wrap; gap: 0.5em; }
+.widget-btn {
+  font-family: inherit;
+  font-size: 1em;
+  padding: 5px 14px;
+  border: 2px solid #0396A6;
+  border-radius: 6px;
+  background: #fff;
+  color: #0396A6;
+  font-weight: 600;
+  cursor: pointer;
+}
+.widget-btn:hover { background: rgba(3, 150, 166, 0.1); }
+.widget-btn.primary { background: #0396A6; color: #fff; }
+.widget-btn.secondary { border-color: #3E2259; color: #3E2259; }
+.widget-btn.active { background: #3E2259; border-color: #3E2259; color: #fff; }
+
+.widget-stats {
+  font-size: 0.55em;
+  color: #0D0D0D;
+  text-align: center;
+  margin-top: 0.2em;
+  min-height: 1.4em;
+}
+.widget-credit {
+  font-size: 0.8em;
+  color: #6b6b6b;
+  margin-top: 0.4em;
+}
+
+/* ---- Seeing-Theory-style sampling widget ---- */
+#mc-svg { width: 100%; }
+.mc-mode { display: flex; gap: 0; }
+.mc-mode .widget-btn { border-radius: 0; border-color: #3E2259; color: #3E2259; }
+.mc-mode .widget-btn:first-child { border-radius: 6px 0 0 6px; }
+.mc-mode .widget-btn:last-child { border-radius: 0 6px 6px 0; border-left: none; }
+.mc-mode .widget-btn.active { background: #3E2259; color: #fff; }
+
+.mc-axis line { stroke: #0D0D0D; stroke-width: 1px; }
+.mc-axis text { font-size: 13px; fill: #0D0D0D; font-family: "Source Serif 4", Georgia, serif; }
+path.mc-pdf { fill: none; stroke: #0396A6; stroke-width: 2.5px; }
+path.mc-pdf-area { fill: #0396A6; fill-opacity: 0.18; stroke: none; }
+line.mc-mu { stroke: #3E2259; stroke-width: 1.5px; stroke-dasharray: 4 4; }
+.mc-reveal g text, svg text { font-family: "Source Serif 4", Georgia, serif; }
+circle.mc-sample { fill: #3E2259; }
+circle.mc-resample { fill: #79BAC8; stroke: #fff; stroke-width: 0.5px; }
+.mc-bar rect { fill: #F28627; fill-opacity: 0.85; }
+
+/* ---- DGP lab ---- */
+#dgp-svg { width: 100%; }
+.dgp-axis path, .dgp-axis line { fill: none; stroke: #0D0D0D; shape-rendering: crispEdges; }
+.dgp-axis text { font-size: 12px; fill: #0D0D0D; }
+.dgp-label { font-size: 14px; fill: #0D0D0D; }
+.dgp-bar { fill: #0396A6; fill-opacity: 0.75; }
+.dgp-ref { fill: none; stroke: #F28627; stroke-width: 2.5px; }
+.dgp-true { stroke: #3E2259; stroke-width: 2px; stroke-dasharray: 6 4; }
+.dgp-true-label { font-size: 13px; fill: #3E2259; }
+.dgp-ref-key { color: #F28627; font-weight: 600; }
+
+/* ---- numbered Monte Carlo steps ---- */
+.mc-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px; min-width: 30px;
+  border-radius: 50%;
+  background: #0396A6;
+  color: #fff;
+  font-family: "Archivo Black", "Arial Black", sans-serif;
+  font-size: 15px;
+}
+.mc-steps-list { display: flex; flex-direction: column; gap: 0.55em; font-size: 0.8em; margin-top: 0.4em; }
+.mc-step-row { display: flex; align-items: center; gap: 0.7em; }
+
+.mc-steps {
+  display: flex;
+  gap: 0.6em;
+  justify-content: space-between;
+  margin-top: 0.4em;
+}
+.mc-step {
+  flex: 1 1 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+  padding: 0.5em 0.6em;
+  border-top: 3px solid #0396A6;
+  background: rgba(3, 150, 166, 0.06);
+  border-radius: 0 0 6px 6px;
+  font-size: 0.5em;
+  line-height: 1.35;
+}
+.mc-step b { color: #3E2259; font-size: 1.1em; }
