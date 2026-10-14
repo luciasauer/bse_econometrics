@@ -1049,40 +1049,6 @@ scalars:
 </div>
 </div></div>
 </section>
-<section class="slide level2">
-
-<!-- Hidden slides (Correlation or causation? / Are our regressors good enough?)
- ## Correlation or causation?
-
- ::: {.callout-warning title="3. Does drinking alcohol have an effect on college GPA?" icon=false}
-::: 
-
- ::: {.fragment}
-::: {.answer}
-We cannot say. OLS gives a **conditional association**, not a causal effect: that needs $E(\varepsilon \mid X) = 0$. Here $\varepsilon$ contains motivation, sociability, family background…, which are likely correlated with `alcohol`. The **positive** sign is a hint that something is missing.
-::: 
- :::  
-
- --- 
-
- ## Are our regressors good enough?
-
- ::: {.callout-warning title="Question" icon=false}
-How do we know that the variables we used are good enough to capture the **variability** in college GPA?
-::: 
-
- ::: {.fragment}
-- $R^2 = 0.2575$: the model explains **26%** of the sample variation in `colGPA`; 74% is left in the residual
-- But $R^2$ never falls when we add regressors, even useless ones: adjusted $R^2 = 0.224$ corrects for that
-::: 
-
- ::: {.fragment}
-::: {.callout-tip title="Next question" icon=false}
-Is $R^2 = 0.26$ **significantly different from zero**, or could it come from chance in a sample of 141 students? This is what the $F(6, 134) = 7.74$ at the top of the output tests.
-::: 
-::: 
--->
-</section>
 <section id="does-the-model-explain-anything" class="slide level2">
 <h2>Does the model explain anything?</h2>
 <p>We want to test whether our regression model adds explanatory power <strong>beyond the mean</strong> of <span class="math inline">\(\texttt{colGPA}\)</span>.</p>
@@ -1185,18 +1151,6 @@ RSSE = 19.406099   SSE = 14.409812
 <p><span class="math display">\[
 F = \frac{(19.406 - 14.410)/6}{14.410/134} = \frac{0.8327}{0.1075} = 7.74
 \]</span></p>
-</div>
-</div>
-</div>
-<div title="Note">
-<div class="callout callout-note no-icon callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<p><strong>Note</strong></p>
-</div>
-<div class="callout-content">
-<p>RSSE <span class="math inline">\(= \sum_i (\texttt{colGPA}_i - \overline{\texttt{colGPA}})^2\)</span> is the <strong>Total SS</strong> of the output (19.406); SSE is the <strong>Residual SS</strong> (14.410). We use <code>egen … total()</code> because <code>sum()</code> inside <code>generate</code> is a <em>running</em> sum in Stata.</p>
-</div>
 </div>
 </div>
 </div>
@@ -1361,18 +1315,6 @@ Critical value (5%) = 3.0637149
 
 <span class="cmd">. display "p-value = " Ftail(2, e(df_r), F)</span>
 p-value = .61317149</div>
-</div>
-</div>
-</div>
-</div>
-<div title="Note">
-<div class="callout callout-note no-icon callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<p><strong>Note</strong></p>
-</div>
-<div class="callout-content">
-<p><code>e(df_r)</code> is the residual degrees of freedom <span class="math inline">\(n - K\)</span> of the <strong>last</strong> regression, which is why we run the unrestricted model second.</p>
 </div>
 </div>
 </div>
