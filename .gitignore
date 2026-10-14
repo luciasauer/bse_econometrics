@@ -25,3 +25,8 @@ TA8/A7.ipynb
 /theme/__pycache__/
 
 .DS_Store
+
+!TA*/imgs/*.png
+*.log
+regression_table.tex
+
