@@ -1,53 +1,306 @@
 ---
 title: "Econometrics"
-subtitle: "<span class='subtitle-text'>TA Session 5</span>"
+subtitle: |
+  <span class="subtitle-text">TA Session 5</span>
 author: "Lucia Sauer"
-institute: "<em>Barcelona School of Economics</em>"
+institute: |
+  <p class="cover-affiliation"><em>Barcelona School of Economics</em></p>
+  <p class="cover-contact"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/></svg> <a href="mailto:lucia.sauer@bse.eu">lucia.sauer@bse.eu</a></p>
 date: "2025-10-22"
 format:
   revealjs:
-    chalkboard: true
+    df-print: paged
+    theme: [default, ../theme/bse-theme.scss]
+    css: ta5-widgets.css
+    width: 1280
+    height: 720
     transition: fade
     slide-number: true
     progress: true
+    controls: true
+    menu: true
+    navigation-mode: linear
+    preview-links: auto
     title-slide-attributes:
-      data-background-position: "95% 90%"
-      data-background-size: "100px"
+      data-background-color: "#0396A6"
+      data-background-image: "../theme/assets/cover-graphic.svg"
+      data-background-size: "34%"
+      data-background-position: "92% 50%"
+      data-background-repeat: "no-repeat"
+    include-after-body:
+      text: |
+        <script src="../theme/print-lazyload-fix.js"></script>
+        <script>window.__amdDefine = window.define; window.define = undefined;</script>
+        <script src="js/d3.v3.min.js"></script>
+        <script src="js/jstat.min.js"></script>
+        <script>window.define = window.__amdDefine;</script>
+        <script src="js/se-widget.js"></script>
 editor:
   render-on-save: true
+---
+
+```{python}
+#| echo: false
+#| output: false
+import sys
+sys.path.insert(0, "../theme")
+import bse_style
+_ = bse_style.apply()
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+```
+
+## Overview {background-color="#0396A6"}
+
+- Monte Carlo experiments: consistency of the sample mean and of OLS
+- Heteroskedasticity: visual inspection, Breusch-Pagan test, robust standard errors
+- Bootstrapped standard errors: the paired bootstrap
 
 ---
 
-## Overview
-
-- Visual Inspection of Heteroskedasticity
-- Testing for Heteroskedasticity: Breusch-Pagan Test
-- Classical vs. Robust Standard Errors
-- Bootstrapped Standard Errors in Stata
-- Clustered Data and Cluster-Robust Standard Errors
-
+## Monte Carlo Experiments: Consistency {.section-divider-centered background-color="#0396A6"}
 
 ---
 
-## Non-spherical disturbances
+## From TA3 to consistency
 
-The spherical disturbances includes two assumptions on the behavior of
-the disturbances:
+In TA3 we **fixed** $n$ and looked at the sampling distribution of an estimator across many samples. Now we let $n$ **grow**.
 
-1. Homoskedasticity $var(\epsilon_i|X) = \sigma^2$
+::: {.callout-note title="Consistency" icon=false}
+An estimator $\hat\theta_n$ is **consistent** for $\theta$ if it converges in probability to $\theta$:
 
-2. Uncorrelatedness $cov(\epsilon_i, \epsilon_j|X) = 0, \forall i \neq j$
+$$\text{plim}_{n \to \infty}\; \hat\theta_n = \theta$$
+:::
 
-Now, we will consider the possibility of abandoning one of these assumptions, and see how the estimation and inference procedures change.
+**The picture we want to see:** as $n$ grows, the sampling distribution of $\hat\theta_n$ **collapses** onto the true value $\theta$.
+
+The Monte Carlo recipe is the same as in TA3, repeated for several sample sizes.
+
+---
+
+## Seeing it: the sample mean
+
+::: {.columns .mc-widget-root data-modes="montecarlo" style="align-items:flex-start;"}
+
+::: {.column width="34%"}
+```{=html}
+<div class="widget-controls">
+  <div class="widget-step">1 · Population</div>
+  <select class="mc-dist">
+    <option value="uniform">Uniform</option>
+    <option value="normal">Normal</option>
+    <option value="studentt">Student T</option>
+    <option value="chisquare">Chi Squared</option>
+    <option value="exponential" selected>Exponential</option>
+    <option value="centralF">Fisher–Snedecor</option>
+  </select>
+  <div class="widget-step">2 · Sample size</div>
+  <div class="slider-row">
+    <label>\(n\) = <span class="mc-n-value">30</span></label>
+    <input class="mc-n" type="range" min="0" max="10" step="1" value="4"
+           data-values="3,5,10,20,30,50,100,200,300,500,1000">
+  </div>
+  <div class="btn-row"><button class="widget-btn primary mc-sample">Sample</button></div>
+  <div class="widget-step">3 · Repeat the experiment</div>
+  <p>Draw new samples from the population and average each one.</p>
+  <div class="btn-row">
+    <button class="widget-btn mc-resample">New sample</button>
+    <button class="widget-btn mc-resample-100">100 new samples</button>
+  </div>
+  <p style="font-size:0.85em;">Move \(n\) from 10 to 1,000 (click <b>Sample</b> after changing it) and watch the histogram collapse onto \(\mu\).</p>
+  <div class="widget-credit">Adapted from <a href="https://seeing-theory.brown.edu/frequentist-inference/index.html#section3" target="_blank">Seeing Theory</a> (D. Kunin et al., Brown University).</div>
+</div>
+```
+:::
+
+::: {.column width="66%"}
+```{=html}
+<div class="mc-svg" style="height:450px;"></div>
+<div class="widget-stats mc-stats">&nbsp;</div>
+```
+:::
+
+:::
+
+
+
+## Consistency of the sample mean: your dgp
+
+
+```{python}
+#| echo: true
+#| eval: true
+rng = np.random.default_rng(0)
+
+def simulate_means(n, R=1000, mu=0, sigma=1):
+    """Generate R samples of size n de from a Normal(mu, sigma) and return R means"""
+    means = np.zeros(R)
+    for r in range(R):
+        sample = rng.normal(loc=mu, scale=sigma, size=n)   # a sample of size n
+        means[r] = sample.mean()                           # store the mean
+    return means
+
+# example: z ~ Normal(2, 1)
+mu, sigma = 2, 1
+ns = [10, 100, 1_000, 10_000]
+means = {n: simulate_means(n, mu=mu, sigma=sigma) for n in ns}
+
+```
+
+::: {.callout-warning title="Your turn" icon=false}
+Propose another dgp for $z$: change `rng.uniform(0, 10, size)`, `rng.chisquare(4, size)`, `rng.poisson(3, size)` and re-run the next plot.
+:::
+
+---
+
+## The sample mean collapses onto $\mu$
+
+::: {.panel-tabset}
+
+#### Code
+
+```{python}
+#| echo: true
+#| eval: false
+fig, ax = plt.subplots(figsize=(10, 4.2))
+for n in ns:
+    sns.kdeplot(means[n], fill=True, alpha=0.3, label=f"n = {n:,}", ax=ax)
+ax.axvline(mu, color="black", ls="--", label=r"$\mu$")
+ax.set_xlabel(r"$\bar z_n$")
+ax.legend()
+plt.show()
+```
+
+#### Output
+
+```{python}
+#| echo: false
+#| eval: true
+fig, axes = plt.subplots(1, len(ns), figsize=(13, 3.9), sharex=True)
+colors = [bse_style.TEAL, bse_style.PURPLE, bse_style.ORANGE, bse_style.TEAL_LIGHT]
+for ax, n, color in zip(axes, ns, colors):
+    sns.kdeplot(means[n], fill=True, alpha=0.35, color=color, linewidth=2, ax=ax)
+    ax.axvline(mu, color=bse_style.BLACK, ls="--", lw=1.2)
+    ax.set_title(f"n = {n:,}")
+    ax.set_xlabel(r"$\bar z_n$")
+    ax.set_ylabel("Density" if n == ns[0] else "")
+ax.set_xlim(mu - 2, mu + 2)
+plt.tight_layout()
+plt.show()
+```
+
+:::
+
+Same x-axis in every panel: as $n$ grows the KDE gets **narrower and taller** around $\mu = 2$.
+
+---
+
+## Consistency of OLS: a dgp with four regressors
+
+<div class="eq-box-wrap"><div class="eq-box">
+
+$$y_i = 1 + 2\,x_{i2} - 1\,x_{i3} + 0.5\,x_{i4} + \varepsilon_i$$
+
+$$x_{i2} \sim N(0,1), \qquad x_{i3} = 0.5\,x_{i2} + u_i,\;\; u_i \sim N(0,1), \qquad x_{i4} \sim \text{Bernoulli}(0.3)$$
+
+$$\varepsilon_i = \frac{\chi^2_i(3) - 3}{\sqrt 6}\;\; \text{(independent of } X\text{)}$$
+
+</div></div>
+
+- $x_2$ and $x_3$ are **correlated**; $x_4$ is a dummy
+- The error is **not normal** (skewed), but it has mean 0 and is independent of the regressors
+
+::: {.callout-note title="Recall from lecture" icon=false}
+OLS is consistent if the observations are i.i.d., $E(x_i\varepsilon_i) = 0$, and $\text{plim}\,\frac{X'X}{n}$ exists and is finite and non-singular. Normality is **not** needed.
+:::
+
+---
+
+## Monte Carlo in code
+
+```{python}
+#| echo: true
+#| eval: true
+#| code-line-numbers: "1|3-5|6-9|10-12|13"
+BETA = np.array([1, 2, -1, 0.5])
+
+def simulate_ols(n, R=1000, seed=0):
+    rng = np.random.default_rng(seed)
+    betas = np.empty((R, 4))
+    for r in range(R):
+        x2 = rng.normal(0, 1, n)
+        x3 = 0.5 * x2 + rng.normal(0, 1, n)
+        x4 = rng.binomial(1, 0.3, n)
+        eps = (rng.chisquare(3, n) - 3) / np.sqrt(6)
+        X = np.column_stack([np.ones(n), x2, x3, x4])
+        y = X @ BETA + eps
+        betas[r] = np.linalg.solve(X.T @ X, X.T @ y)
+    return betas
+
+ns_ols = [50, 200, 1_000, 5_000]
+betas_by_n = {n: simulate_ols(n) for n in ns_ols}
+```
+
+---
+
+## OLS estimates collapse onto the true $\beta$'s
+
+```{python}
+#| echo: false
+#| eval: true
+names = [r"$\hat\beta_2$", r"$\hat\beta_3$", r"$\hat\beta_4$"]
+colors = [bse_style.TEAL, bse_style.PURPLE, bse_style.ORANGE, bse_style.TEAL_LIGHT]
+fig, axes = plt.subplots(1, 3, figsize=(13, 4.1))
+for k, (ax, name) in enumerate(zip(axes, names), start=1):
+    for n, color in zip(ns_ols, colors):
+        sns.kdeplot(betas_by_n[n][:, k], fill=True, alpha=0.25, color=color, linewidth=2,
+                    label=f"n = {n:,}", ax=ax)
+    ax.axvline(BETA[k], color=bse_style.BLACK, ls="--", lw=1.2)
+    ax.set_title(f"{name}   (true = {BETA[k]})")
+    ax.set_xlim(BETA[k] - 0.8, BETA[k] + 0.8)
+    ax.set_ylabel("Density" if k == 1 else "")
+axes[0].legend(fontsize=10, loc="upper left")
+plt.tight_layout()
+plt.show()
+```
+
+For **every** estimated coeff., the KDE gets narrower and taller around the true value as $n$ grows, even though $\varepsilon$ is not normal.
+
+
+
+
+## Non-spherical disturbances {.section-divider-centered background-color="#0396A6"}
+
+---
+
+## Spherical disturbances
+
+The **spherical disturbances** assumption includes two assumptions on the behaviour of the disturbances:
+
+1. **Homoskedasticity**: $\;var(\varepsilon_i \mid X) = \sigma^2$
+2. **Uncorrelatedness**: $\;cov(\varepsilon_i, \varepsilon_j \mid X) = 0, \;\; \forall i \neq j$
+
+<div class="eq-box-wrap"><div class="eq-box">
+
+$$Var(\varepsilon \mid X) = \sigma^2 I_n$$
+
+</div></div>
+
+Now we consider the possibility of abandoning one of these assumptions, and see how estimation and inference change.
 
 ---
 
 ## 1. Heteroskedasticity
 
 Let's start by relaxing the homoskedasticity assumption:
-$$var(\epsilon_i|X) = \sigma^2_i$$
+
+$$var(\varepsilon_i \mid X) = \sigma^2_i$$
 
 The variance-covariance matrix of the disturbances is now:
+
 $$\Sigma = \begin{bmatrix}
 \sigma_1^2 & 0 & 0 & \cdots & 0 \\
 0 & \sigma_2^2 & 0 & \cdots & 0 \\
@@ -59,257 +312,347 @@ $$
 
 ---
 
-### 1.1 Visual Inspection of Heteroskedasticity
+## House prices data
 
-$$ 
-price_i = \beta_1 + \beta_2 area_i + \beta_3 rooms_i + \epsilon_i 
+The `hprice3` dataset (Wooldridge) contains 321 house sales. We estimate:
+
+$$
+price_i = \beta_1 + \beta_2\, area_i + \beta_3\, rooms_i + \varepsilon_i
 $$
 
+```{python}
+#| echo: true
+#| eval: true
+import wooldridge as woo
+import statsmodels.formula.api as smf
 
-```{stata}
-clear all
-bcuse hprice3, clear
-regress price area rooms
-rvpplot area
+df = woo.dataWoo("hprice3")
+model = smf.ols("price ~ area + rooms", data=df).fit()
+df[["price", "area", "rooms", "nbh"]].head(4)
 ```
-::: {.center}
-![](visual_inspection.png){width=80%}
+
+---
+
+## 1.1 Visual inspection of heteroskedasticity
+
+::: {.panel-tabset}
+
+#### Code
+
+```{python}
+#| echo: true
+#| eval: false
+fig, ax = plt.subplots(figsize=(9, 4.2))
+ax.scatter(df["area"], model.resid, color=bse_style.TEAL, s=30, alpha=0.6)
+ax.axhline(0, color=bse_style.PURPLE, ls="--")
+ax.set_xlabel("Area (square feet)")
+ax.set_ylabel("Residuals")
+plt.show()
+```
+
+#### Output
+
+```{python}
+#| echo: false
+#| eval: true
+fig, ax = plt.subplots(figsize=(9, 4.2))
+ax.scatter(df["area"], model.resid, color=bse_style.TEAL, s=30, alpha=0.6)
+ax.axhline(0, color=bse_style.PURPLE, ls="--", lw=1.5)
+ax.set_xlabel("Area (square feet)")
+ax.set_ylabel("Residuals")
+ax.set_title("Residuals versus area")
+plt.tight_layout()
+plt.show()
+```
+
+:::
+
+::: {.callout-warning title="Question" icon=false}
+Does the spread of the residuals look constant as `area` grows?
 :::
 
 ---
 
-## 2. Testing for Heteroskedasticity
+## 2. Testing for heteroskedasticity
 
-Breusch-Pagan Test for the presence of heteroskedasticity:
-
-::: {.callout-note title = "BP Steps" icon=false}
-
-1. Estimate the original model and obtain the SSE
-
-2. Set auxiliary regression:
-
-$$
-\hat{\epsilon}_i^{2} = \alpha_1 + \alpha_2 area_i + \alpha_3 rooms_i + v_i 
-$$
-
-3. Then perform the test:
-
-$$
-H_0: \alpha_2 = \alpha_3 = 0 \quad (homoskedasticity)
-$$
-$$
-H_1: \text{at least one } \alpha_i \neq 0 \quad (heteroskedasticity)
-$$
-
-using the statistic:
-
-- Finite sample version:
-$$
-F = \frac{RSSE - SSE/2}{SSE/321-3}\underset{H_0}{\sim} F_{2, 321-3}
-$$
-
-- Asymptotic version:
-$$
-n \tilde{R}^2 \underset{H_0}{\overset{a}{\sim}} \chi^2(2)
-$$
-
-
+::: {.callout-note title="Breusch-Pagan steps" icon=false}
+1. Estimate the original model and obtain the residuals $\hat\varepsilon_i$
+2. Run the auxiliary regression:
+$$\hat{\varepsilon}_i^{2} = \alpha_1 + \alpha_2\, area_i + \alpha_3\, rooms_i + v_i$$
+3. Test $\;H_0: \alpha_2 = \alpha_3 = 0$ (homoskedasticity) $\;$ vs. $\;H_1:$ at least one $\alpha_j \neq 0$ (heteroskedasticity)
 :::
 
+
+
+
+**Finite sample version**
+$$
+F = \frac{(\widetilde{RSSE} - \widetilde{SSE})/2}{\widetilde{SSE}/(321-3)}\underset{H_0}{\sim} F_{2,\, 321-3}
+$$
+
+**Asymptotic version**
+$$
+n \widetilde{R}^2 \underset{H_0}{\overset{a}{\sim}} \chi^2(2)
+$$
+
+
+---
+
+## Breusch-Pagan test in Python
+
+
+
+
+**By hand**: the auxiliary regression
+
+```{python}
+#| echo: true
+#| eval: true
+df["resid2"] = model.resid ** 2
+aux = smf.ols("resid2 ~ area + rooms", data=df).fit()
+
+n = len(df)
+print(f"F     = {aux.fvalue:.4f}")
+print(f"p     = {aux.f_pvalue:.2e}")
+print(f"n R^2 = {n * aux.rsquared:.4f}")
+```
+
+
+::: {.callout-warning title="Question" icon=false}
+At $\alpha = 5\%$, do we reject homoskedasticity? What does that imply for the standard errors of our regression?
+:::
 
 ---
 
 ## Classical SE
 
-```{stata}
-reg price rooms area
+```{python}
+#| echo: true
+#| eval: true
+summary = model.summary(slim=True)
+print(summary)
+
 ```
 
-```{=html}
-<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
-
-      Source |       SS           df       MS      Number of obs   =       321
--------------+----------------------------------   F(2, 318)       =    119.95
-       Model |  2.5709e+11         2  1.2854e+11   Prob > F        =    0.0000
-    Residual |  3.4077e+11       318  1.0716e+09   R-squared       =    0.4300
--------------+----------------------------------   Adj R-squared   =    0.4264
-       Total |  5.9785e+11       320  1.8683e+09   Root MSE        =     32735
-
-------------------------------------------------------------------------------
-       price | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        area |   35.56307   3.114753    11.42   0.000     29.43494    41.69119
-       rooms |   6604.305   2401.922     2.75   0.006     1878.639    11329.97
-       _cons |  -22314.85   13628.21    -1.64   0.103     -49127.7    4497.993
-------------------------------------------------------------------------------
-
-</pre>
-```
-
-::: {.callout-warning title = "Question" icon=false}
-
-- How does the behavior of OLS estimator change under non-spherical disturbances?
-- Which properties of the estimator remain and which ones are lost? 
-
+::: {.callout-warning title="Question" icon=false}
+- How does the behaviour of the OLS estimator change under non-spherical disturbances?
+- Which properties of the estimator remain and which ones are lost?
 :::
-
 
 ---
 
 ## Robust SE
 
-How to correctly estimate the model under the presence of heteroskedasticity?
+Under heteroskedasticity, $\hat\beta$ is still unbiased, but $\hat\sigma^2(X'X)^{-1}$ is no longer its variance. The **robust** (White, HC1) estimator is:
 
-```{stata}
-reg price rooms area, vce(robust)
+<div class="eq-box-wrap"><div class="eq-box" style="padding: 8px 18px;">
+
+$$\widehat{Var}_{HC1}(\hat\beta) = \frac{n}{n-K}\,(X'X)^{-1}\Big(\sum_{i=1}^n \hat\varepsilon_i^2\, x_i x_i'\Big)(X'X)^{-1}$$
+
+</div></div>
+
+```{python}
+#| echo: true
+#| eval: true
+model_robust = smf.ols("price ~ area + rooms", data=df).fit(cov_type="HC1")
+print(model_robust.summary(slim=True).tables[1])
 ```
 
-```{=html}
-<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
-Linear regression                               Number of obs     =        321
-                                                F(2, 318)         =      80.07
-                                                Prob > F          =     0.0000
-                                                R-squared         =     0.4300
-                                                Root MSE          =      32735
-
-------------------------------------------------------------------------------
-             |               Robust
-       price | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        area |   35.56307   4.816768     7.38   0.000     26.08631    45.03982
-       rooms |   6604.305   2501.109     2.64   0.009     1683.492    11525.12
-       _cons |  -22314.85   12067.17    -1.85   0.065    -46056.43    1426.722
-------------------------------------------------------------------------------
-
-
-</pre>
-```
-
-::: {.callout-warning title = "Question" icon=false}
-Elements that change and why?
+::: {.callout-warning title="Question" icon=false}
+Which elements of the output change and why?
 :::
 
 ---
 
-## Bootstrapped SE
+## Bootstrapped Standard Errors {.section-divider-centered background-color="#0396A6"}
 
-Illustration of how the [Boostraping](https://seeing-theory.brown.edu/frequentist-inference/index.html#section3) works. 
+---
 
-```{stata}
-bootstrap, reps(500) seed(123): regress price rooms area
+## The bootstrap idea
 
-```
+The robust SE needs a **formula**. For many estimators the formula is hard (or impossible) to derive. The **bootstrap** estimates the standard error by **resampling** the data we have.
+
+<br>
+
+Remember the Monte Carlo experiment from TA3: draw many samples **from the population**, compute the estimator in each, look at the spread.
+
+<span style="color:#F28627; font-weight:600;">The problem:</span> with real data we do not know the population.
+
+::: {.callout-tip title="The bootstrap trick" icon=false}
+Treat the **observed sample** as if it were the population: draw many samples of size $n$ **with replacement** from it, compute the estimator in each, and use the sd of those estimates as the standard error.
+:::
+
+---
+
+## Seeing it: Monte Carlo vs. Bootstrap
+
+::: {.columns .mc-widget-root style="align-items:flex-start;"}
+
+::: {.column width="34%"}
 ```{=html}
-<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
-Linear regression                                   Number of obs =        321
-                                                    Replications  =        500
-                                                    Wald chi2(2)  =     149.93
-                                                    Prob > chi2   =     0.0000
-                                                    R-squared     =     0.4300
-                                                    Adj R-squared =     0.4264
-                                                    Root MSE      = 32735.2613
-
-------------------------------------------------------------------------------
-             |   Observed   Bootstrap                         Normal-based
-       price | coefficient  std. err.      z    P>|z|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        area |   35.56307   4.613844     7.71   0.000      26.5201    44.60603
-       rooms |   6604.305   2457.818     2.69   0.007     1787.071    11421.54
-       _cons |  -22314.85    12407.4    -1.80   0.072    -46632.92    2003.211
-------------------------------------------------------------------------------
-
-</pre>
+<div class="widget-controls">
+  <div class="widget-step">1 · Population</div>
+  <select class="mc-dist">
+    <option value="uniform">Uniform</option>
+    <option value="normal">Normal</option>
+    <option value="studentt">Student T</option>
+    <option value="chisquare">Chi Squared</option>
+    <option value="exponential" selected>Exponential</option>
+    <option value="centralF">Fisher–Snedecor</option>
+  </select>
+  <div class="widget-step">2 · Your one sample</div>
+  <div class="slider-row">
+    <label>\(n\) = <span class="mc-n-value">30</span></label>
+    <input class="mc-n" type="range" min="0" max="10" step="1" value="4"
+           data-values="3,5,10,20,30,50,100,200,300,500,1000">
+  </div>
+  <div class="btn-row"><button class="widget-btn primary mc-sample">Sample</button></div>
+  <div class="widget-step">3 · Repeat the experiment</div>
+  <div class="mc-mode">
+    <button class="widget-btn" data-mode="montecarlo">Monte Carlo</button>
+    <button class="widget-btn" data-mode="bootstrap">Bootstrap</button>
+  </div>
+  <div class="btn-row">
+    <button class="widget-btn mc-resample">New sample</button>
+    <button class="widget-btn mc-resample-100">100 new samples</button>
+  </div>
+  <p style="font-size:0.85em;">Run both modes: the active one is drawn as bars, the other one as an outline.</p>
+  <div class="widget-credit">Adapted from <a href="https://seeing-theory.brown.edu/frequentist-inference/index.html#section3" target="_blank">Seeing Theory</a> (D. Kunin et al., Brown University).</div>
+</div>
 ```
+:::
+
+::: {.column width="66%"}
+```{=html}
+<div class="mc-svg" style="height:450px;"></div>
+<div class="widget-stats mc-stats">&nbsp;</div>
+```
+:::
+
+:::
+
+
+
+
+<!-- ## Monte Carlo vs. Bootstrap
+
+| | Monte Carlo | Bootstrap |
+|---|---|---|
+| Each replication draws from | the **population** (DGP) | the **observed sample**, with replacement |
+| Requires | knowing the DGP | only the data |
+| Distribution centred at | $\mu$ (or $\beta$) | $\bar x$ (or $\hat\beta$) |
+| sd of the replications | the **true** standard error | an **estimate** of the standard error |
+| Used to | study an estimator in the lab | do inference with real data |
+
+::: {.callout-warning title="Try it" icon=false}
+1. With $n = 30$, run 300 replications in each mode. How close is the bootstrap SE to the Monte Carlo SE?
+2. Click **Sample** again and repeat the bootstrap: does the bootstrap SE change? Does the Monte Carlo SE?
+3. Move $n$ to 5. Why does the bootstrap work worse with very small samples?
+::: -->
+
+---
+
+## Paired bootstrap SE for OLS
+
+The same recipe works for $\hat\beta$: resample **rows** $(y_i, x_i)$ with replacement, keeping each $y_i$ together with its $x_i$ (the **paired** bootstrap).
+
+::: columns
+
+::: {.column width="58%"}
+```{python}
+#| echo: true
+#| eval: true
+#| code-line-numbers: "1-2|4-6|7-8|10-11"
+B = 500
+rng = np.random.default_rng(123)
+
+boot = []
+for b in range(B):
+    df_b = df.sample(n=len(df), replace=True, random_state=rng)
+    fit_b = smf.ols("price ~ area + rooms", data=df_b).fit()
+    boot.append(fit_b.params)
+
+boot = pd.DataFrame(boot)
+boot_se = boot.std()
+boot_se
+```
+:::
+
+::: {.column width="42%"}
+```{python}
+#| echo: false
+#| eval: true
+fig, ax = plt.subplots(figsize=(5.2, 4.4))
+sns.histplot(boot["area"], bins=35, stat="density", color=bse_style.PURPLE, alpha=0.6,
+             edgecolor="white", ax=ax)
+ax.axvline(model.params["area"], color=bse_style.BLACK, ls="--", lw=1.3,
+           label=r"$\hat\beta_{area}$ (original sample)")
+ax.set_xlabel(r"bootstrap estimates $\hat\beta^{*}_{area}$")
+ax.set_ylabel("Density")
+ax.set_title(f"B = {B}:  bootstrap SE = {boot_se['area']:.3f}")
+ax.legend(loc="upper right", fontsize=10)
+plt.tight_layout()
+plt.show()
+```
+:::
+
+:::
+
+---
+
+## Bootstrap regression table
+
+With the bootstrap SE we build the usual table, using normal-based inference:
+
+```{python}
+#| echo: true
+#| eval: true
+from scipy import stats
+
+table = pd.DataFrame({"coef": model.params, "boot se": boot_se})
+table["z"] = table["coef"] / table["boot se"]
+table["P>|z|"] = 2 * (1 - stats.norm.cdf(table["z"].abs()))
+table["[0.025"] = table["coef"] - 1.96 * table["boot se"]
+table["0.975]"] = table["coef"] + 1.96 * table["boot se"]
+table.round(4)
+```
+
+::: {.callout-note title="Note" icon=false}
+Bootstrap SEs depend on the random draws: a different `seed` or a different $B$ gives slightly different numbers (Stata's `bootstrap, reps(500)` will not match exactly).
+:::
 
 ---
 
 ## Comparing confidence intervals across SE types
 
-::: {.center}
-![](ci_area.png){width=80%}
-:::
+```{python}
+#| echo: false
+#| eval: true
+b = model.params["area"]
+ses = {
+    "Classical": model.bse["area"],
+    "Robust (HC1)": model_robust.bse["area"],
+    "Paired bootstrap": boot_se["area"],
+}
+colors = [bse_style.TEAL, bse_style.ORANGE, bse_style.PURPLE]
 
-*Same coefficient estimate for `area`, but wider confidence intervals under robust and bootstrap SEs.*
-
-
-
-----
-
-## 3. Clustered data 
-
-- A second reason to relax the **non-spherical disturbances** assumption arises when observations are **clustered**.
-
-- Within each **neighborhood**, house prices may move together.
-
-
-::: {.center}
-![](cluster_data.png){width=80%}
-:::
-
-
-
----
-
-## Disturbance structure
-
-Within each neighborhood, residuals can move together:
-
-$$
-cov(\epsilon_i, \epsilon_j|X) =
-\begin{cases}
- \neq 0, & \text{if } i = j \text{(same neighborhood)} \\
-0, & \text{if } i \neq j \text{(different neighborhoods)}
-\end{cases}
-$$
-
-Hence, the covariance matrix of disturbances has a **block-diagonal** form:
-
-$$
-\Sigma =
-\begin{bmatrix}
-\Sigma_1 & 0 & 0 & \cdots & 0 \\
-0 & \Sigma_2 & 0 & \cdots & 0 \\
-0 & 0 & \Sigma_3 & \cdots & 0 \\
-\vdots & \vdots & \vdots & \ddots & \vdots \\
-0 & 0 & 0 & \cdots & \Sigma_G
-\end{bmatrix}
-$$
-
-
-Each block $\Sigma_j$ captures the correlation of errors **within neighborhood j**.
-
-
-
-
----
-
-## Cluster robust SE
-
-The disturbances are correlated within clusters but uncorrelated across clusters:
-
-
-```{stata}
-reg price rooms area, vce(cluster nbh)
+fig, ax = plt.subplots(figsize=(10, 3.6))
+for i, ((label, se), color) in enumerate(zip(ses.items(), colors)):
+    lo, hi = b - 1.96 * se, b + 1.96 * se
+    ax.plot([lo, hi], [i, i], color=color, lw=5, solid_capstyle="round")
+    ax.plot(b, i, "o", color=bse_style.BLACK, ms=8)
+    ax.text(hi + 0.4, i, f"se = {se:.2f}   [{lo:.1f}, {hi:.1f}]", va="center", fontsize=12)
+ax.set_yticks(range(len(ses)))
+ax.set_yticklabels(ses.keys(), fontsize=13)
+ax.set_xlabel(r"95% confidence interval for $\beta_{area}$")
+ax.set_xlim(b - 15, b + 22)
+ax.set_ylim(-0.6, len(ses) - 0.4)
+ax.invert_yaxis()
+ax.grid(axis="y", visible=False)
+plt.tight_layout()
+plt.show()
 ```
 
-```{=html}
-<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
-Linear regression                               Number of obs     =        321
-                                                F(2, 6)           =      88.92
-                                                Prob > F          =     0.0000
-                                                R-squared         =     0.4300
-                                                Root MSE          =      32735
+*Same coefficient estimate for `area`, but wider confidence intervals under robust and paired bootstrap SEs.*
 
-                                    (Std. err. adjusted for 7 clusters in nbh)
-------------------------------------------------------------------------------
-             |               Robust
-       price | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        area |   35.56307   7.672663     4.64   0.004     16.78874    54.33739
-       rooms |   6604.305   3148.177     2.10   0.081    -1099.006    14307.62
-       _cons |  -22314.85   13356.84    -1.67   0.146    -54997.86    10368.16
-------------------------------------------------------------------------------
-
-</pre>
-```
-
+# Thanks! {background-color="#0396A6"}

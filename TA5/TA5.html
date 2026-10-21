@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="TA5_files/libs/clipboard/clipboard.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="TA5_files/libs/clipboard/clipboard.min.js"></script>
 <script src="TA5_files/libs/quarto-html/tabby.min.js"></script>
 <script src="TA5_files/libs/quarto-html/popper.min.js"></script>
 <script src="TA5_files/libs/quarto-html/tippy.umd.min.js"></script>
@@ -96,12 +96,11 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="TA5_files/libs/revealjs/dist/theme/quarto-f563837468303362081e247dddd440d0.css">
+  <link rel="stylesheet" href="TA5_files/libs/revealjs/dist/theme/quarto-7f3deb6ae4601429a8f92596a36d44fa.css">
+  <link rel="stylesheet" href="ta5-widgets.css">
   <link href="TA5_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="TA5_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="TA5_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="TA5_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
-  <link href="TA5_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
   <link href="TA5_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
     .reveal div.sourceCode {
@@ -190,14 +189,17 @@
       margin-right: 0; 
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+  
+  <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 </head>
 <body class="quarto-light">
   <div class="reveal">
     <div class="slides">
 
-<section id="title-slide" data-background-position="95% 90%" data-background-size="100px" class="quarto-title-block center">
+<section id="title-slide" data-background-color="#0396A6" data-background-image="../theme/assets/cover-graphic.svg" data-background-position="92% 50%" data-background-repeat="no-repeat" data-background-size="34%" class="quarto-title-block center">
   <h1 class="title">Econometrics</h1>
-  <p class="subtitle"><span class="subtitle-text">TA Session 5</span></p>
+  <p class="subtitle"></p><p><span class="subtitle-text">TA Session 5</span></p><p></p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -205,36 +207,223 @@
 Lucia Sauer 
 </div>
         <p class="quarto-title-affiliation">
+            </p><p class="cover-affiliation">
             <em>Barcelona School of Economics</em>
-          </p>
+            </p>
+            <p class="cover-contact">
+            <svg width="13" height="13" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 5h18v14H3z"></path><path d="M3 6l9 7 9-7"></path>
+            </svg>
+            <a href="mailto:lucia.sauer@bse.eu">lucia.sauer@bse.eu</a>
+            </p>
+          <p></p>
     </div>
 </div>
 
   <p class="date">2025-10-22</p>
 </section>
-<section id="overview" class="slide level2">
+<section id="overview" class="slide level2" data-background-color="#0396A6">
 <h2>Overview</h2>
 <ul>
-<li>Visual Inspection of Heteroskedasticity</li>
-<li>Testing for Heteroskedasticity: Breusch-Pagan Test</li>
-<li>Classical vs.&nbsp;Robust Standard Errors</li>
-<li>Bootstrapped Standard Errors in Stata</li>
-<li>Clustered Data and Cluster-Robust Standard Errors</li>
+<li>Monte Carlo experiments: consistency of the sample mean and of OLS</li>
+<li>Heteroskedasticity: visual inspection, Breusch-Pagan test, robust standard errors</li>
+<li>Bootstrapped standard errors: the paired bootstrap</li>
 </ul>
 </section>
-<section id="non-spherical-disturbances" class="slide level2">
+<section id="monte-carlo-experiments-consistency" class="slide level2 section-divider-centered" data-background-color="#0396A6">
+<h2>Monte Carlo Experiments: Consistency</h2>
+</section>
+<section id="from-ta3-to-consistency" class="slide level2">
+<h2>From TA3 to consistency</h2>
+<p>In TA3 we <strong>fixed</strong> <span class="math inline">\(n\)</span> and looked at the sampling distribution of an estimator across many samples. Now we let <span class="math inline">\(n\)</span> <strong>grow</strong>.</p>
+<div title="Consistency">
+<div class="callout callout-note no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Consistency</strong></p>
+</div>
+<div class="callout-content">
+<p>An estimator <span class="math inline">\(\hat\theta_n\)</span> is <strong>consistent</strong> for <span class="math inline">\(\theta\)</span> if it converges in probability to <span class="math inline">\(\theta\)</span>:</p>
+<p><span class="math display">\[\text{plim}_{n \to \infty}\; \hat\theta_n = \theta\]</span></p>
+</div>
+</div>
+</div>
+</div>
+<p><strong>The picture we want to see:</strong> as <span class="math inline">\(n\)</span> grows, the sampling distribution of <span class="math inline">\(\hat\theta_n\)</span> <strong>collapses</strong> onto the true value <span class="math inline">\(\theta\)</span>.</p>
+<p>The Monte Carlo recipe is the same as in TA3, repeated for several sample sizes.</p>
+</section>
+<section id="seeing-it-the-sample-mean" class="slide level2">
+<h2>Seeing it: the sample mean</h2>
+<div class="columns mc-widget-root" data-modes="montecarlo" style="align-items:flex-start;">
+<div class="column" style="width:34%;">
+<div class="widget-controls">
+  <div class="widget-step">1 · Population</div>
+  <select class="mc-dist">
+    <option value="uniform">Uniform</option>
+    <option value="normal">Normal</option>
+    <option value="studentt">Student T</option>
+    <option value="chisquare">Chi Squared</option>
+    <option value="exponential" selected="">Exponential</option>
+    <option value="centralF">Fisher–Snedecor</option>
+  </select>
+  <div class="widget-step">2 · Sample size</div>
+  <div class="slider-row">
+    <label>\(n\) = <span class="mc-n-value">30</span></label>
+    <input class="mc-n" type="range" min="0" max="10" step="1" value="4" data-values="3,5,10,20,30,50,100,200,300,500,1000">
+  </div>
+  <div class="btn-row"><button class="widget-btn primary mc-sample">Sample</button></div>
+  <div class="widget-step">3 · Repeat the experiment</div>
+  <p>Draw new samples from the population and average each one.</p>
+  <div class="btn-row">
+    <button class="widget-btn mc-resample">New sample</button>
+    <button class="widget-btn mc-resample-100">100 new samples</button>
+  </div>
+  <p style="font-size:0.85em;">Move \(n\) from 10 to 1,000 (click <b>Sample</b> after changing it) and watch the histogram collapse onto \(\mu\).</p>
+  <div class="widget-credit">Adapted from <a href="https://seeing-theory.brown.edu/frequentist-inference/index.html#section3" target="_blank">Seeing Theory</a> (D. Kunin et al., Brown University).</div>
+</div>
+</div><div class="column" style="width:66%;">
+<div class="mc-svg" style="height:450px;"></div>
+<div class="widget-stats mc-stats">&nbsp;</div>
+</div></div>
+</section>
+<section id="consistency-of-the-sample-mean-your-dgp" class="slide level2">
+<h2>Consistency of the sample mean: your dgp</h2>
+<div id="4f4704b4" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href=""></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">0</span>)</span>
+<span id="cb1-2"><a href=""></a></span>
+<span id="cb1-3"><a href=""></a><span class="kw">def</span> simulate_means(n, R<span class="op">=</span><span class="dv">1000</span>, mu<span class="op">=</span><span class="dv">0</span>, sigma<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb1-4"><a href=""></a>    <span class="co">"""Generate R samples of size n de from a Normal(mu, sigma) and return R means"""</span></span>
+<span id="cb1-5"><a href=""></a>    means <span class="op">=</span> np.zeros(R)</span>
+<span id="cb1-6"><a href=""></a>    <span class="cf">for</span> r <span class="kw">in</span> <span class="bu">range</span>(R):</span>
+<span id="cb1-7"><a href=""></a>        sample <span class="op">=</span> rng.normal(loc<span class="op">=</span>mu, scale<span class="op">=</span>sigma, size<span class="op">=</span>n)   <span class="co"># a sample of size n</span></span>
+<span id="cb1-8"><a href=""></a>        means[r] <span class="op">=</span> sample.mean()                           <span class="co"># store the mean</span></span>
+<span id="cb1-9"><a href=""></a>    <span class="cf">return</span> means</span>
+<span id="cb1-10"><a href=""></a></span>
+<span id="cb1-11"><a href=""></a><span class="co"># example: z ~ Normal(2, 1)</span></span>
+<span id="cb1-12"><a href=""></a>mu, sigma <span class="op">=</span> <span class="dv">2</span>, <span class="dv">1</span></span>
+<span id="cb1-13"><a href=""></a>ns <span class="op">=</span> [<span class="dv">10</span>, <span class="dv">100</span>, <span class="dv">1_000</span>, <span class="dv">10_000</span>]</span>
+<span id="cb1-14"><a href=""></a>means <span class="op">=</span> {n: simulate_means(n, mu<span class="op">=</span>mu, sigma<span class="op">=</span>sigma) <span class="cf">for</span> n <span class="kw">in</span> ns}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div title="Your turn">
+<div class="callout callout-warning no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Your turn</strong></p>
+</div>
+<div class="callout-content">
+<p>Propose another dgp for <span class="math inline">\(z\)</span>: change <code>rng.uniform(0, 10, size)</code>, <code>rng.chisquare(4, size)</code>, <code>rng.poisson(3, size)</code> and re-run the next plot.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="the-sample-mean-collapses-onto-mu" class="slide level2">
+<h2>The sample mean collapses onto <span class="math inline">\(\mu\)</span></h2>
+<div class="panel-tabset">
+<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">Code</a></li><li><a href="#tabset-1-2">Output</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1">
+<div id="4d43291e" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href=""></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="fl">4.2</span>))</span>
+<span id="cb2-2"><a href=""></a><span class="cf">for</span> n <span class="kw">in</span> ns:</span>
+<span id="cb2-3"><a href=""></a>    sns.kdeplot(means[n], fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>, label<span class="op">=</span><span class="ss">f"n = </span><span class="sc">{</span>n<span class="sc">:,}</span><span class="ss">"</span>, ax<span class="op">=</span>ax)</span>
+<span id="cb2-4"><a href=""></a>ax.axvline(mu, color<span class="op">=</span><span class="st">"black"</span>, ls<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="vs">r"</span><span class="dv">$\m</span><span class="vs">u</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb2-5"><a href=""></a>ax.set_xlabel(<span class="vs">r"</span><span class="dv">$\b</span><span class="vs">ar z_n</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb2-6"><a href=""></a>ax.legend()</span>
+<span id="cb2-7"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-1-2">
+<div id="40ec40f1" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div>
+<figure>
+<p><img data-src="TA5_files/figure-revealjs/cell-5-output-1.png"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Same x-axis in every panel: as <span class="math inline">\(n\)</span> grows the KDE gets <strong>narrower and taller</strong> around <span class="math inline">\(\mu = 2\)</span>.</p>
+</section>
+<section id="consistency-of-ols-a-dgp-with-four-regressors" class="slide level2">
+<h2>Consistency of OLS: a dgp with four regressors</h2>
+<div class="eq-box-wrap">
+<div class="eq-box">
+<p><span class="math display">\[y_i = 1 + 2\,x_{i2} - 1\,x_{i3} + 0.5\,x_{i4} + \varepsilon_i\]</span></p>
+<p><span class="math display">\[x_{i2} \sim N(0,1), \qquad x_{i3} = 0.5\,x_{i2} + u_i,\;\; u_i \sim N(0,1), \qquad x_{i4} \sim \text{Bernoulli}(0.3)\]</span></p>
+<p><span class="math display">\[\varepsilon_i = \frac{\chi^2_i(3) - 3}{\sqrt 6}\;\; \text{(independent of } X\text{)}\]</span></p>
+</div>
+</div>
+<ul>
+<li><span class="math inline">\(x_2\)</span> and <span class="math inline">\(x_3\)</span> are <strong>correlated</strong>; <span class="math inline">\(x_4\)</span> is a dummy</li>
+<li>The error is <strong>not normal</strong> (skewed), but it has mean 0 and is independent of the regressors</li>
+</ul>
+<div title="Recall from lecture">
+<div class="callout callout-note no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Recall from lecture</strong></p>
+</div>
+<div class="callout-content">
+<p>OLS is consistent if the observations are i.i.d., <span class="math inline">\(E(x_i\varepsilon_i) = 0\)</span>, and <span class="math inline">\(\text{plim}\,\frac{X'X}{n}\)</span> exists and is finite and non-singular. Normality is <strong>not</strong> needed.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="monte-carlo-in-code" class="slide level2">
+<h2>Monte Carlo in code</h2>
+<div id="a2f7d6cf" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb3" data-code-line-numbers="1|3-5|6-9|10-12|13"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href=""></a>BETA <span class="op">=</span> np.array([<span class="dv">1</span>, <span class="dv">2</span>, <span class="op">-</span><span class="dv">1</span>, <span class="fl">0.5</span>])</span>
+<span id="cb3-2"><a href=""></a></span>
+<span id="cb3-3"><a href=""></a><span class="kw">def</span> simulate_ols(n, R<span class="op">=</span><span class="dv">1000</span>, seed<span class="op">=</span><span class="dv">0</span>):</span>
+<span id="cb3-4"><a href=""></a>    rng <span class="op">=</span> np.random.default_rng(seed)</span>
+<span id="cb3-5"><a href=""></a>    betas <span class="op">=</span> np.empty((R, <span class="dv">4</span>))</span>
+<span id="cb3-6"><a href=""></a>    <span class="cf">for</span> r <span class="kw">in</span> <span class="bu">range</span>(R):</span>
+<span id="cb3-7"><a href=""></a>        x2 <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, n)</span>
+<span id="cb3-8"><a href=""></a>        x3 <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> x2 <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, n)</span>
+<span id="cb3-9"><a href=""></a>        x4 <span class="op">=</span> rng.binomial(<span class="dv">1</span>, <span class="fl">0.3</span>, n)</span>
+<span id="cb3-10"><a href=""></a>        eps <span class="op">=</span> (rng.chisquare(<span class="dv">3</span>, n) <span class="op">-</span> <span class="dv">3</span>) <span class="op">/</span> np.sqrt(<span class="dv">6</span>)</span>
+<span id="cb3-11"><a href=""></a>        X <span class="op">=</span> np.column_stack([np.ones(n), x2, x3, x4])</span>
+<span id="cb3-12"><a href=""></a>        y <span class="op">=</span> X <span class="op">@</span> BETA <span class="op">+</span> eps</span>
+<span id="cb3-13"><a href=""></a>        betas[r] <span class="op">=</span> np.linalg.solve(X.T <span class="op">@</span> X, X.T <span class="op">@</span> y)</span>
+<span id="cb3-14"><a href=""></a>    <span class="cf">return</span> betas</span>
+<span id="cb3-15"><a href=""></a></span>
+<span id="cb3-16"><a href=""></a>ns_ols <span class="op">=</span> [<span class="dv">50</span>, <span class="dv">200</span>, <span class="dv">1_000</span>, <span class="dv">5_000</span>]</span>
+<span id="cb3-17"><a href=""></a>betas_by_n <span class="op">=</span> {n: simulate_ols(n) <span class="cf">for</span> n <span class="kw">in</span> ns_ols}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="ols-estimates-collapse-onto-the-true-betas" class="slide level2">
+<h2>OLS estimates collapse onto the true <span class="math inline">\(\beta\)</span>’s</h2>
+
+<img data-src="TA5_files/figure-revealjs/cell-7-output-1.png" class="r-stretch"><p>For <strong>every</strong> estimated coeff., the KDE gets narrower and taller around the true value as <span class="math inline">\(n\)</span> grows, even though <span class="math inline">\(\varepsilon\)</span> is not normal.</p>
+</section>
+<section id="non-spherical-disturbances" class="slide level2 section-divider-centered" data-background-color="#0396A6">
 <h2>Non-spherical disturbances</h2>
-<p>The spherical disturbances includes two assumptions on the behavior of the disturbances:</p>
+</section>
+<section id="spherical-disturbances" class="slide level2">
+<h2>Spherical disturbances</h2>
+<p>The <strong>spherical disturbances</strong> assumption includes two assumptions on the behaviour of the disturbances:</p>
 <ol type="1">
-<li><p>Homoskedasticity <span class="math inline">\(var(\epsilon_i|X) = \sigma^2\)</span></p></li>
-<li><p>Uncorrelatedness <span class="math inline">\(cov(\epsilon_i, \epsilon_j|X) = 0, \forall i \neq j\)</span></p></li>
+<li><strong>Homoskedasticity</strong>: <span class="math inline">\(\;var(\varepsilon_i \mid X) = \sigma^2\)</span></li>
+<li><strong>Uncorrelatedness</strong>: <span class="math inline">\(\;cov(\varepsilon_i, \varepsilon_j \mid X) = 0, \;\; \forall i \neq j\)</span></li>
 </ol>
-<p>Now, we will consider the possibility of abandoning one of these assumptions, and see how the estimation and inference procedures change.</p>
+<div class="eq-box-wrap">
+<div class="eq-box">
+<p><span class="math display">\[Var(\varepsilon \mid X) = \sigma^2 I_n\]</span></p>
+</div>
+</div>
+<p>Now we consider the possibility of abandoning one of these assumptions, and see how estimation and inference change.</p>
 </section>
 <section id="heteroskedasticity" class="slide level2">
 <h2>1. Heteroskedasticity</h2>
-<p>Let’s start by relaxing the homoskedasticity assumption: <span class="math display">\[var(\epsilon_i|X) = \sigma^2_i\]</span></p>
-<p>The variance-covariance matrix of the disturbances is now: <span class="math display">\[\Sigma = \begin{bmatrix}
+<p>Let’s start by relaxing the homoskedasticity assumption:</p>
+<p><span class="math display">\[var(\varepsilon_i \mid X) = \sigma^2_i\]</span></p>
+<p>The variance-covariance matrix of the disturbances is now:</p>
+<p><span class="math display">\[\Sigma = \begin{bmatrix}
 \sigma_1^2 &amp; 0 &amp; 0 &amp; \cdots &amp; 0 \\
 0 &amp; \sigma_2^2 &amp; 0 &amp; \cdots &amp; 0 \\
 0 &amp; 0 &amp; \sigma_3^2 &amp; \cdots &amp; 0 \\
@@ -243,54 +432,172 @@ Lucia Sauer
 \end{bmatrix}
 \]</span></p>
 </section>
-<section class="slide level2">
-
-<h3 id="visual-inspection-of-heteroskedasticity">1.1 Visual Inspection of Heteroskedasticity</h3>
+<section id="house-prices-data" class="slide level2">
+<h2>House prices data</h2>
+<p>The <code>hprice3</code> dataset (Wooldridge) contains 321 house sales. We estimate:</p>
 <p><span class="math display">\[
-price_i = \beta_1 + \beta_2 area_i + \beta_3 rooms_i + \epsilon_i
+price_i = \beta_1 + \beta_2\, area_i + \beta_3\, rooms_i + \varepsilon_i
 \]</span></p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource {stata} number-lines code-with-copy"><code class="sourceCode"><span id="cb1-1"><a href=""></a>clear all</span>
-<span id="cb1-2"><a href=""></a>bcuse hprice3, clear</span>
-<span id="cb1-3"><a href=""></a>regress price area rooms</span>
-<span id="cb1-4"><a href=""></a>rvpplot area</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="center">
-<p><img data-src="visual_inspection.png" style="width:80.0%"></p>
+<div id="82bb422b" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href=""></a><span class="im">import</span> wooldridge <span class="im">as</span> woo</span>
+<span id="cb4-2"><a href=""></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb4-3"><a href=""></a></span>
+<span id="cb4-4"><a href=""></a>df <span class="op">=</span> woo.dataWoo(<span class="st">"hprice3"</span>)</span>
+<span id="cb4-5"><a href=""></a>model <span class="op">=</span> smf.ols(<span class="st">"price ~ area + rooms"</span>, data<span class="op">=</span>df).fit()</span>
+<span id="cb4-6"><a href=""></a>df[[<span class="st">"price"</span>, <span class="st">"area"</span>, <span class="st">"rooms"</span>, <span class="st">"nbh"</span>]].head(<span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+
+<table class="dataframe caption-top" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header" style="text-align: right;">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">price</th>
+<th data-quarto-table-cell-role="th">area</th>
+<th data-quarto-table-cell-role="th">rooms</th>
+<th data-quarto-table-cell-role="th">nbh</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>60000.0</td>
+<td>1660</td>
+<td>7</td>
+<td>4</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>40000.0</td>
+<td>2612</td>
+<td>6</td>
+<td>4</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>34000.0</td>
+<td>1144</td>
+<td>6</td>
+<td>4</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>63900.0</td>
+<td>1136</td>
+<td>5</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="visual-inspection-of-heteroskedasticity" class="slide level2">
+<h2>1.1 Visual inspection of heteroskedasticity</h2>
+<div class="panel-tabset">
+<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">Code</a></li><li><a href="#tabset-2-2">Output</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1">
+<div id="3bd83964" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href=""></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="fl">4.2</span>))</span>
+<span id="cb5-2"><a href=""></a>ax.scatter(df[<span class="st">"area"</span>], model.resid, color<span class="op">=</span>bse_style.TEAL, s<span class="op">=</span><span class="dv">30</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb5-3"><a href=""></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span>bse_style.PURPLE, ls<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb5-4"><a href=""></a>ax.set_xlabel(<span class="st">"Area (square feet)"</span>)</span>
+<span id="cb5-5"><a href=""></a>ax.set_ylabel(<span class="st">"Residuals"</span>)</span>
+<span id="cb5-6"><a href=""></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-2-2">
+<div id="6a70677d" class="cell" data-execution_count="9">
+<div class="cell-output cell-output-display">
+<div>
+<figure>
+<p><img data-src="TA5_files/figure-revealjs/cell-10-output-1.png"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div title="Question">
+<div class="callout callout-warning no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Question</strong></p>
+</div>
+<div class="callout-content">
+<p>Does the spread of the residuals look constant as <code>area</code> grows?</p>
+</div>
+</div>
+</div>
 </div>
 </section>
 <section id="testing-for-heteroskedasticity" class="slide level2">
-<h2>2. Testing for Heteroskedasticity</h2>
-<p>Breusch-Pagan Test for the presence of heteroskedasticity:</p>
-<div title="BP Steps">
+<h2>2. Testing for heteroskedasticity</h2>
+<div title="Breusch-Pagan steps">
 <div class="callout callout-note no-icon callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
-<p><strong>BP Steps</strong></p>
+<p><strong>Breusch-Pagan steps</strong></p>
 </div>
 <div class="callout-content">
 <ol type="1">
-<li><p>Estimate the original model and obtain the SSE</p></li>
-<li><p>Set auxiliary regression:</p></li>
+<li>Estimate the original model and obtain the residuals <span class="math inline">\(\hat\varepsilon_i\)</span></li>
+<li>Run the auxiliary regression: <span class="math display">\[\hat{\varepsilon}_i^{2} = \alpha_1 + \alpha_2\, area_i + \alpha_3\, rooms_i + v_i\]</span></li>
+<li>Test <span class="math inline">\(\;H_0: \alpha_2 = \alpha_3 = 0\)</span> (homoskedasticity) <span class="math inline">\(\;\)</span> vs.&nbsp;<span class="math inline">\(\;H_1:\)</span> at least one <span class="math inline">\(\alpha_j \neq 0\)</span> (heteroskedasticity)</li>
 </ol>
-<p><span class="math display">\[
-\hat{\epsilon}_i^{2} = \alpha_1 + \alpha_2 area_i + \alpha_3 rooms_i + v_i
+</div>
+</div>
+</div>
+</div>
+<p><strong>Finite sample version</strong> <span class="math display">\[
+F = \frac{(\widetilde{RSSE} - \widetilde{SSE})/2}{\widetilde{SSE}/(321-3)}\underset{H_0}{\sim} F_{2,\, 321-3}
 \]</span></p>
-<ol start="3" type="1">
-<li>Then perform the test:</li>
-</ol>
-<p><span class="math display">\[
-H_0: \alpha_2 = \alpha_3 = 0 \quad (homoskedasticity)
-\]</span> <span class="math display">\[
-H_1: \text{at least one } \alpha_i \neq 0 \quad (heteroskedasticity)
+<p><strong>Asymptotic version</strong> <span class="math display">\[
+n \widetilde{R}^2 \underset{H_0}{\overset{a}{\sim}} \chi^2(2)
 \]</span></p>
-<p>using the statistic:</p>
-<ul>
-<li><p>Finite sample version: <span class="math display">\[
-F = \frac{RSSE - SSE/2}{SSE/321-3}\underset{H_0}{\sim} F_{2, 321-3}
-\]</span></p></li>
-<li><p>Asymptotic version: <span class="math display">\[
-n \tilde{R}^2 \underset{H_0}{\overset{a}{\sim}} \chi^2(2)
-\]</span></p></li>
-</ul>
+</section>
+<section id="breusch-pagan-test-in-python" class="slide level2">
+<h2>Breusch-Pagan test in Python</h2>
+<p><strong>By hand</strong>: the auxiliary regression</p>
+<div id="468e65a1" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href=""></a>df[<span class="st">"resid2"</span>] <span class="op">=</span> model.resid <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb6-2"><a href=""></a>aux <span class="op">=</span> smf.ols(<span class="st">"resid2 ~ area + rooms"</span>, data<span class="op">=</span>df).fit()</span>
+<span id="cb6-3"><a href=""></a></span>
+<span id="cb6-4"><a href=""></a>n <span class="op">=</span> <span class="bu">len</span>(df)</span>
+<span id="cb6-5"><a href=""></a><span class="bu">print</span>(<span class="ss">f"F     = </span><span class="sc">{</span>aux<span class="sc">.</span>fvalue<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb6-6"><a href=""></a><span class="bu">print</span>(<span class="ss">f"p     = </span><span class="sc">{</span>aux<span class="sc">.</span>f_pvalue<span class="sc">:.2e}</span><span class="ss">"</span>)</span>
+<span id="cb6-7"><a href=""></a><span class="bu">print</span>(<span class="ss">f"n R^2 = </span><span class="sc">{</span>n <span class="op">*</span> aux<span class="sc">.</span>rsquared<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>F     = 35.3295
+p     = 1.39e-14
+n R^2 = 58.3584</code></pre>
+</div>
+</div>
+<div title="Question">
+<div class="callout callout-warning no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Question</strong></p>
+</div>
+<div class="callout-content">
+<p>At <span class="math inline">\(\alpha = 5\%\)</span>, do we reject homoskedasticity? What does that imply for the standard errors of our regression?</p>
 </div>
 </div>
 </div>
@@ -298,24 +605,30 @@ n \tilde{R}^2 \underset{H_0}{\overset{a}{\sim}} \chi^2(2)
 </section>
 <section id="classical-se" class="slide level2">
 <h2>Classical SE</h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource {stata} number-lines code-with-copy"><code class="sourceCode"><span id="cb2-1"><a href=""></a>reg price rooms area</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
-      Source |       SS           df       MS      Number of obs   =       321
--------------+----------------------------------   F(2, 318)       =    119.95
-       Model |  2.5709e+11         2  1.2854e+11   Prob &gt; F        =    0.0000
-    Residual |  3.4077e+11       318  1.0716e+09   R-squared       =    0.4300
--------------+----------------------------------   Adj R-squared   =    0.4264
-       Total |  5.9785e+11       320  1.8683e+09   Root MSE        =     32735
-
+<div id="852bec71" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href=""></a>summary <span class="op">=</span> model.summary(slim<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-2"><a href=""></a><span class="bu">print</span>(summary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                  price   R-squared:                       0.430
+Model:                            OLS   Adj. R-squared:                  0.426
+No. Observations:                 321   F-statistic:                     120.0
+Covariance Type:            nonrobust   Prob (F-statistic):           1.52e-39
+==============================================================================
+                 coef    std err          t      P&gt;|t|      [0.025      0.975]
 ------------------------------------------------------------------------------
-       price | Coefficient  Std. err.      t    P&gt;|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        area |   35.56307   3.114753    11.42   0.000     29.43494    41.69119
-       rooms |   6604.305   2401.922     2.75   0.006     1878.639    11329.97
-       _cons |  -22314.85   13628.21    -1.64   0.103     -49127.7    4497.993
-------------------------------------------------------------------------------
+Intercept  -2.231e+04   1.36e+04     -1.637      0.103   -4.91e+04    4497.993
+area          35.5631      3.115     11.418      0.000      29.435      41.691
+rooms       6604.3052   2401.922      2.750      0.006    1878.639    1.13e+04
+==============================================================================
 
-</pre>
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+[2] The condition number is large, 1.68e+04. This might indicate that there are
+strong multicollinearity or other numerical problems.</code></pre>
+</div>
+</div>
 <div title="Question">
 <div class="callout callout-warning no-icon callout-titled callout-style-default">
 <div class="callout-body">
@@ -324,7 +637,7 @@ n \tilde{R}^2 \underset{H_0}{\overset{a}{\sim}} \chi^2(2)
 </div>
 <div class="callout-content">
 <ul>
-<li>How does the behavior of OLS estimator change under non-spherical disturbances?</li>
+<li>How does the behaviour of the OLS estimator change under non-spherical disturbances?</li>
 <li>Which properties of the estimator remain and which ones are lost?</li>
 </ul>
 </div>
@@ -334,25 +647,25 @@ n \tilde{R}^2 \underset{H_0}{\overset{a}{\sim}} \chi^2(2)
 </section>
 <section id="robust-se" class="slide level2">
 <h2>Robust SE</h2>
-<p>How to correctly estimate the model under the presence of heteroskedasticity?</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource {stata} number-lines code-with-copy"><code class="sourceCode"><span id="cb3-1"><a href=""></a>reg price rooms area, vce(robust)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">Linear regression                               Number of obs     =        321
-                                                F(2, 318)         =      80.07
-                                                Prob &gt; F          =     0.0000
-                                                R-squared         =     0.4300
-                                                Root MSE          =      32735
-
+<p>Under heteroskedasticity, <span class="math inline">\(\hat\beta\)</span> is still unbiased, but <span class="math inline">\(\hat\sigma^2(X'X)^{-1}\)</span> is no longer its variance. The <strong>robust</strong> (White, HC1) estimator is:</p>
+<div class="eq-box-wrap">
+<div class="eq-box" style="padding: 8px 18px;">
+<p><span class="math display">\[\widehat{Var}_{HC1}(\hat\beta) = \frac{n}{n-K}\,(X'X)^{-1}\Big(\sum_{i=1}^n \hat\varepsilon_i^2\, x_i x_i'\Big)(X'X)^{-1}\]</span></p>
+</div>
+</div>
+<div id="c159cbec" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href=""></a>model_robust <span class="op">=</span> smf.ols(<span class="st">"price ~ area + rooms"</span>, data<span class="op">=</span>df).fit(cov_type<span class="op">=</span><span class="st">"HC1"</span>)</span>
+<span id="cb10-2"><a href=""></a><span class="bu">print</span>(model_robust.summary(slim<span class="op">=</span><span class="va">True</span>).tables[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>==============================================================================
+                 coef    std err          z      P&gt;|z|      [0.025      0.975]
 ------------------------------------------------------------------------------
-             |               Robust
-       price | Coefficient  std. err.      t    P&gt;|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        area |   35.56307   4.816768     7.38   0.000     26.08631    45.03982
-       rooms |   6604.305   2501.109     2.64   0.009     1683.492    11525.12
-       _cons |  -22314.85   12067.17    -1.85   0.065    -46056.43    1426.722
-------------------------------------------------------------------------------
-
-
-</pre>
+Intercept  -2.231e+04   1.21e+04     -1.849      0.064    -4.6e+04    1336.364
+area          35.5631      4.817      7.383      0.000      26.122      45.004
+rooms       6604.3052   2501.109      2.641      0.008    1702.221    1.15e+04
+==============================================================================</code></pre>
+</div>
+</div>
 <div title="Question">
 <div class="callout callout-warning no-icon callout-titled callout-style-default">
 <div class="callout-body">
@@ -360,96 +673,217 @@ n \tilde{R}^2 \underset{H_0}{\overset{a}{\sim}} \chi^2(2)
 <p><strong>Question</strong></p>
 </div>
 <div class="callout-content">
-<p>Elements that change and why?</p>
+<p>Which elements of the output change and why?</p>
 </div>
 </div>
 </div>
 </div>
 </section>
-<section id="bootstrapped-se" class="slide level2">
-<h2>Bootstrapped SE</h2>
-<p>Illustration of how the <a href="https://seeing-theory.brown.edu/frequentist-inference/index.html#section3">Boostraping</a> works.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource {stata} number-lines code-with-copy"><code class="sourceCode"><span id="cb4-1"><a href=""></a>bootstrap, reps(500) seed(123): regress price rooms area</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">Linear regression                                   Number of obs =        321
-                                                    Replications  =        500
-                                                    Wald chi2(2)  =     149.93
-                                                    Prob &gt; chi2   =     0.0000
-                                                    R-squared     =     0.4300
-                                                    Adj R-squared =     0.4264
-                                                    Root MSE      = 32735.2613
+<section id="bootstrapped-standard-errors" class="slide level2 section-divider-centered" data-background-color="#0396A6">
+<h2>Bootstrapped Standard Errors</h2>
+</section>
+<section id="the-bootstrap-idea" class="slide level2">
+<h2>The bootstrap idea</h2>
+<p>The robust SE needs a <strong>formula</strong>. For many estimators the formula is hard (or impossible) to derive. The <strong>bootstrap</strong> estimates the standard error by <strong>resampling</strong> the data we have.</p>
+<p><br></p>
+<p>Remember the Monte Carlo experiment from TA3: draw many samples <strong>from the population</strong>, compute the estimator in each, look at the spread.</p>
+<p><span style="color:#F28627; font-weight:600;">The problem:</span> with real data we do not know the population.</p>
+<div title="The bootstrap trick">
+<div class="callout callout-tip no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>The bootstrap trick</strong></p>
+</div>
+<div class="callout-content">
+<p>Treat the <strong>observed sample</strong> as if it were the population: draw many samples of size <span class="math inline">\(n\)</span> <strong>with replacement</strong> from it, compute the estimator in each, and use the sd of those estimates as the standard error.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="seeing-it-monte-carlo-vs.-bootstrap" class="slide level2">
+<h2>Seeing it: Monte Carlo vs.&nbsp;Bootstrap</h2>
+<div class="columns mc-widget-root" style="align-items:flex-start;">
+<div class="column" style="width:34%;">
+<div class="widget-controls">
+  <div class="widget-step">1 · Population</div>
+  <select class="mc-dist">
+    <option value="uniform">Uniform</option>
+    <option value="normal">Normal</option>
+    <option value="studentt">Student T</option>
+    <option value="chisquare">Chi Squared</option>
+    <option value="exponential" selected="">Exponential</option>
+    <option value="centralF">Fisher–Snedecor</option>
+  </select>
+  <div class="widget-step">2 · Your one sample</div>
+  <div class="slider-row">
+    <label>\(n\) = <span class="mc-n-value">30</span></label>
+    <input class="mc-n" type="range" min="0" max="10" step="1" value="4" data-values="3,5,10,20,30,50,100,200,300,500,1000">
+  </div>
+  <div class="btn-row"><button class="widget-btn primary mc-sample">Sample</button></div>
+  <div class="widget-step">3 · Repeat the experiment</div>
+  <div class="mc-mode">
+    <button class="widget-btn" data-mode="montecarlo">Monte Carlo</button>
+    <button class="widget-btn" data-mode="bootstrap">Bootstrap</button>
+  </div>
+  <div class="btn-row">
+    <button class="widget-btn mc-resample">New sample</button>
+    <button class="widget-btn mc-resample-100">100 new samples</button>
+  </div>
+  <p style="font-size:0.85em;">Run both modes: the active one is drawn as bars, the other one as an outline.</p>
+  <div class="widget-credit">Adapted from <a href="https://seeing-theory.brown.edu/frequentist-inference/index.html#section3" target="_blank">Seeing Theory</a> (D. Kunin et al., Brown University).</div>
+</div>
+</div><div class="column" style="width:66%;">
+<div class="mc-svg" style="height:450px;"></div>
+<div class="widget-stats mc-stats">&nbsp;</div>
+</div></div>
+<!-- ## Monte Carlo vs. Bootstrap
 
-------------------------------------------------------------------------------
-             |   Observed   Bootstrap                         Normal-based
-       price | coefficient  std. err.      z    P&gt;|z|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        area |   35.56307   4.613844     7.71   0.000      26.5201    44.60603
-       rooms |   6604.305   2457.818     2.69   0.007     1787.071    11421.54
-       _cons |  -22314.85    12407.4    -1.80   0.072    -46632.92    2003.211
-------------------------------------------------------------------------------
+| | Monte Carlo | Bootstrap |
+|---|---|---|
+| Each replication draws from | the **population** (DGP) | the **observed sample**, with replacement |
+| Requires | knowing the DGP | only the data |
+| Distribution centred at | $\mu$ (or $\beta$) | $\bar x$ (or $\hat\beta$) |
+| sd of the replications | the **true** standard error | an **estimate** of the standard error |
+| Used to | study an estimator in the lab | do inference with real data |
 
-</pre>
+::: {.callout-warning title="Try it" icon=false}
+1. With $n = 30$, run 300 replications in each mode. How close is the bootstrap SE to the Monte Carlo SE?
+2. Click **Sample** again and repeat the bootstrap: does the bootstrap SE change? Does the Monte Carlo SE?
+3. Move $n$ to 5. Why does the bootstrap work worse with very small samples?
+::: -->
+</section>
+<section id="paired-bootstrap-se-for-ols" class="slide level2">
+<h2>Paired bootstrap SE for OLS</h2>
+<p>The same recipe works for <span class="math inline">\(\hat\beta\)</span>: resample <strong>rows</strong> <span class="math inline">\((y_i, x_i)\)</span> with replacement, keeping each <span class="math inline">\(y_i\)</span> together with its <span class="math inline">\(x_i\)</span> (the <strong>paired</strong> bootstrap).</p>
+<div class="columns">
+<div class="column" style="width:58%;">
+<div id="0a4799bd" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb12" data-code-line-numbers="1-2|4-6|7-8|10-11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href=""></a>B <span class="op">=</span> <span class="dv">500</span></span>
+<span id="cb12-2"><a href=""></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">123</span>)</span>
+<span id="cb12-3"><a href=""></a></span>
+<span id="cb12-4"><a href=""></a>boot <span class="op">=</span> []</span>
+<span id="cb12-5"><a href=""></a><span class="cf">for</span> b <span class="kw">in</span> <span class="bu">range</span>(B):</span>
+<span id="cb12-6"><a href=""></a>    df_b <span class="op">=</span> df.sample(n<span class="op">=</span><span class="bu">len</span>(df), replace<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span>rng)</span>
+<span id="cb12-7"><a href=""></a>    fit_b <span class="op">=</span> smf.ols(<span class="st">"price ~ area + rooms"</span>, data<span class="op">=</span>df_b).fit()</span>
+<span id="cb12-8"><a href=""></a>    boot.append(fit_b.params)</span>
+<span id="cb12-9"><a href=""></a></span>
+<span id="cb12-10"><a href=""></a>boot <span class="op">=</span> pd.DataFrame(boot)</span>
+<span id="cb12-11"><a href=""></a>boot_se <span class="op">=</span> boot.std()</span>
+<span id="cb12-12"><a href=""></a>boot_se</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>Intercept    11898.687112
+area             4.554624
+rooms         2391.799973
+dtype: float64</code></pre>
+</div>
+</div>
+</div><div class="column" style="width:42%;">
+<div id="a13dea06" class="cell" data-execution_count="14">
+<div class="cell-output cell-output-display">
+<div>
+<figure>
+<p><img data-src="TA5_files/figure-revealjs/cell-15-output-1.png"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
+</section>
+<section id="bootstrap-regression-table" class="slide level2">
+<h2>Bootstrap regression table</h2>
+<p>With the bootstrap SE we build the usual table, using normal-based inference:</p>
+<div id="08ee50a6" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href=""></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
+<span id="cb14-2"><a href=""></a></span>
+<span id="cb14-3"><a href=""></a>table <span class="op">=</span> pd.DataFrame({<span class="st">"coef"</span>: model.params, <span class="st">"boot se"</span>: boot_se})</span>
+<span id="cb14-4"><a href=""></a>table[<span class="st">"z"</span>] <span class="op">=</span> table[<span class="st">"coef"</span>] <span class="op">/</span> table[<span class="st">"boot se"</span>]</span>
+<span id="cb14-5"><a href=""></a>table[<span class="st">"P&gt;|z|"</span>] <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> stats.norm.cdf(table[<span class="st">"z"</span>].<span class="bu">abs</span>()))</span>
+<span id="cb14-6"><a href=""></a>table[<span class="st">"[0.025"</span>] <span class="op">=</span> table[<span class="st">"coef"</span>] <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> table[<span class="st">"boot se"</span>]</span>
+<span id="cb14-7"><a href=""></a>table[<span class="st">"0.975]"</span>] <span class="op">=</span> table[<span class="st">"coef"</span>] <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> table[<span class="st">"boot se"</span>]</span>
+<span id="cb14-8"><a href=""></a>table.<span class="bu">round</span>(<span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+
+<table class="dataframe caption-top" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header" style="text-align: right;">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">coef</th>
+<th data-quarto-table-cell-role="th">boot se</th>
+<th data-quarto-table-cell-role="th">z</th>
+<th data-quarto-table-cell-role="th">P&gt;|z|</th>
+<th data-quarto-table-cell-role="th">[0.025</th>
+<th data-quarto-table-cell-role="th">0.975]</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Intercept</td>
+<td>-22314.8520</td>
+<td>11898.6871</td>
+<td>-1.8754</td>
+<td>0.0607</td>
+<td>-45636.2788</td>
+<td>1006.5747</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">area</td>
+<td>35.5631</td>
+<td>4.5546</td>
+<td>7.8081</td>
+<td>0.0000</td>
+<td>26.6360</td>
+<td>44.4901</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">rooms</td>
+<td>6604.3052</td>
+<td>2391.8000</td>
+<td>2.7612</td>
+<td>0.0058</td>
+<td>1916.3772</td>
+<td>11292.2331</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div title="Note">
+<div class="callout callout-note no-icon callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>Bootstrap SEs depend on the random draws: a different <code>seed</code> or a different <span class="math inline">\(B\)</span> gives slightly different numbers (Stata’s <code>bootstrap, reps(500)</code> will not match exactly).</p>
+</div>
+</div>
+</div>
+</div>
 </section>
 <section id="comparing-confidence-intervals-across-se-types" class="slide level2">
 <h2>Comparing confidence intervals across SE types</h2>
-<div class="center">
-<p><img data-src="ci_area.png" style="width:80.0%"></p>
-</div>
-<p><em>Same coefficient estimate for <code>area</code>, but wider confidence intervals under robust and bootstrap SEs.</em></p>
-</section>
-<section id="clustered-data" class="slide level2">
-<h2>3. Clustered data</h2>
-<ul>
-<li><p>A second reason to relax the <strong>non-spherical disturbances</strong> assumption arises when observations are <strong>clustered</strong>.</p></li>
-<li><p>Within each <strong>neighborhood</strong>, house prices may move together.</p></li>
-</ul>
-<div class="center">
-<p><img data-src="cluster_data.png" style="width:80.0%"></p>
-</div>
-</section>
-<section id="disturbance-structure" class="slide level2">
-<h2>Disturbance structure</h2>
-<p>Within each neighborhood, residuals can move together:</p>
-<p><span class="math display">\[
-cov(\epsilon_i, \epsilon_j|X) =
-\begin{cases}
-\neq 0, &amp; \text{if } i = j \text{(same neighborhood)} \\
-0, &amp; \text{if } i \neq j \text{(different neighborhoods)}
-\end{cases}
-\]</span></p>
-<p>Hence, the covariance matrix of disturbances has a <strong>block-diagonal</strong> form:</p>
-<p><span class="math display">\[
-\Sigma =
-\begin{bmatrix}
-\Sigma_1 &amp; 0 &amp; 0 &amp; \cdots &amp; 0 \\
-0 &amp; \Sigma_2 &amp; 0 &amp; \cdots &amp; 0 \\
-0 &amp; 0 &amp; \Sigma_3 &amp; \cdots &amp; 0 \\
-\vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
-0 &amp; 0 &amp; 0 &amp; \cdots &amp; \Sigma_G
-\end{bmatrix}
-\]</span></p>
-<p>Each block <span class="math inline">\(\Sigma_j\)</span> captures the correlation of errors <strong>within neighborhood j</strong>.</p>
-</section>
-<section id="cluster-robust-se" class="slide level2">
-<h2>Cluster robust SE</h2>
-<p>The disturbances are correlated within clusters but uncorrelated across clusters:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource {stata} number-lines code-with-copy"><code class="sourceCode"><span id="cb5-1"><a href=""></a>reg price rooms area, vce(cluster nbh)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">Linear regression                               Number of obs     =        321
-                                                F(2, 6)           =      88.92
-                                                Prob &gt; F          =     0.0000
-                                                R-squared         =     0.4300
-                                                Root MSE          =      32735
 
-                                    (Std. err. adjusted for 7 clusters in nbh)
-------------------------------------------------------------------------------
-             |               Robust
-       price | Coefficient  std. err.      t    P&gt;|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        area |   35.56307   7.672663     4.64   0.004     16.78874    54.33739
-       rooms |   6604.305   3148.177     2.10   0.081    -1099.006    14307.62
-       _cons |  -22314.85   13356.84    -1.67   0.146    -54997.86    10368.16
-------------------------------------------------------------------------------
-
-</pre>
+<img data-src="TA5_files/figure-revealjs/cell-17-output-1.png" class="r-stretch"><p><em>Same coefficient estimate for <code>area</code>, but wider confidence intervals under robust and paired bootstrap SEs.</em></p>
+</section>
+<section id="thanks" class="title-slide slide level1 center" data-background-color="#0396A6">
+<h1>Thanks!</h1>
 
 </section>
     </div>
@@ -466,7 +900,6 @@ cov(\epsilon_i, \epsilon_j|X) =
   <script src="TA5_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
   <script src="TA5_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
   <script src="TA5_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="TA5_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
   <script src="TA5_files/libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
@@ -481,19 +914,18 @@ cov(\epsilon_i, \epsilon_j|X) =
       // Full list of configuration options available at:
       // https://revealjs.com/config/
       Reveal.initialize({
-'controlsAuto': true,
-'previewLinksAuto': false,
+'controlsAuto': false,
+'previewLinksAuto': true,
 'pdfSeparateFragments': false,
 'autoAnimateEasing': "ease",
 'autoAnimateDuration': 1,
 'autoAnimateUnmatched': true,
 'jumpToSlide': true,
-'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
-'chalkboard': {"buttons":true},
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'smaller': false,
  
         // Display controls in the bottom right corner
-        controls: false,
+        controls: true,
 
         // Help the user learn the controls by providing hints, for example by
         // bouncing the down arrow when they first encounter a vertical slide
@@ -635,9 +1067,9 @@ cov(\epsilon_i, \epsilon_j|X) =
         // The "normal" size of the presentation, aspect ratio will be preserved
         // when the presentation is scaled to fit different resolutions. Can be
         // specified using percentage units.
-        width: 1050,
+        width: 1280,
 
-        height: 700,
+        height: 720,
 
         // Factor of the display size that should remain empty around the content
         margin: 0.1,
@@ -660,7 +1092,7 @@ cov(\epsilon_i, \epsilon_j|X) =
         },
 
         // reveal.js plugins
-        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
 
           RevealMath,
           RevealNotes,
@@ -836,6 +1268,12 @@ cov(\epsilon_i, \epsilon_j|X) =
         }
       });
       </script>
+    <script src="../theme/print-lazyload-fix.js"></script>
+    <script>window.__amdDefine = window.define; window.define = undefined;</script>
+    <script src="js/d3.v3.min.js"></script>
+    <script src="js/jstat.min.js"></script>
+    <script>window.define = window.__amdDefine;</script>
+    <script src="js/se-widget.js"></script>
     
 
 </body></html>
