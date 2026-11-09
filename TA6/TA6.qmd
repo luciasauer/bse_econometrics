@@ -1,1180 +1,735 @@
 ---
 title: "Econometrics"
-subtitle: "<span class='subtitle-text'>TA Session 6</span>"
+subtitle: |
+  <span class="subtitle-text">TA Session 6</span>
 author: "Lucia Sauer"
-institute: "<em>Barcelona School of Economics</em>"
-date: "2025-11-07"
+institute: |
+  <p class="cover-affiliation"><em>Barcelona School of Economics</em></p>
+  <p class="cover-contact"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/></svg> <a href="mailto:lucia.sauer@bse.eu">lucia.sauer@bse.eu</a></p>
+date: "2025-11-11"
 format:
   revealjs:
-    chalkboard: true
+    html-math-method:
+      method: mathjax
+      url: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js"
+    theme: [default, ../theme/bse-theme.scss]
+    css: ta6-rct.css
+    width: 1280
+    height: 720
     transition: fade
     slide-number: true
     progress: true
+    controls: true
+    menu: true
+    navigation-mode: linear
+    preview-links: auto
     title-slide-attributes:
-      data-background-position: "95% 90%"
-      data-background-size: "100px"
+      data-background-color: "#0396A6"
+      data-background-image: "../theme/assets/cover-graphic.svg"
+      data-background-size: "34%"
+      data-background-position: "92% 50%"
+      data-background-repeat: "no-repeat"
+    include-in-header:
+      text: |
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap">
+    include-after-body:
+      text: |
+        <script src="../theme/print-lazyload-fix.js"></script>
+execute:
+  echo: false
+  warning: false
 editor:
   render-on-save: true
-
 ---
+
+```{python}
+#| output: false
+import sys
+sys.path.insert(0, "../theme")
+import bse_style, bse_anim
+_ = bse_style.apply()
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy import stats
+import statsmodels.formula.api as smf
+
+T_COL, C_COL = bse_style.ORANGE, bse_style.TEAL   # treated = orange, control = teal
+PURPLE, GRAY = bse_style.PURPLE, "#9A9A9A"
+
+def md_table(rows, header, align=None):
+    align = align or ["l"] + ["r"] * (len(header) - 1)
+    sep = {"l": ":---", "r": "---:", "c": ":---:"}
+    out = ["| " + " | ".join(header) + " |", "|" + "|".join(sep[a] for a in align) + "|"]
+    out += ["| " + " | ".join(r) + " |" for r in rows]
+    print("\n" + "\n".join(out) + "\n")
+
+def stars(p):
+    return "***" if p < 0.01 else "**" if p < 0.05 else "*" if p < 0.10 else ""
+
+def reg(formula, data):
+    return smf.ols(formula, data).fit(cov_type="HC1")      # robust (HC1) standard errors
+
+FENCE = "`" * 3   # a literal fence at line start would end a Quarto cell
+
+def sm_summary(fit, font=0.55):
+    """Full statsmodels summary(), rendered as an academic (booktabs-style) table."""
+    xn = [v.replace("C(city)[T.", "city[").replace("treat:", "treat × ") for v in fit.params.index]
+    sm = fit.summary(xname=xn)
+    html = "".join(t.as_html() for t in sm.tables)
+    notes = "<br>".join(sm.extra_txt.splitlines()) if sm.extra_txt else ""
+    print(f"\n{FENCE}{{=html}}\n<div class='sm-summary' style='font-size:{font}em'>{html}"
+          f"<div class='sm-notes'>{notes}</div></div>\n{FENCE}\n")
+
+# ---------------------------------------------------------------------------
+# Simulated RCT in a ride-hailing app (the same code is in TA6.ipynb)
+# ---------------------------------------------------------------------------
+CITIES = ["Madrid", "Barcelona", "Paris", "London"]
+
+def simulate_app(n=4000, seed=669):
+    rng = np.random.default_rng(seed)
+    # pre-treatment covariates
+    city = rng.choice(CITIES, n, p=[0.3, 0.3, 0.2, 0.2])
+    age = np.clip(rng.normal(34, 9, n).round(), 18, 70).astype(int)
+    tenure = np.clip(rng.exponential(20, n).round(), 1, 96).astype(int)           # months on the app
+    base = pd.Series(city).map({"Madrid": 3.0, "Barcelona": 3.5, "Paris": 4.5, "London": 5.5}).values
+    fare = pd.Series(city).map({"Madrid": 11, "Barcelona": 12, "Paris": 16, "London": 19}).values \
+        * rng.lognormal(0, 0.15, n)                                                 # user's usual fare (€)
+    mu_pre = base * np.exp(-0.02 * (age - 34)) * (0.7 + 0.6 * np.minimum(tenure, 48) / 48)
+    rides_pre = rng.poisson(mu_pre * rng.gamma(1.5, 1 / 1.5, n))                   # rides in the 4 weeks before
+    revenue_pre = np.round(rides_pre * fare * rng.uniform(0.9, 1.1, n), 2)         # € spent in the 4 weeks before
+    # random assignment
+    treat = rng.binomial(1, 0.5, n)
+    # would the user pick "Wait & Save" if offered? (heavy and young users more likely)
+    p_choose = 1 / (1 + np.exp(-(-0.4 + 0.15 * (rides_pre - 4) - 0.04 * (age - 34))))
+    would_choose = rng.binomial(1, p_choose)
+    # potential outcomes in the 4 weeks of the test
+    tau = np.clip(pd.Series(city).map({"Madrid": 0.3, "Barcelona": 0.8, "Paris": 1.8, "London": 3.0}).values
+                  + 0.03 * (34 - age), 0, None)                                    # extra rides from the new option
+    rides0 = rng.poisson(0.8 * rides_pre + 0.02 * tenure + 0.5)                    # rides with app A
+    new_rides = rng.poisson(tau) * would_choose                                    # NEW rides, at 75% of the fare
+    switched = rng.binomial(rides0, 0.5) * would_choose                            # usual rides switched to W&S (-25%)
+    rev0 = rides0 * fare                                                           # revenue with app A
+    rev1 = rev0 - 0.25 * fare * switched + 0.75 * fare * new_rides                 # revenue with app B
+    # what we observe
+    rides_post = np.where(treat == 1, rides0 + new_rides, rides0)
+    revenue_post = np.round(np.where(treat == 1, rev1, rev0), 2)
+    df = pd.DataFrame(dict(user_id=np.arange(1, n + 1), city=city, age=age, tenure=tenure,
+                           rides_pre=rides_pre, revenue_pre=revenue_pre, treat=treat,
+                           chose_wait_save=treat * would_choose, rides_post=rides_post,
+                           revenue_post=revenue_post))
+    return df, pd.DataFrame(dict(rev0=rev0, rev1=rev1))
+
+app, truth = simulate_app()
+app["city"] = pd.Categorical(app.city, categories=CITIES)   # Madrid = base category
+true_ate = (truth.rev1 - truth.rev0).mean()
+```
 
 ---
 
 ## Planification — 2° Part
 
-<div style="font-size:1.1em; margin-top:1em;">
+<div style="font-size:0.95em; margin-top:0.5em;">
 
-<div style="border-left:4px solid #00bfa5; padding-left:1em; margin-bottom:1em;">
-  <strong> TA6 — RCT, Matching</strong><br>
-  <span style="color:#777;">📆 Hand in Assignment 6 by <strong style="color:#00bfa5;">17th Nov</strong></span>
+<div style="border-left:4px solid #0396A6; padding-left:1em; margin-bottom:0.7em;">
+  <strong>TA6 — RCTs</strong>
 </div>
 
-<div style="border-left:4px solid #42a5f5; padding-left:1em; margin-bottom:1em;">
-  <strong>TA7 — IV, RDD</strong><br>
-  <span style="color:#777;">📆 Hand in Assignment 7 by <strong style="color:#42a5f5;">25th Nov</strong></span>
+<div style="border-left:4px solid #0396A6; padding-left:1em; margin-bottom:0.7em;">
+  <strong>TA7 — Matching</strong>
 </div>
 
-<div style="border-left:4px solid #ab47bc; padding-left:1em; margin-bottom:1em;">
-  <strong> TA8 — Difference-in-Differences</strong><br>
-  <span style="color:#777;">📆 Hand in Assignment 8 by <strong style="color:#ab47bc;">2nd Dec</strong></span>
+<div style="border-left:4px solid #79BAC8; padding-left:1em; margin-bottom:0.7em;">
+  <strong>TA8 — Instrumental Variables</strong><br>
+  <span style="color:#777;">📆 Hand in Assignment 6 by <strong style="color:#0396A6;">18th Nov</strong></span>
 </div>
 
-<div style="border-left:4px solid #ef5350; padding-left:1em;">
-  <strong> TA9 — Review for the Exam</strong><br>
-  <span style="color:#777;">🗓️ Week of <strong style="color:#ef5350;">Dec 8</strong></span>
+<div style="border-left:4px solid #79BAC8; padding-left:1em; margin-bottom:0.7em;">
+  <strong>TA9 — Regression Discontinuity</strong><br>
+  <span style="color:#777;">📆 Hand in Assignment 7 by <strong style="color:#79BAC8;">27th Nov</strong></span>
+</div>
+
+<div style="border-left:4px solid #3E2259; padding-left:1em;">
+  <strong>TA10 — Difference-in-Differences</strong><br>
+  <span style="color:#777;">📆 Hand in Assignment 8 by <strong style="color:#3E2259;">2nd Dec</strong></span>
 </div>
 
 </div>
 
-
-
 ---
 
-## Overview
+## Today {background-color="#0396A6"}
 
-- Introduction
-- Birthweight and smokers
-- Randomized Controlled Trials
-- Matching
-- Propensity Score Matching
+1. **Potential outcomes** — the fundamental problem of causality *(smoking & birthweight)*
+2. **Randomization** — why it solves the problem
+3. **An RCT in a ride-hailing app** — design, estimation, balance, covariates, heterogeneity
 
----
-
-## Introduction to Treatment Effects
-
-- Allow us to estimate the causal effect of a treatment on an outcome.
-
-
-Some examples:
-
-| Treatment         | Outcome            |
-|-------------------|--------------------|
-| New drug          | Blood Pressure     |
-| Surgery           | Mobility           |
-| Job training      | Employment Status  |
-| Ad Campaign       | Sales              |
-
----
-
-### Potential Outcomes
-
-- $Y_{i}(0)$ outcome for individual $i$ without treatment
-- $Y_{i}(1)$ outcome for individual $i$ with treatment
-- $D_{i}$ treatment indicator (1 if treated, 0 if not)
-- Observed outcome: 
-$$Y_{i} = D_{i}Y_{i}(1) + (1 - D_{i})Y_{i}(0)$$
-- Causal effect for individual $i$: 
-$$\tau_{i} = Y_{i}(1) - Y_{i}(0)$$
-
-But we can never observe both $Y_{i}(1)$ and $Y_{i}(0)$ for the same individual!
-<!-- I cant go back in time and see what would have happened if I had not taken the treatment. -->
-
-
----
-
-### Example: Birthweight and Smokers
-
-*Does smoking during pregnancy affect birthweight?*
-
-
-```{python}
-#| echo: false
-#| fig-align: center
-
-import pandas as pd 
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-sns.set(style="whitegrid")
-import numpy as np
-import pandas as pd
-
-np.random.seed(42)
-
-# Número de observaciones
-n = 200
-
-# Edad de la madre (confounder)
-mother_age = np.random.normal(27, 5, n).clip(17, 40)
-
-# Probabilidad de fumar: más jóvenes fuman más
-p_smoke = 1 / (1 + np.exp(-(35 - mother_age)/2))
-smoke = np.random.binomial(1, p_smoke)
-
-# Potenciales outcomes
-# Y0: sin fumar → mayor peso, crece con edad
-Y0 = 3000 + 40 * (mother_age - 25) + np.random.normal(0, 150, n)
-
-# Y1: si fumara → menor peso, relación más plana
-Y1 = 2800 + 20 * (mother_age - 25) + np.random.normal(0, 150, n)
-
-# Outcome observado
-birthweight = np.where(smoke == 1, Y1, Y0)
-
-# Dataset final
-df_sim = pd.DataFrame({
-    "mother_age": mother_age,
-    "smoke": smoke,
-    "Y0": Y0,
-    "Y1": Y1,
-    "birthweight": birthweight
-})
-
-
-#keep only 20 observation for non-smokers
-df_smokers = df_sim[df_sim['smoke'] == 1].sample(20)
-df_nonsmokers = df_sim[df_sim['smoke'] == 0].sample(10)
-df_sim = pd.concat([df_smokers, df_nonsmokers])
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-sns.set(style="whitegrid", context="talk")
-palette = {0: "forestgreen", 1: "red"}
-
-plt.figure(figsize=(9,6))
-sns.scatterplot(
-    data=df_sim,
-    x="mother_age",
-    y="birthweight",
-    hue="smoke",
-    palette=palette,
-    s=70,
-    alpha=0.9,
-    edgecolor="black"
-)
-
-
-plt.xlabel("Mother's Age")
-plt.ylabel("Birthweight")
-plt.title("Observed Birthweight by Mother's Age (Simulated Data)")
-plt.legend(title="", labels=["Smoker", "Non-Smoker"])
-plt.show()
-
-```
-
-
----
-
-Potential outcomes:
-
-  - $Y_{i}(1)$: Birthweight if mother smokes
-  - $Y_{i}(0)$: Birthweight if mother does not smoke
-
-
-```{python}
-#| echo: false
-#| fig-align: center
-
-df_sim["birthweight_cf"] = np.where(df_sim["smoke"]==1, df_sim["Y0"], df_sim["Y1"])
-
-sns.set(style="whitegrid", context="talk")
-palette = {0: "forestgreen", 1: "red"}
-
-plt.figure(figsize=(9,6))
-sns.scatterplot(
-    data=df_sim,
-    x="mother_age", y="birthweight",
-    hue="smoke",
-    palette=palette,
-    s=70,
-    alpha=0.9,
-    edgecolor="black"
-)
-
-sns.scatterplot(
-    data=df_sim,
-    x="mother_age", y="birthweight_cf",
-    hue="smoke",
-    palette=palette,
-    s=70,
-    alpha=0.1,
-    facecolors=None,      # sin relleno
-    linewidth=1.8,          # grosor del borde
-    edgecolor=df_sim["smoke"].map({0: "forestgreen", 1: "red"}),
-    legend=False            # no duplicar leyenda
-)
-
-plt.xlabel("Mother's Age")
-plt.ylabel("Birthweight")
-plt.title("Observed (solid) and Unobserved (hollow) Outcomes", fontsize=14)
-plt.legend(title="", labels=["Smoker", "Non-Smoker"])
-plt.show()
-```
-
----
-
-- Causal effect: $\tau_{i} = Y_{i}(1) - Y_{i}(0)$
-- We can only observe one of these outcomes for each mother.
-
-
-```{python}
-#| echo: false
-#| fig-align: center
-#| size: 100%
-
-sns.set(style="whitegrid", context="talk")
-
-plt.figure(figsize=(9,6))
-
-
-for _, row in df_sim.iterrows():
-    plt.plot(
-        [row["mother_age"], row["mother_age"]],
-        [row["birthweight"], row["birthweight_cf"]],
-        color=palette[row["smoke"]],
-        alpha=0.5,
-        linewidth=1.2
-    )
-
-
-sns.scatterplot(
-    data=df_sim,
-    x="mother_age", y="birthweight",
-    hue="smoke",
-    palette=palette,
-    s=70, alpha=0.9, edgecolor="black"
-)
-
-
-sns.scatterplot(
-    data=df_sim,
-    x="mother_age", y="birthweight_cf",
-    hue="smoke",
-    palette=palette,
-    s=70, alpha=0.1,
-    facecolors="none",
-    linewidth=1.8,
-    edgecolor=df_sim["smoke"].map(palette),
-    legend=False
-)
-
-
-sns.regplot(
-    data=df_sim[df_sim["smoke"]==0],
-    x="mother_age", y="birthweight", scatter=False,
-    color="forestgreen", ci=None
-)
-sns.regplot(
-    data=df_sim[df_sim["smoke"]==1],
-    x="mother_age", y="birthweight", scatter=False,
-    color="red", ci=None
-)
-
-plt.xlabel("Mother's Age")
-plt.ylabel("Birthweight")
-plt.title("Individual Treatment Effects (Observed vs. Counterfactual)", fontsize=14)
-plt.show()
-
-```
-
-- The challenge: how can we estimate an average effect if one of the two outcomes is always missing?
-
----
-
-## RCTs
-
-Randomly assign individuals to treatment $D_i = 1$ or control $D_i = 0$.
-
-
-$$ Y_i(1), Y_i(0) \perp\!\!\!\perp D_i $$
-
-- Randomization guarantees that, on average:
-
-  - Treated and control groups are **identical in all characteristics**, except for the treatment.
-  - Any difference in outcomes can be **causally attributed** to the treatment.
-
-
----
-
-### Ham and LaLonde (1996)
-
-*Does participation in the job training program lead to higher earnings?*
-
-- Outcome: Earnings in 1978 (post-treatment)
-- Treatment: Participation in job training program
-
-
-```{python}
-#| echo: false
-df = pd.read_stata("TA6.dta")
-df.head(5)
-```
-
---- 
-
-### Proposed Analysis 
-
-::: {.callout-warning title = "Exercise" icon=false}
-1. What are the average earnings for participants versus non-participants?
+::: {style="font-size:0.7em; margin-top:1em"}
+📓 Everything in **TA6.ipynb** (the data are simulated inside the notebook)
 :::
 
-```stata
-tabulate train, summarize(re78) means standard
-```
-
-
-
-| Group          | Average Earnings | SD of Earnings |
-|----------------|------------------|----------------|
-| Treated        | 4.55             | 5.48           |
-| Controls       | 6.35             | 7.86           |
-
-
+# 1 · Potential outcomes {background-color="#0396A6" .section-divider-centered}
 
 ---
 
-::: {.callout-warning title = "Exercise" icon=false}
-2. Is the difference in mean earnings statistically significant?
-:::
+## Potential outcomes
 
-
-$$H_0: \mu_{treat} - \mu_{control} = 0 \quad H_a: not \ H_0$$
-
-
-Test statistic using **different** variances:
-
-$$t = \frac{(\bar{Y}_{treat} - \bar{Y}_{control}) - 0}{\sqrt{\frac{s^2_{treat}}{n_{treat}} + \frac{s^2_{control}}{n_{control}}}} \underset{Under \ H_0}{\sim} t_{df}$$
-
-
-
-
-Two-sample t-test: Difference in Means
-
-|                | Treatment mean | Control Mean     | Difference   |
-|----------------|------------------|----------------|--------------|
-| earnings       | 6.35             | 4.55           | -1.79**      |
-| N              | 185              | 260            | 445          |
-
-
-
---- 
-
-::: {.callout-warning title = "Exercise" icon=false}
-3. Assuming that randomization was properly done, can we estimate the effect of training on earnings using regression?
-::: 
-
-If randomization was properly done, we can estimate the effect of training on earnings using a simple regression model:
-
-$$\texttt{earnings}_i = \beta_0 + \beta_1 \texttt{D}_i + \epsilon_i$$
-
-
-```{=html}
-<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
-
-      Source |       SS           df       MS      Number of obs   =       445
--------------+----------------------------------   F(1, 443)       =      8.04
-       Model |  348.013451         1  348.013451   Prob > F        =    0.0048
-    Residual |  19177.6432       443  43.2903909   R-squared       =    0.0178
--------------+----------------------------------   Adj R-squared   =    0.0156
-       Total |  19525.6566       444  43.9767041   Root MSE        =    6.5795
-
-------------------------------------------------------------------------------
-    earnings | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-       treat |   1.794343   .6328536     2.84   0.005     .5505748    3.038111
-       _cons |   4.554802    .408046    11.16   0.000     3.752856    5.356749
-------------------------------------------------------------------------------
-
-
-</pre>
-```
-
-
----
-
-::: {.callout-warning title = "Exercise" icon=false}
-4. How does adding control variables affect the estimated treatment effect?
-:::
-
-If randomization is successful, adding covariates should not substantially change the ATE.
- 
-ATE Comparison: Simple vs. +Controls
-
-|                | Simple           | Simple + Controls Mean   | 
-|----------------|------------------|--------------------------|
-| treat_coeff    |  1.794**         | 1.625*                   |
-| se             | (0.633)          | (0.640)                  |
-|r2              |  0.0178          | 0.0490                   |
-
-
-
-
----
-
-
-### Regression Adjustment (RA): Intuition
-
-1. **Fit two regressions**
-   - One for treated $(D=1)$ and one for controls $(D=0)$:
-     $$\hat{E}[Y|D=d,X] = \alpha_d + X'\beta_d$$
-
-2. **Predict potential outcomes**
-     $$\hat{Y_i(1)}, \; \hat{Y_i(0)}$$
-
-3. **Compute individual effects**
-   $$\hat{\tau_i} = \hat{Y_i(1)} - \hat{Y_i(0)}$$
-
-4. **Average**
-   - `, ate`: average over **all individuals** $\rightarrow  \ ATE$
-   - `, atet`: average over **treated only** $\rightarrow  \ ATT$
-
-
----
-
-::: {.callout-warning title = "Exercise" icon=false}
-5. Are the baseline characteristics balanced between treated and control groups?
-:::
-
-
-| Covariate | Treated Mean | Control Mean | Difference         |
-| --------- | -----------: | -----------: | -----------------: |
-| re74      |        2.107 |        2.096 |             +0.011 |
-| re75      |        1.267 |        1.532 |             −0.265 |
-| age       |       25.054 |       25.816 |             −0.762 |
-| agesq     |      677.315 |      717.395 |            −40.079 |
-| nodegree  |        0.835 |        0.708 |        **+0.127*** |
-| married   |        0.154 |        0.189 |             −0.035 |
-| black     |        0.827 |        0.843 |             −0.016 |
-| hisp      |        0.108 |        0.059 |        **+0.048*** |
-
-
----
-
-
-## Matching
-
-After examining the covariate balance table...
-
-- Treated and control groups **differ systematically** in key characteristics (e.g., `nodegree`, `hisp`).
-- These differences create **confounding** — bias in estimating the treatment effect.
-- We need to make the groups **comparable**, as if treatment were randomly assigned.
-
-> **Idea:** Find in the control group individuals who look similar (in X’s) to the treated ones.
-
----
-
-### Why Not Just Control for Covariates?
-
-- In a regression, we "control for" covariates **by modeling**:
-$$Y_i = \alpha + \tau D_i + X_i'\beta + \varepsilon_i$$
-  But if treated and control units differ too much in $X$, regression must **extrapolate** into regions with no comparable controls.
-
-- This leads to **model dependence** and possible **bias** if the functional form is misspecified.
-
-> Matching compares treated and control units **with similar X**, ensuring overlap — we only compare *apples with apples*.
-
----
-
-### Matching and the Counterfactual
-
-- Recall the potential outcomes framework:
- $$
-  Y_i = D_iY_i(1) + (1 - D_i)Y_i(0)
-  $$
-- For treated units ($D_i=1$), we observe $Y_i(1)$ but not $Y_i(0)$.
-
-Matching allows us to **reconstruct the missing counterfactual** $Y_i(0)$
-using similar individuals from the control group.
-
-> Under the **Conditional Independence Assumption (CIA):**
-> $$(Y_i(1), Y_i(0)) \perp D_i \mid X_i$$
-> treatment is “as good as random” given \(X\).  
-
----
-
-### 1. Nearest Neighbor Matching
-
-::: {.callout-note title = "Procedure" icon=false}
-
-1. Preprocess: 
-    - Distance $(X_c, X_t)= \sqrt{(X_c - X_t)'S^{-1}(X_c - X_t)}$
-    - Match each treated unit to nearest control unit
-    - Control units: not reused; prune if unused
-    - Prune matches if distance > caliper
-2. Estimate treatment effect on matched sample
-::: 
-
----
-
-#### Building Intuition
-
-- Consider 2 covariates, Education and Age. No dependent variable here.
-- We have some Treated units and some Control units.
-
-```{python}
-#| echo: false
-#| fig-align: center
-#| size: 100%
-
-np.random.seed(42)
-
-n = 100
-
-education = np.random.normal(18, 3, n).clip(12, 28)
-age = np.random.normal(50, 12, n).clip(20, 80)
-
-p_treat = 1 / (1 + np.exp(-(0.3*(education - 18) - 0.1*(age - 50))))
-treated = np.random.binomial(1, p_treat)
-
-df = pd.DataFrame({
-    'education': education,
-    'age': age,
-    'treated': treated
-})
-
-df = df.loc[((df['treated']==1) & (df['education']<25) & (df['age']>45)) | (df['treated']==0)]
-
-sns.set(style="whitegrid", context="talk")
-
-plt.figure(figsize=(8,6))
-for _, row in df.iterrows():
-    if row['treated'] == 1:
-        plt.text(row['education'], row['age'], 'T', color='red', fontsize=14, fontweight='bold')
-    else:
-        plt.text(row['education'], row['age'], 'C', color='blue', fontsize=14, fontweight='bold')
-
-plt.xlabel("Education (years)")
-plt.ylabel("Age")
-plt.title("Treated (T) and Control (C) Units by Covariates")
-plt.xlim(10, 25)
-plt.ylim(30, 90)
-plt.show()
-
-```
-
----
-
-#### Matching treated and control units
-
-- For every Treated unit we find the closest Control unit.
-- Order in which your data are set up actually determines the match.
-```{python}
-#| echo: false
-#| fig-align: center
-#| size: 100%
-from scipy.spatial.distance import cdist
-
-
-treated_df = df[df['treated']==1].reset_index(drop=True)
-control_df = df[df['treated']==0].reset_index(drop=True)
-
-
-dist_matrix = cdist(treated_df[['education','age']], control_df[['education','age']], metric='euclidean')
-
-
-matches = []
-used_controls = set()
-for i, row in enumerate(dist_matrix):
-    available = [(j, d) for j, d in enumerate(row) if j not in used_controls]
-    if not available:
-        continue
-    j, d = min(available, key=lambda x: x[1])
-    matches.append((i, j))
-    used_controls.add(j)
-
-
-sns.set(style="whitegrid", context="talk")
-plt.figure(figsize=(8,6))
-
-
-for i, j in matches:
-    t = treated_df.iloc[i]
-    c = control_df.iloc[j]
-    plt.plot([t['education'], c['education']], [t['age'], c['age']], 'k--', alpha=0.5)
-
-
-for _, row in df.iterrows():
-    if row['treated'] == 1:
-        plt.text(row['education'], row['age'], 'T', color='red', fontsize=14, fontweight='bold')
-    else:
-        plt.text(row['education'], row['age'], 'C', color='blue', fontsize=14, fontweight='bold')
-
-plt.xlabel("Education (years)")
-plt.ylabel("Age")
-plt.title("Nearest Neighbor Matching (One-to-One)")
-plt.xlim(10, 25)
-plt.ylim(30, 90)
-plt.show()
-
-```
-
----
-
-#### Pruning Unmatched Units
-
-- We can get rid of observations that did not achieve a match.
-- Now we have something closer to a randomized experiment.
-
-```{python}
-#| echo: false
-#| fig-align: center
-#| size: 100%
-
-from scipy.spatial.distance import cdist
-
-np.random.seed(42)
-
-# Simulate 100 individuals
-n = 100
-education = np.random.normal(18, 3, n).clip(12, 28)
-age = np.random.normal(50, 12, n).clip(20, 80)
-p_treat = 1 / (1 + np.exp(-(0.3*(education - 18) - 0.1*(age - 50))))
-treated = np.random.binomial(1, p_treat)
-
-df = pd.DataFrame({
-    'education': education,
-    'age': age,
-    'treated': treated
-})
-
-# Keep subset for visualization clarity
-df = df.loc[((df['treated']==1) & (df['education']<25) & (df['age']>45)) | (df['treated']==0)].copy()
-
-# Separate treated and control
-treated_df = df[df['treated']==1].reset_index(drop=True)
-control_df = df[df['treated']==0].reset_index(drop=True)
-
-# Compute distances between treated and control
-dist_matrix = cdist(treated_df[['education','age']], control_df[['education','age']], metric='euclidean')
-
-# Match treated to nearest control (without replacement)
-matches = []
-used_controls = set()
-for i, row in enumerate(dist_matrix):
-    available = [(j, d) for j, d in enumerate(row) if j not in used_controls]
-    if not available:
-        continue
-    j, d = min(available, key=lambda x: x[1])
-    matches.append((i, j))
-    used_controls.add(j)
-
-# Keep only matched units
-matched_controls = control_df.iloc[[j for _, j in matches]]
-matched_treated = treated_df.iloc[[i for i, _ in matches]]
-matched_df = pd.concat([matched_treated, matched_controls], ignore_index=True)
-
-# Plot
-sns.set(style="whitegrid", context="talk")
-plt.figure(figsize=(8,6))
-
-# Draw dashed lines for matched pairs
-for i, j in matches:
-    t = treated_df.iloc[i]
-    c = control_df.iloc[j]
-    plt.plot([t['education'], c['education']], [t['age'], c['age']], 'k--', alpha=0.6)
-
-# Plot matched treated and controls
-for _, row in matched_df.iterrows():
-    if row['treated'] == 1:
-        plt.text(row['education'], row['age'], 'T', color='red', fontsize=14, fontweight='bold')
-    else:
-        plt.text(row['education'], row['age'], 'C', color='blue', fontsize=14, fontweight='bold')
-
-plt.xlabel("Education (years)")
-plt.ylabel("Age")
-plt.title("Matched Sample (Nearest Neighbor One-to-One)")
-plt.xlim(10, 25)
-plt.ylim(30, 90)
-plt.show()
-```
-
-
-
-
-----
-
-### 2. Exact Matching
-
-- Such a beautiful dataset! Tons of control units.
-- Every red T has a blue C on top.
-
-```{python}
-#| echo: false
-#| fig-align: center
-#| size: 100%
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-np.random.seed(42)
-
-# --- Simulate many controls (wide spread)
-n_control = 160
-education_c = np.random.normal(17, 2.5, n_control).clip(12, 25)
-age_c = np.random.normal(48, 10, n_control).clip(25, 75)
-df_control = pd.DataFrame({"education": education_c, "age": age_c, "treated": 0})
-
-# --- Simulate treated units (near some controls to ensure overlap)
-n_treated = 40
-df_treated = df_control.copy().iloc[:n_treated]
-df_treated['treated'] = 1
-
-
-# Combine datasets
-df = pd.concat([df_control, df_treated], ignore_index=True)
-
-# --- Plot
-sns.set(style="whitegrid", context="talk")
-plt.figure(figsize=(8,6))
-
-for _, row in df.iterrows():
-    if row['treated'] == 1:
-        plt.text(row['education'], row['age'], 'T', color='red', fontsize=14, fontweight='bold')
-    else:
-        plt.text(row['education'], row['age'], 'C', color='blue', fontsize=14, fontweight='bold')
-
-plt.xlabel("Education (years)")
-plt.ylabel("Age")
-plt.title("Treated and Control Units with Overlap")
-plt.xlim(10, 26)
-plt.ylim(25, 80)
-plt.show()
-```
-
-
-----
-
-- No matter what we do with Age and Education, it couldn’t predict the difference between treatment and control. They can’t close bias.
-- We can look at the causal effect on the outcome variable by just taking the difference in means.
-
-```{python}
-#| echo: false
-#| fig-align: center
-#| size: 100%
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-np.random.seed(42)
-
-# --- Simulate many controls (wide spread)
-n_control = 160
-education_c = np.random.normal(17, 2.5, n_control).clip(12, 25)
-age_c = np.random.normal(48, 10, n_control).clip(25, 75)
-df_control = pd.DataFrame({"education": education_c, "age": age_c, "treated": 0})
-
-# --- Simulate treated units (near some controls to ensure overlap)
-n_treated = 40
-df_treated = df_control.copy().iloc[:n_treated]
-df_treated['treated'] = 1
-
-df_control = df_control.loc[df_control.index.isin(df_treated.index)]
-
-# Combine datasets
-df = pd.concat([df_control, df_treated], ignore_index=True)
-
-# --- Plot
-sns.set(style="whitegrid", context="talk")
-plt.figure(figsize=(8,6))
-
-for _, row in df.iterrows():
-    if row['treated'] == 1:
-        plt.text(row['education'], row['age'], 'T', color='red', fontsize=14, fontweight='bold')
-    else:
-        plt.text(row['education'], row['age'], 'C', color='blue', fontsize=14, fontweight='bold')
-
-plt.xlabel("Education (years)")
-plt.ylabel("Age")
-plt.title("Treated and Control Units with Overlap")
-plt.xlim(10, 26)
-plt.ylim(25, 80)
-plt.show()
-
-```
-
----
-
-
-### The Curse of Dimensionality
-
-When there are many covariates $(X_1, X_2, ..., X_k)$:
-
-- Hard to find exact matches in all dimensions.
-- Matching becomes sparse or impossible.
-
-**Solution:** Summarize all covariates into a single number:
 $$
-\pi(X) = P(D=1|X)$$
+\begin{array}{rcl}
+D_i \in \{0,1\} & \qquad & \text{treatment indicator} \\[2pt]
+Y_i(1) & & \text{potential outcome } \textbf{with} \text{ treatment} \\[2pt]
+Y_i(0) & & \text{potential outcome } \textbf{without} \text{ treatment} \\[2pt]
+\tau_i = Y_i(1) - Y_i(0) & & \text{individual causal effect}
+\end{array}
+$$
 
-the **propensity score**.
+::: {.fragment}
+What we observe:
 
-Then match treated and controls with similar $\pi(X)$ values instead of the full vector $X$.
+::: {.eq-box-wrap style="margin:0.2em 0"}
+::: {.eq-box}
+$$Y_i \;=\; D_i\,Y_i(1) + (1-D_i)\,Y_i(0) \;=\; \begin{cases} Y_i(1) & \text{if } D_i = 1 \\ Y_i(0) & \text{if } D_i = 0 \end{cases}$$
+:::
+:::
+:::
+
+::: {.fragment}
+::: {.callout-warning title="The fundamental problem of causal inference" icon=false}
+We **never** observe both $Y_i(1)$ and $Y_i(0)$ for the same person: causality is a **missing data** problem.
+:::
+:::
 
 ---
 
-### 3. Propensity Score Matching
-
-
-
-::: {.callout-note title = "Procedure" icon=false}
-
-1. Preprocess: 
-    - Reduce $k$ elements of $X$ to scalar $\pi_i = P(T_i = 1|X) = \frac{1}{1+e^{-X_i'\beta}}$
-    - Compute distance $(X_c, X_t)= |\pi_c - \pi_t|$
-    - Match each treated unit to the nearest control unit.
-    - Control units: not reused; prune if unused
-    - Prune matches if distance > caliper
-2. Estimate treatment effect on matched sample
-::: 
-
-
----
-
-#### Building Intuition
-
-- Create a Propensity Score $\pi_i$ from 0 to 1.
-- Project each of those observations into a one-dimensional space.
-
+## Example: does smoking during pregnancy reduce birthweight?
 
 ```{python}
-#| echo: false
-#| fig-align: center
-#| size: 100%
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.linear_model import LogisticRegression
-
+#| output: asis
 np.random.seed(42)
+n = 200
+mother_age = np.random.normal(27, 5, n).clip(17, 40)
+p_smoke = 1 / (1 + np.exp(-(35 - mother_age) / 2))     # younger mothers smoke more
+smoke = np.random.binomial(1, p_smoke)
+Y0 = 3000 + 40 * (mother_age - 25) + np.random.normal(0, 150, n)
+Y1 = 2800 + 20 * (mother_age - 25) + np.random.normal(0, 150, n)
+bw = np.where(smoke == 1, Y1, Y0)
+sim = pd.DataFrame(dict(age=mother_age, smoke=smoke, Y0=Y0, Y1=Y1, bw=bw))
+sim = pd.concat([sim[sim.smoke == 1].sample(20, random_state=1),
+                 sim[sim.smoke == 0].sample(10, random_state=1)])
+sim["cf"] = np.where(sim.smoke == 1, sim.Y0, sim.Y1)
+sm_, ns_ = sim[sim.smoke == 1], sim[sim.smoke == 0]
 
-# --- Simulate overlapping data ---
-n_control = 160
-education_c = np.random.normal(17, 2.5, n_control).clip(12, 25)
-age_c = np.random.normal(48, 10, n_control).clip(25, 75)
-df_control = pd.DataFrame({"education": education_c, "age": age_c, "treated": 0})
-
-n_treated = 40
-anchors = df_control.sample(n_treated, random_state=42)
-education_t = anchors["education"] + np.random.normal(0, 0.8, n_treated)
-age_t = anchors["age"] + np.random.normal(0, 3, n_treated)
-df_treated = pd.DataFrame({"education": education_t, "age": age_t, "treated": 1})
-
-df = pd.concat([df_control, df_treated], ignore_index=True)
-
-# --- Estimate Propensity Scores (Logit) ---
-X = df[["education", "age"]]
-y = df["treated"]
-model = LogisticRegression()
-model.fit(X, y)
-df["pscore"] = model.predict_proba(X)[:, 1]
-
-# --- Plot Setup ---
-sns.set(style="whitegrid", context="talk")
-fig, ax = plt.subplots(figsize=(9, 6))
-
-# Plot treated and controls in covariate space
-for _, row in df.iterrows():
-    if row["treated"] == 1:
-        plt.text(row["education"], row["age"], "T", color="red", fontsize=12, fontweight="bold", alpha=0.8)
-    else:
-        plt.text(row["education"], row["age"], "C", color="blue", fontsize=12, fontweight="bold", alpha=0.8)
-
-# Add vertical "propensity score axis"
-x_ps = 33  # farther to the right than before
-plt.plot([x_ps, x_ps], [20, 80], color="black", linewidth=1)
-plt.text(x_ps + 0.3, 75, "Propensity\nScore", fontsize=12)
-plt.text(x_ps + 0.3, 80, "1", fontsize=12)
-plt.text(x_ps + 0.3, 21, "0", fontsize=12)
-
-# Draw projection lines
-for _, row in df.iterrows():
-    x1, y1 = row["education"], row["age"]
-    x2, y2 = x_ps, 20 + 60 * row["pscore"]  # project score to vertical scale (0→20, 1→80)
-    color = "red" if row["treated"] == 1 else "blue"
-    plt.plot([x1, x2], [y1, y2], color=color, alpha=0.25)
-
-# Plot points on the propensity score bar
-for _, row in df.iterrows():
-    y2 = 20 + 60 * row["pscore"]
-    if row["treated"] == 1:
-        plt.text(x_ps + 0.3, y2, "T", color="red", fontsize=10, fontweight="bold")
-    else:
-        plt.text(x_ps + 0.3, y2, "C", color="blue", fontsize=10, fontweight="bold")
-
-# Labels and limits
-plt.xlabel("Education (years)")
-plt.ylabel("Age")
-plt.xlim(10, 36)
-plt.ylim(20, 85)
-plt.title("Projection of Treated and Controls onto the Propensity Score Axis")
-plt.show()
+s = bse_anim.Steps("bw", figsize=(9.6, 4.6), margins=dict(left=0.09, right=0.74))
+ax = s.ax
+ax.set_xlim(16, 41); ax.set_ylim(2350, 3600)
+ax.set_xlabel("Mother's age"); ax.set_ylabel("Birthweight (g)")
+ax.scatter(ns_.age, ns_.bw, s=70, color=C_COL, edgecolor="black", lw=0.6, zorder=3, label="Non-smoker")
+ax.scatter(sm_.age, sm_.bw, s=70, color=T_COL, edgecolor="black", lw=0.6, zorder=3, label="Smoker")
+ax.set_title("What we observe")
+ax.legend(loc="upper left", bbox_to_anchor=(1.01, 1), fontsize=11)
+s.snap()
+ax.scatter(sm_.age, sm_.cf, s=70, facecolor="none", edgecolor=T_COL, lw=1.6, zorder=3, label="Smoker, if not smoking")
+ax.scatter(ns_.age, ns_.cf, s=70, facecolor="none", edgecolor=C_COL, lw=1.6, zorder=3, label="Non-smoker, if smoking")
+ax.set_title("What we would need: the counterfactuals (hollow)")
+ax.legend(loc="upper left", bbox_to_anchor=(1.01, 1), fontsize=11)
+s.snap()
+for _, r in sim.iterrows():
+    ax.plot([r.age, r.age], [r.bw, r.cf], color=T_COL if r.smoke else C_COL, alpha=0.45, lw=1.3, zorder=2)
+ax.set_title(r"Individual effects $\tau_i = Y_i(1) - Y_i(0)$ — never observed")
+s.snap()
+s.show(height=480)
 ```
 
+::: {.fragment style="font-size:0.75em; text-align:center;"}
+Each vertical segment is one $\tau_i$. We only ever see **one end** of it.
+:::
 
+---
 
-----
+## Two averages of $\tau_i$: ATE and ATT
 
-Then we perform the matching on this one-dimension space.
+::: {.eq-box-wrap}
+::: {.eq-box}
+$$\text{ATE} = E[Y(1) - Y(0)] \qquad\qquad \text{ATT} = E[Y(1) - Y(0) \mid D = 1]$$
+:::
+:::
+
+::: {.fragment style="font-size:0.9em"}
+- **ATE**: average effect over **everyone**. *"What if all mothers smoked vs. none?"*
+- **ATT**: average effect over the **treated** only. *"How much lighter are smokers' babies because their mothers smoked?"*
+:::
+
+::: {.fragment}
+What does the naive comparison of means estimate?
+
+::: {.eq-box-wrap style="font-size:0.85em; margin:0.2em 0"}
+::: {.eq-box}
+$$\underbrace{E[Y \mid D = 1] - E[Y \mid D = 0]}_{\text{naive comparison}} \;=\; \underbrace{E[Y(1) - Y(0) \mid D = 1]}_{\text{ATT}} \;+\; \underbrace{E[Y(0) \mid D = 1] - E[Y(0) \mid D = 0]}_{\text{selection bias}}$$
+:::
+:::
+
+::: {style="font-size:0.8em; text-align:center"}
+**Age is a confounder:** younger mothers smoke more **and** have lighter babies anyway ⇒ selection bias ≠ 0, so the naive comparison is neither the ATT nor the ATE.
+:::
+:::
+
+# 2 · Randomization {background-color="#0396A6" .section-divider-centered}
+
+---
+
+## Randomization kills selection bias
+
+::: {style="font-size:0.85em"}
+If $D_i$ is assigned by a **coin flip**, it cannot depend on anything about the mother, observed or not:
+:::
 
 ```{python}
-#| echo: false
-#| fig-align: center
-#| size: 100%
-import matplotlib.pyplot as plt
-import numpy as np
-
-# Example data: random propensity scores for treated (T) and control (C)
-np.random.seed(42)
-ps_treated = np.random.uniform(0.3, 0.9, 8)
-ps_control = np.random.uniform(0.1, 0.8, 12)
-
-# Create figure
-plt.figure(figsize=(4, 6))
-
-# Draw vertical propensity score line
-x_ps = 0
-plt.plot([x_ps, x_ps], [0, 1], color='black', linewidth=1)
-
-# Add treated (T) and control (C) letters directly on the line
-for y in ps_treated:
-    plt.text(x_ps, y, "T", color='red', fontsize=12, fontweight='bold',
-             ha='center', va='center')
-
-for y in ps_control:
-    plt.text(x_ps, y, "C", color='blue', fontsize=12, fontweight='bold',
-             ha='center', va='center')
-
-# Annotate the axis
-plt.text(x_ps, 1.03, "1", fontsize=12, ha='center')
-plt.text(x_ps, -0.05, "0", fontsize=12, ha='center')
-plt.text(x_ps + 0.15, 0.5, "Propensity\nScore", fontsize=12, va='center')
-
-# Clean up plot
-plt.ylim(-0.05, 1.05)
-plt.xlim(-0.5, 0.5)
-plt.xticks([])
-plt.yticks([])
-plt.box(False)
-plt.title("", fontsize=13)
-plt.show()
+#| output: asis
+np.random.seed(7)
+Nn = 4000
+age_ = np.random.normal(27, 5, Nn).clip(17, 40)
+d_self = np.random.binomial(1, 1 / (1 + np.exp(-(30 - age_) / 2.5)))
+d_rand = np.random.binomial(1, 0.5, Nn)
+bins = np.arange(17, 41, 1)
+s = bse_anim.Steps("random", figsize=(10, 3.9), ncols=2, sharey=True,
+                   margins=dict(left=0.07, right=0.98, bottom=0.16, top=0.86, wspace=0.08))
+a1, a2 = s.ax
+for a, d, ttl in [(a1, d_self, "Self-selection: mothers choose"), (a2, d_rand, "Randomization: coin flip")]:
+    a.hist(age_[d == 0], bins=bins, density=True, color=C_COL, alpha=0.6, label="D = 0")
+    a.hist(age_[d == 1], bins=bins, density=True, color=T_COL, alpha=0.6, label="D = 1")
+    a.axvline(age_[d == 0].mean(), color=C_COL, lw=2.5); a.axvline(age_[d == 1].mean(), color=T_COL, lw=2.5)
+    a.set_title(ttl); a.set_xlabel("Mother's age")
+a1.set_ylabel("Density"); a1.legend(loc="upper right")
+a2.set_visible(False); s.snap()
+a2.set_visible(True); s.snap()
+s.show(height=255)
 ```
 
+::: {.fragment}
+::: {.eq-box-wrap style="font-size:0.8em; margin:0.1em 0"}
+::: {.eq-box}
+$$\begin{aligned}
+\big(Y(1), Y(0)\big) \perp\!\!\!\perp D \;&\Longrightarrow\; \underbrace{E[Y(0) \mid D = 1] - E[Y(0) \mid D = 0]}_{\text{selection bias} \;=\; 0} \\[2pt]
+&\Longrightarrow\; E[Y \mid D = 1] - E[Y \mid D = 0] \;=\; \text{ATT} \;=\; \text{ATE}
+\end{aligned}$$
+:::
+:::
+:::
 
-----
+::: {.fragment style="font-size:0.72em"}
+::: {.callout-warning title="Caveat" icon=false}
+Here randomization is **not an option**: assigning pregnant women to smoke would be **unethical** (and infeasible). For questions like this we need **observational** methods: matching, IV, RDD, DiD (the next TAs).
+:::
+:::
 
-Then we perform the matching on this one-dimension space.
+# 3 · An RCT in a ride-hailing app {background-color="#0396A6" .section-divider-centered}
 
+---
+
+## The case: a new, cheaper option in the app
+
+::: {style="font-size:0.8em"}
+*Ryde*, a (fictional) ride-hailing app, wants to add **one** new option to the menu:
+**"Wait & Save"**: ~25% cheaper if you accept being picked up in 10–15 minutes.
+:::
 
 ```{python}
-#| echo: false
-#| fig-align: center
-#| size: 100%
-import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.patches import ConnectionPatch
+#| output: asis
+CAR = ('<svg viewBox="0 0 38 20"><path d="M4 13 L6 8 Q7 6 9 6 L27 6 Q29 6 31 8 L34 12 Q36 12.5 36 14 L36 15 '
+       'L2 15 L2 14 Q2 13 4 13 Z" fill="{c}"/><path d="M10 7.5 L26 7.5 L29 11 L8 11 Z" fill="#cfe0ea"/>'
+       '<circle cx="10" cy="15.5" r="2.8" fill="#222"/><circle cx="28" cy="15.5" r="2.8" fill="#222"/></svg>')
+MAP = """<svg viewBox="0 0 220 300" preserveAspectRatio="xMidYMid slice">
+<rect width="220" height="300" fill="#E9EBEE"/>
+<path d="M-10 230 C 60 200, 120 260, 230 215 L230 250 C 130 290, 60 235, -10 265 Z" fill="#CFE2F3"/>
+<rect x="128" y="72" width="62" height="48" rx="4" fill="#D5EBD7"/>
+<g stroke="#FFFFFF" stroke-width="7" fill="none">
+<path d="M-10 60 L230 85"/><path d="M-10 150 L230 160"/><path d="M40 -10 L60 310"/>
+<path d="M115 -10 L105 310"/><path d="M180 -10 L200 310"/><path d="M-10 0 L230 210"/></g>
+<g stroke="#FFFFFF" stroke-width="3" fill="none">
+<path d="M-10 110 L230 120"/><path d="M-10 195 L230 190"/><path d="M80 -10 L80 310"/><path d="M150 -10 L150 310"/></g>
+<path d="M58 168 L80 166 L80 118 L150 120 L150 82" stroke="#000" stroke-width="3.5" fill="none" stroke-linejoin="round"/>
+<circle cx="58" cy="168" r="6" fill="#000"/><circle cx="58" cy="168" r="2.4" fill="#fff"/>
+<rect x="144" y="76" width="12" height="12" fill="#000"/><rect x="148" y="80" width="4" height="4" fill="#fff"/>
+</svg>"""
+STATUS = ('<div class="status"><span>9:41</span><span><svg width="44" height="11" viewBox="0 0 44 11">'
+          '<rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/>'
+          '<rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/>'
+          '<rect x="22" y="0.5" width="19" height="10" rx="3" fill="none" stroke="#000" stroke-width="1"/>'
+          '<rect x="24" y="2.5" width="13" height="6" rx="1.5"/><rect x="42" y="3.5" width="1.6" height="4" rx="0.8"/>'
+          '</svg></span></div>')
 
-# --- Simulate data ---
-np.random.seed(42)
-ps_treated = np.random.uniform(0.3, 0.9, 8)
-ps_control = np.random.uniform(0.1, 0.8, 12)
+def phone(new=False):
+    opts = [("Economy", "4 min · 4 seats", "€12.40", "#3b3b3b", "selected"),
+            ("Comfort", "5 min · newer cars", "€15.90", "#5f6b75", ""),
+            ("XL", "7 min · 6 seats", "€21.10", "#1f2a33", "")]
+    if new:
+        opts.append(('Wait &amp; Save<span class="badge">NEW</span>', "Pick-up in 10–15 min", "€9.30", "#F28627", "new"))
+    rows = "".join(f'<div class="opt {cls}">{CAR.format(c=col)}<div class="txt"><b>{name}</b><span>{sub}</span></div>'
+                   f'<div class="price">{price}</div></div>' for name, sub, price, col, cls in opts)
+    return (f'<div class="iphone"><div class="screen"><div class="island"></div>{STATUS}'
+            f'<div class="map">{MAP}<div class="where"><div><i class="dot"></i>Plaça de Catalunya</div>'
+            f'<div><i></i>Sagrada Família</div></div></div>'
+            f'<div class="sheet"><div class="handle"></div><div class="sheet-title">Choose a ride</div>{rows}'
+            f'<div class="pay">💳 Visa •••• 4242</div><div class="request">Request ride</div></div>'
+            f'<div class="homebar"></div></div></div>')
 
-# --- Matching: each T matched to its closest C ---
-matched_pairs = []
-available_controls = ps_control.copy().tolist()
+print(f"""
+{FENCE}{{=html}}
+<div class="phones">
+  <div class="phone-col"><div class="phone-label" style="color:{C_COL}">A · Control (D = 0)</div>{phone()}</div>
+  <div class="phone-col fragment"><div class="phone-label" style="color:{T_COL}">B · Treatment (D = 1)</div>{phone(new=True)}</div>
+</div>
+{FENCE}
+""")
+```
 
-for ps_t in ps_treated:
-    # find closest available control
-    diffs = np.abs(np.array(available_controls) - ps_t)
-    idx = np.argmin(diffs)
-    matched_pairs.append((ps_t, available_controls[idx]))
-    # remove used control
-    available_controls.pop(idx)
+::: {.fragment .hyp-box}
+**Hypothesis:** **IF** we add an option **"Wait & Save"** **THEN** price-sensitive users who today take the bus or walk will now request a ride bringing more **revenue**.
+:::
 
-# --- Plot setup ---
-plt.figure(figsize=(4, 6))
-x_ps = 0
+---
 
-# Draw vertical line
-plt.plot([x_ps, x_ps], [0, 1], color='black', linewidth=1)
+## Designing the experiment
 
-# Plot treated and control letters directly on the line
-for y in ps_treated:
-    plt.text(x_ps, y, "T", color='red', fontsize=12, fontweight='bold',
-             ha='center', va='center')
+::: {style="font-size:0.8em"}
+- **Outcome** $Y_i$: **revenue** from user $i$ in the 4 weeks of the test.
+- **Treatment** $D_i = 1$ if user $i$ sees app **B** (with "Wait & Save"), $D_i = 0$ if app **A** (current menu).
+- **Units:** active users, each randomly assigned to A or B with probability ½ (a coin flip per user).
+:::
 
-for y in ps_control:
-    plt.text(x_ps, y, "C", color='blue', fontsize=12, fontweight='bold',
-             ha='center', va='center')
+```{python}
+#| output: asis
+rng_ = np.random.default_rng(11)
+NR, NC = 5, 10
+d_demo = rng_.permutation(np.r_[np.ones(25, int), np.zeros(25, int)])
+s = bse_anim.Steps("assign", figsize=(11.5, 3.8), margins=dict(left=0.01, right=0.99, top=0.99, bottom=0.01))
+ax = s.ax
+ax.set_xlim(0, 23.2); ax.set_ylim(-0.9, 6.6); ax.axis("off"); ax.set_aspect("equal")
+sq = 0.78
+def grid(x0, y0, colors, ncol):
+    for k, col in enumerate(colors):
+        ax.add_patch(plt.Rectangle((x0 + (k % ncol) * 1.0, y0 - (k // ncol) * 1.0), sq, sq, color=col, lw=0))
+grid(0.2, 4.6, ["#BDBDBD"] * 50, NC)
+ax.text(5.1, 5.75, f"{len(app):,} active users", ha="center", fontsize=14, fontweight="bold")
+ax.text(5.1, -0.75, "pre-treatment info: city, age, tenure, past rides and spending", ha="center", fontsize=11, color="#666")
+s.snap()
+grid(0.2, 4.6, [T_COL if d else C_COL for d in d_demo], NC)
+ax.annotate("", xy=(13.4, 2.9), xytext=(10.6, 2.9), arrowprops=dict(arrowstyle="-|>", color=PURPLE, lw=2.5, mutation_scale=20))
+ax.text(12.0, 3.35, "coin flip", ha="center", fontsize=13, color=PURPLE)
+s.snap()
+grid(14.0, 4.6, [T_COL] * 25, 9); grid(14.0, 1.0, [C_COL] * 25, 9)
+ax.text(18.4, 5.75, f"B · treatment (n = {app.treat.sum():,})", ha="center", fontsize=13, color=T_COL, fontweight="bold")
+ax.text(18.4, 2.15, f"A · control (n = {(1 - app.treat).sum():,})", ha="center", fontsize=13, color=C_COL, fontweight="bold")
+s.snap()
+s.show(height=320)
+```
 
-# --- Draw curved dashed lines between matched pairs ---
-for (y_t, y_c) in matched_pairs:
-    # use ConnectionPatch for curved dashed arcs
-    con = ConnectionPatch(
-        xyA=(x_ps, y_t), xyB=(x_ps, y_c),
-        coordsA="data", coordsB="data",
-        arrowstyle="-",
-        linestyle="--", color="gray", alpha=0.6,
-        connectionstyle="arc3,rad=0.3"  # curvature
-    )
-    plt.gca().add_artist(con)
+# 4 · Estimation {background-color="#0396A6" .section-divider-centered}
 
-# Annotate the axis
-plt.text(x_ps, 1.03, "1", fontsize=12, ha='center')
-plt.text(x_ps, -0.05, "0", fontsize=12, ha='center')
-plt.text(x_ps + 0.2, 0.5, "Propensity\nScore", fontsize=12, va='center')
+---
 
-# Clean up
-plt.ylim(-0.05, 1.05)
-plt.xlim(-0.6, 0.6)
-plt.xticks([])
-plt.yticks([])
-plt.box(False)
-plt.title("", fontsize=12)
-plt.show()
+## The data
+
+::: {style="font-size:0.85em"}
+We simulate the experiment (code in the notebook) for 4,000 users. Relevant variables:
+
+- `revenue_post`: $Y_i$, revenue (€) from user $i$ during the 4 weeks of the test
+- `treat`: $D_i$, equal to 1 if app **B** (with "Wait & Save"), 0 if app **A**
+- `city`, `age`, `tenure` (months on the app), `rides_pre`, `revenue_pre` (rides and € in the 4 weeks **before**): pre-treatment covariates $X_i$
+:::
+
+::: {style="font-size:0.95em; margin-top:0.6em"}
+```{python}
+#| echo: true
+app[["user_id", "city", "age", "tenure", "rides_pre", "revenue_pre", "treat", "revenue_post"]].head()
+```
+:::
+
+---
+
+## ATE = difference in means
+
+Randomization ⇒ no selection bias ⇒ $\;\text{ATE} = E[Y \mid D = 1] - E[Y \mid D = 0]$, estimated by $\;\widehat{\text{ATE}} = \bar Y_1 - \bar Y_0$.
+
+::: {.eq-box-wrap style="font-size:0.85em; margin:0.2em 0"}
+::: {.eq-box}
+$$\begin{gathered}
+H_0:\ E[Y \mid D = 1] = E[Y \mid D = 0] \qquad\quad H_a:\ E[Y \mid D = 1] \neq E[Y \mid D = 0] \\[6pt]
+t = \frac{\bar Y_1 - \bar Y_0}{\sqrt{s_1^2/n_1 + s_0^2/n_0}} \;\overset{H_0}{\approx}\; N(0,1)
+\end{gathered}$$
+:::
+:::
+
+::: {style="font-size:0.8em"}
+Welch two-sample $t$-test (unequal variances): reject $H_0$ at 5% if $|t| > 1.96$.
+:::
+
+::: {style="font-size:0.85em"}
+```{python}
+#| echo: true
+y1 = app.loc[app.treat == 1, "revenue_post"]          # D = 1 (app B)
+y0 = app.loc[app.treat == 0, "revenue_post"]          # D = 0 (app A)
+print(f"mean(D=1) = {y1.mean():.2f}   mean(D=0) = {y0.mean():.2f}   difference = {y1.mean() - y0.mean():.2f}")
+res = stats.ttest_ind(y1, y0, equal_var=False)          # Welch t-test
+print(f"t = {res.statistic:.3f}   p-value = {res.pvalue:.4f}   df = {res.df:.1f}")
+```
+:::
+
+```{python}
+#| output: asis
+tt = stats.ttest_ind(y1, y0, equal_var=False)
+decision = ("we **reject** $H_0$ at 5%" if tt.pvalue < 0.05
+            else "we **cannot reject** $H_0$ at 5%: the estimate is positive, but too noisy")
+print(f"""
+::: {{.fragment style="font-size:0.85em"}}
+$t = {tt.statistic:.2f}$, $\;p = {tt.pvalue:.3f}$ ⇒ {decision}.
+:::
+""")
 ```
 
 ---
 
-Finally, we project them back to the multivariate space. This is the subset of the data that goes into the analysis.
+## … which is the same as a regression on $D$
 
-
+$$\texttt{revenue}\_\texttt{post}_i = \beta_0 + \beta_1 D_i + \varepsilon_i$$
 
 ```{python}
-#| echo: false
-#| fig-align: center
-#| size: 100%
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.linear_model import LogisticRegression
-
-np.random.seed(42)
-
-# --- Simulate overlapping data ---
-n_control = 160
-education_c = np.random.normal(17, 2.5, n_control).clip(12, 25)
-age_c = np.random.normal(48, 10, n_control).clip(25, 75)
-df_control = pd.DataFrame({"education": education_c, "age": age_c, "treated": 0})
-
-n_treated = 40
-anchors = df_control.sample(n_treated, random_state=42)
-education_t = anchors["education"] + np.random.normal(0, 0.8, n_treated)
-age_t = anchors["age"] + np.random.normal(0, 3, n_treated)
-df_treated = pd.DataFrame({"education": education_t, "age": age_t, "treated": 1})
-
-df = pd.concat([df_control, df_treated], ignore_index=True)
-
-# --- Step 1: Estimate Propensity Scores (Logit) ---
-X = df[["education", "age"]]
-y = df["treated"]
-model = LogisticRegression()
-model.fit(X, y)
-df["pscore"] = model.predict_proba(X)[:, 1]
-
-# --- Step 2: Find nearest control for each treated unit ---
-treated_df = df[df["treated"] == 1].copy()
-control_df = df[df["treated"] == 0].copy()
-
-matched_controls = set()
-for _, t in treated_df.iterrows():
-    control_df["dist"] = np.abs(control_df["pscore"] - t["pscore"])
-    match_idx = control_df["dist"].idxmin()
-    matched_controls.add(match_idx)
-    # remove matched control so it can't be reused
-    control_df = control_df.drop(match_idx)
-
-# Subset the dataset to only treated + matched controls
-df_matched = pd.concat([
-    treated_df,
-    df.loc[list(matched_controls)]
-])
-
-# --- Step 3: Plot ---
-sns.set(style="whitegrid", context="talk")
-fig, ax = plt.subplots(figsize=(9, 6))
-
-# Plot treated and matched controls in covariate space
-for _, row in df_matched.iterrows():
-    if row["treated"] == 1:
-        plt.text(row["education"], row["age"], "T", color="red", fontsize=12, fontweight="bold", alpha=0.8)
-    else:
-        plt.text(row["education"], row["age"], "C", color="blue", fontsize=12, fontweight="bold", alpha=0.8)
-
-# Add vertical "propensity score axis"
-x_ps = 33
-plt.plot([x_ps, x_ps], [20, 80], color="black", linewidth=1)
-plt.text(x_ps + 0.3, 75, "Propensity\nScore", fontsize=12)
-plt.text(x_ps + 0.3, 80, "1", fontsize=12)
-plt.text(x_ps + 0.3, 21, "0", fontsize=12)
-
-# Draw projection lines only for matched sample
-for _, row in df_matched.iterrows():
-    x1, y1 = row["education"], row["age"]
-    x2, y2 = x_ps, 20 + 60 * row["pscore"]
-    color = "red" if row["treated"] == 1 else "blue"
-    plt.plot([x1, x2], [y1, y2], color=color, alpha=0.25)
-
-# Plot points on the propensity score bar
-for _, row in df_matched.iterrows():
-    y2 = 20 + 60 * row["pscore"]
-    if row["treated"] == 1:
-        plt.text(x_ps + 0.3, y2, "T", color="red", fontsize=10, fontweight="bold")
-    else:
-        plt.text(x_ps + 0.3, y2, "C", color="blue", fontsize=10, fontweight="bold")
-
-# Labels and limits
-plt.xlabel("Education (years)")
-plt.ylabel("Age")
-plt.xlim(10, 36)
-plt.ylim(20, 85)
-plt.title("Projection after Matching (Unmatched Controls Dropped)")
-plt.show()
+#| output: asis
+r1 = reg("revenue_post ~ treat", app)
+sm_summary(r1, font=0.52)
 ```
 
+---
+
+## Are treatment and control truly random?
+
+::: {style="font-size:0.8em"}
+If randomization worked, B and A look alike **before** the test. For each pre-treatment covariate $X_k$:
+:::
+
+::: {.eq-box-wrap style="font-size:0.8em; margin:0.2em 0"}
+::: {.eq-box}
+$$H_0:\ E[X_k \mid D = 1] = E[X_k \mid D = 0] \qquad t_k = \frac{\bar X_{k,1} - \bar X_{k,0}}{\sqrt{s_{k,1}^2/n_1 + s_{k,0}^2/n_0}}$$
+:::
+:::
+
+::: {style="font-size:0.56em"}
+```{python}
+#| output: asis
+for c in CITIES:
+    app[c] = (app.city == c).astype(int)
+BAL = [("age", "Age"), ("tenure", "Tenure (months)"), ("rides_pre", "Rides before"),
+       ("revenue_pre", "Revenue before (€)")] + [(c, f"City = {c} (share)") for c in CITIES]
+rows = []
+for v, lab in BAL:
+    a, b = app[v][app.treat == 1], app[v][app.treat == 0]
+    t_ = stats.ttest_ind(a, b, equal_var=False)
+    rows.append([lab, f"{a.mean():.3f}", f"{b.mean():.3f}", f"{a.mean() - b.mean():+.3f}", f"{t_.statistic:.2f}", f"{t_.pvalue:.2f}"])
+md_table(rows, ["$X_k$", "$\\bar X_{k,1}$", "$\\bar X_{k,0}$", "Diff.", "$t_k$", "p"])
+ja = smf.ols("treat ~ age + tenure + rides_pre + revenue_pre + C(city)", app).fit()
+```
+:::
+
+::: {.fragment style="font-size:0.7em"}
+```{python}
+#| output: asis
+print(f"No difference is significant ✅ (with many tests, ~1 in 20 rejects at 5% by chance). Joint check, regressing $D$ on all $X$: $F$ = {ja.fvalue:.2f}, $p$ = {ja.f_pvalue:.2f}.")
+```
+:::
 
 ---
 
+## Using covariates to estimate the ATE
 
-### Estimating the Propensity Score
+$$\texttt{revenue}\_\texttt{post}_i = \beta_0 + \beta_1 D_i + \gamma_1\,\texttt{age}_i + \gamma_2\,\texttt{tenure}_i + \gamma_3\,\texttt{revenue}\_\texttt{pre}_i + \textstyle\sum_c \delta_c\,\text{city}_{c,i} + \varepsilon_i$$
 
-
-1. **Estimate the Propensity Score**
-     
-     $$P(D_i=1|X_i) = \Phi(X_i'\beta)$$
-     
-   - Predicts each individual’s probability of being treated (`myscore`).
-
-2. **Describe the Distribution**
-   - Reports min, max, mean, and percentiles of the estimated scores.
-   - Identifies *common support*: where treated and controls overlap.
-
+```{python}
+#| output: asis
+r3 = reg("revenue_post ~ treat + C(city) + age + tenure + revenue_pre", app)
+sm_summary(r3, font=0.44)
+```
 
 ---
 
+## Covariates shrink the CI, not the bias
 
-3. **Divide into Blocks (Stratification)**
-   - Splits the sample into intervals of the propensity score (`myblock`).
-   - In each block, treated and controls have similar scores on average.
+```{python}
+#| output: asis
+specs = [("revenue_post ~ treat", "(1) No controls"),
+         ("revenue_post ~ treat + C(city) + age + tenure", "(2) + city, age, tenure"),
+         ("revenue_post ~ treat + C(city) + age + tenure + revenue_pre", "(3) + revenue before")]
+fits = [(lab, reg(f, app)) for f, lab in specs]
+lo = min(f.params.treat - 1.96 * f.bse.treat for _, f in fits); hi = max(f.params.treat + 1.96 * f.bse.treat for _, f in fits)
+s = bse_anim.Steps("coefplot", figsize=(9.5, 3.3), margins=dict(left=0.29, right=0.97, top=0.86, bottom=0.21))
+ax = s.ax
+ax.set_xlim(min(lo, 0) - 0.5, hi + 0.35 * (hi - min(lo, 0))); ax.set_ylim(-0.6, 2.6); ax.invert_yaxis()
+ax.set_yticks(range(3)); ax.set_yticklabels([lab for lab, _ in fits], fontsize=13)
+ax.axvline(0, color="black", lw=1); ax.set_xlabel(r"$\hat\beta_1$ with 95% CI (€ per user, 4 weeks)")
+for k, (lab, f) in enumerate(fits):
+    b, se = f.params.treat, f.bse.treat
+    col = [GRAY, PURPLE, T_COL][k]
+    ax.plot([b - 1.96 * se, b + 1.96 * se], [k, k], color=col, lw=5, solid_capstyle="round", alpha=0.8)
+    ax.scatter([b], [k], s=120, color=col, edgecolor="black", zorder=3)
+    ax.text(b + 1.96 * se + 0.2, k, f"{b:.2f}  (se {se:.2f})", va="center", fontsize=13, color=col)
+    ax.set_title("Same estimate, narrower interval"); s.snap()
+s.show(height=310)
+md_table([["$R^2$"] + [f"{f.rsquared:.3f}" for _, f in fits],
+          ["$p$-value of $\\hat\\beta_1$"] + [f"{f.pvalues.treat:.3f}" for _, f in fits]],
+         [""] + [lab for lab, _ in fits], align=["l", "c", "c", "c"])
+```
 
-4. **Check the Balancing Property**
-   - Tests whether within each block, covariates $X_i$ are balanced across treated and control units:
-     $$D_i \perp X_i \mid p(X_i)$$
-   - If balance is satisfied → the propensity score is valid.
+::: {.fragment style="font-size:0.8em"}
+- **Estimate barely moves:** $X \perp\!\!\!\perp D$ by design, so controlling for $X$ removes no bias (there is none), only chance imbalance.
+- **SE shrinks:** past spending predicts future spending very well → less residual variance → **more precision / power**.
+- Only **pre-treatment** covariates (never something the treatment could change).
+:::
 
-- `myscore`: the estimated propensity score for each individual  
-- `myblock`: the block (interval) of the score where the unit falls  
+---
+
+## Heterogeneous treatment effects: by city
+
+$$\texttt{revenue}\_\texttt{post}_i = \beta_0 + \beta_1 D_i + \textstyle\sum_{c \neq \text{Madrid}} \delta_c\,\text{city}_{c,i} + \sum_{c \neq \text{Madrid}} \theta_c\,(D_i \times \text{city}_{c,i}) + \varepsilon_i$$
+
+```{python}
+#| output: asis
+hc = reg("revenue_post ~ treat * C(city)", app)
+sm_summary(hc, font=0.42)
+```
+
+---
+
+## Heterogeneous treatment effects: by city
+
+```{python}
+#| output: asis
+names = list(hc.params.index)
+city_eff = []
+for c in CITIES:
+    L = np.zeros(len(names)); L[names.index("treat")] = 1
+    if c != CITIES[0]:
+        L[names.index(f"treat:C(city)[T.{c}]")] = 1
+    tt_ = hc.t_test(L); city_eff.append((c, float(tt_.effect[0]), float(np.squeeze(tt_.sd))))
+ftest = hc.f_test(", ".join(f"treat:C(city)[T.{c}] = 0" for c in CITIES[1:]))
+ate_hat = r1.params.treat
+s = bse_anim.Steps("hte", figsize=(9, 3.9), margins=dict(left=0.11, right=0.97, top=0.88, bottom=0.12))
+ax = s.ax
+ax.axhline(0, color="black", lw=1)
+ax.set_xticks(range(len(CITIES))); ax.set_xticklabels(CITIES); ax.set_xlim(-0.6, len(CITIES) - 0.4)
+lo = min(b - 1.96 * se for _, b, se in city_eff); hi = max(b + 1.96 * se for _, b, se in city_eff)
+ax.set_ylim(min(lo, 0) - 1, hi + 1.5); ax.set_ylabel(r"Effect of B on revenue, $\beta_1 + \theta_c$ (€)")
+ax.axhline(ate_hat, color=PURPLE, ls="--", lw=1.8)
+ax.text(-0.55, ate_hat + 0.4, f"ATE = {ate_hat:.2f}", color=PURPLE, fontsize=12)
+ax.set_title("Overall ATE")
+s.snap()
+for k, (lab, b, se) in enumerate(city_eff):
+    ax.errorbar(k, b, yerr=1.96 * se, fmt="o", ms=11, color=T_COL, mec="black", capsize=7, lw=2.5)
+    ax.text(k + 0.1, b, f"{b:.2f}", va="center", fontsize=12)
+ax.set_title("Effect by city (95% CI)")
+s.snap()
+s.show(height=380)
+ranked = sorted(city_eff, key=lambda e: -e[1])
+fp = float(ftest.pvalue)
+verdict = ("we **reject** that the effect is the same in every city" if fp < 0.05
+           else "we **cannot reject** that the effect is the same in every city")
+neg = [c for c, b, _ in city_eff if b < 0]
+neg_txt = (f" In **{' and '.join(neg)}** the estimate is **negative**: users mostly switch to the cheaper option instead of riding more, so revenue falls."
+           if neg else "")
+print(f"""
+::: {{.fragment style="font-size:0.8em"}}
+Joint test $H_0: \\theta_{{BCN}} = \\theta_{{PAR}} = \\theta_{{LON}} = 0$: $F$ = {float(np.squeeze(ftest.fvalue)):.2f}, $p$ = {fp:.3f} → {verdict}.
+Revenue rises most in **{ranked[0][0]}** (€{ranked[0][1]:.2f}) and **{ranked[1][0]}** (€{ranked[1][1]:.2f}).{neg_txt}
+Randomization holds within each city, so each city effect is causal (but pre-specify subgroups: slice the data 20 ways and one will look significant by chance).
+:::
+""")
+```
+
+# Appendix {background-color="#0396A6" .section-divider-centered}
+
+---
+
+## Take-up: offering ≠ using
+
+::: {style="font-size:0.85em"}
+We can **offer** "Wait & Save" (app B), but we cannot force users to **choose** it.
+
+```{python}
+#| output: asis
+takeup = app.chose_wait_save[app.treat == 1].mean()
+itt = r3.params.treat
+B = app[app.treat == 1]
+md_table([[("Chose it" if k else "Did not choose it"), f"{len(g):,}", f"{g.revenue_pre.mean():.2f}", f"{g.revenue_post.mean():.2f}"]
+          for k, g in B.groupby("chose_wait_save")],
+         ["Users in B", "N", "Revenue **before** (€)", "Revenue during (€)"], align=["l", "r", "r", "r"])
+print(f"""
+::: {{.incremental}}
+- Only **{takeup:.0%}** of B users chose the new option.
+- $\\hat\\beta_1$ = €{itt:.2f} is the effect of **being offered** the option: the **intention-to-treat (ITT)**. Still causal, and the relevant number for the launch decision.
+- ❌ Don't compare choosers vs non-choosers: choosers already spent much more **before** the test → self-selection, the same problem as smokers.
+- Effect on those who actually chose it ≈ ITT / take-up = {itt:.2f} / {takeup:.2f} = **€{itt / takeup:.2f}** (more on this with IV, TA8).
+:::
+""")
+```
+:::
+
+---
+
+## When SUTVA fails, change the unit of randomization
+
+::: {style="font-size:0.8em"}
+**SUTVA:** my outcome depends only on **my own** treatment, not on other users' treatment.
+:::
+
+```{python}
+#| output: asis
+rng = np.random.default_rng(5)
+CITY6 = ["Madrid", "Barcelona", "Paris", "London", "Berlin", "Rome"]
+per = 12
+s = bse_anim.Steps("level", figsize=(11, 3.9), ncols=2,
+                   margins=dict(left=0.01, right=0.99, top=0.88, bottom=0.02, wspace=0.06))
+a1, a2 = s.ax
+def draw_cities(ax, assign, title):
+    ax.set_xlim(-0.5, 3 * 4.2); ax.set_ylim(-1.3, 2 * 4.2 - 0.4); ax.axis("off"); ax.set_title(title)
+    pos = {}
+    for c in range(6):
+        cx, cy = (c % 3) * 4.2, (1 - c // 3) * 4.2
+        ax.add_patch(plt.Rectangle((cx - 0.3, cy - 0.3), 3.6, 3.0, fill=False, ec=GRAY, lw=1.2, ls="--"))
+        ax.text(cx + 1.5, cy + 2.95, CITY6[c], ha="center", fontsize=11, color="#555")
+        for j in range(per):
+            x, yy = cx + (j % 4) * 1.0, cy + (j // 4) * 0.95
+            ax.add_patch(plt.Rectangle((x, yy), 0.7, 0.6, color=T_COL if assign[c][j] else C_COL, alpha=0.9))
+            pos[(c, j)] = (x + 0.35, yy + 0.3)
+    return pos
+ind = [rng.binomial(1, 0.5, per) for _ in range(6)]
+pos = draw_cities(a1, ind, "Randomize users")
+a2.set_visible(False); s.snap()
+for c in (0, 4):
+    tr_ = [j for j in range(per) if ind[c][j]]; co_ = [j for j in range(per) if not ind[c][j]]
+    for t_, c_ in list(zip(tr_, co_))[:3]:
+        a1.annotate("", xy=pos[(c, c_)], xytext=pos[(c, t_)], arrowprops=dict(arrowstyle="->", color=PURPLE, lw=1.6))
+a1.text(6.0, -1.0, "B users take the shared drivers → A users wait longer", color=PURPLE, fontsize=12, ha="center")
+s.snap()
+a2.set_visible(True)
+draw_cities(a2, [np.full(per, c in (0, 2, 4)) for c in range(6)], "Randomize cities")
+a2.text(6.0, -1.0, "spillovers stay inside one arm", color=PURPLE, fontsize=12, ha="center")
+s.snap()
+s.show(height=330)
+```
+
+::: {.columns}
+::: {.column width="50%" .fs72}
+::: {.fragment}
+**How the spillover happens.** Users in the same city share the **same pool of drivers**.
+B users request extra (cheap) rides → fewer free drivers → **A users** wait longer, see surge prices, or give up → A's revenue falls **because of B**.
+So $\bar Y_0$ no longer estimates $E[Y(0)]$, and $\bar Y_1 - \bar Y_0$ **overstates** the effect of launching the option for everyone.
+:::
+:::
+::: {.column width="50%" .fs72}
+::: {.fragment}
+**Fix:** randomize at the level where the interaction happens: the **city** (the driver market). All users in a city see the same app, so spillovers stay *within* one arm; **cluster SEs by city**.
+Cost: few units (cities) → much less power. In practice firms use many cities, or **switchback** designs (randomize city × time slot).
+:::
+:::
+:::
+
+# Thanks! {background-color="#0396A6"}

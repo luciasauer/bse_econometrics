@@ -1,0 +1,109 @@
+/* ---------- iPhone mock-ups for the RCT case slide ---------- */
+.phones { display: flex; gap: 22px; justify-content: center; align-items: flex-start; }
+.phone-col { display: flex; flex-direction: column; align-items: center; }
+.phone-label { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+
+.iphone {
+  position: relative; width: 236px; height: 486px; box-sizing: border-box;
+  background: #0b0b0b; border-radius: 40px; padding: 9px;
+  box-shadow: 0 10px 28px rgba(0,0,0,.28), inset 0 0 0 2px #2a2a2a;
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  color: #000; text-align: left; line-height: 1.2;
+}
+.iphone .screen {
+  position: relative; width: 100%; height: 100%; border-radius: 32px; overflow: hidden;
+  background: #fff; display: flex; flex-direction: column;
+}
+.iphone .island {
+  position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+  width: 74px; height: 21px; border-radius: 12px; background: #000; z-index: 5;
+}
+.iphone .status {
+  position: absolute; top: 0; left: 0; right: 0; height: 36px; z-index: 4;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 20px 0 26px; font-size: 12px; font-weight: 600;
+}
+.iphone .map { position: relative; flex: 1 1 auto; min-height: 0; background: #E9EBEE; }
+.iphone .map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.iphone .where {
+  position: absolute; top: 42px; left: 12px; right: 12px; z-index: 3;
+  background: #fff; border-radius: 10px; padding: 6px 10px; font-size: 10.5px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.15);
+}
+.iphone .where div { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+.iphone .where i { display: inline-block; width: 6px; height: 6px; background: #000; }
+.iphone .where i.dot { border-radius: 50%; }
+
+.iphone .sheet {
+  flex: 0 0 auto; background: #fff; border-radius: 16px 16px 0 0; margin-top: -14px;
+  position: relative; z-index: 3; padding: 6px 10px 18px;
+  box-shadow: 0 -3px 10px rgba(0,0,0,.08);
+}
+.iphone .handle { width: 34px; height: 4px; border-radius: 2px; background: #D0D0D0; margin: 0 auto 6px; }
+.iphone .sheet-title { font-size: 13px; font-weight: 700; text-align: center; margin-bottom: 4px; }
+.iphone .opt {
+  display: flex; align-items: center; gap: 8px; padding: 5px 7px; border-radius: 9px;
+  border: 2px solid transparent; margin-bottom: 2px;
+}
+.iphone .opt.selected { border-color: #000; }
+.iphone .opt.new { background: #FDEBD8; border-color: #F28627; }
+.iphone .opt svg { width: 38px; height: 20px; flex: 0 0 auto; }
+.iphone .opt .txt { flex: 1 1 auto; display: flex; flex-direction: column; }
+.iphone .opt .txt b { font-size: 12px; }
+.iphone .opt .txt span { font-size: 9.5px; color: #6B6B6B; }
+.iphone .opt .price { font-size: 12px; font-weight: 700; }
+.iphone .badge {
+  display: inline-block; font-size: 8px; font-weight: 700; color: #fff; background: #F28627;
+  border-radius: 4px; padding: 1px 4px; margin-left: 4px; vertical-align: 1px;
+}
+.iphone .pay { font-size: 10.5px; color: #333; padding: 6px 4px 6px; border-top: 1px solid #EEE; margin-top: 4px; }
+.iphone .request {
+  background: #000; color: #fff; text-align: center; font-size: 13px; font-weight: 600;
+  padding: 9px 0; border-radius: 9px;
+}
+.iphone .homebar {
+  position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+  width: 90px; height: 4px; border-radius: 2px; background: #000; z-index: 6;
+}
+
+/* font-size helpers for columns (width= and style= clash in Quarto) */
+.reveal .fs72 { font-size: 0.72em; }
+.reveal .fs75 { font-size: 0.75em; }
+.reveal .fs78 { font-size: 0.78em; }
+.reveal .fs8 { font-size: 0.8em; }
+
+/* phone mock-ups scaled down for the vertical layout */
+.reveal .phones { zoom: 0.72; }
+
+/* orange hypothesis box */
+.reveal .hyp-box {
+  background: #FDEBD8; border-left: 6px solid #F28627; border-radius: 6px;
+  padding: 0.45em 0.9em; font-size: 0.7em; margin-top: 0.4em;
+}
+.reveal .hyp-box p { margin: 0.15em 0; }
+
+/* statsmodels summary(), academic / booktabs look */
+.reveal .sm-summary {
+  width: fit-content; margin: 0.2em auto; font-family: "Source Serif 4", Georgia, serif; color: #000;
+}
+.reveal .sm-summary table.simpletable {
+  border-collapse: collapse; width: 100%; margin: 0 0 0.35em; font-size: 1em;
+  border-top: 1.6px solid #000; border-bottom: 1.6px solid #000;
+}
+.reveal .sm-summary table.simpletable caption {
+  caption-side: top; font-weight: 700; padding-bottom: 0.25em; color: #000; text-align: center;
+}
+.reveal .sm-summary table.simpletable th,
+.reveal .sm-summary table.simpletable td {
+  background: transparent !important; color: #000 !important; border: none !important;
+  padding: 0.12em 0.8em; font-weight: 400; text-align: right; white-space: nowrap;
+}
+.reveal .sm-summary table.simpletable th { text-align: left; }
+.reveal .sm-summary table.simpletable tr:first-child td:first-child + th,
+.reveal .sm-summary table.simpletable tr:first-child th + th { text-align: right; }
+/* header row of the coefficient table */
+.reveal .sm-summary table.simpletable:nth-of-type(2) tr:first-child th,
+.reveal .sm-summary table.simpletable:nth-of-type(2) tr:first-child td {
+  border-bottom: 0.8px solid #000 !important; font-style: italic;
+}
+.reveal .sm-summary .sm-notes { font-size: 0.85em; color: #444; text-align: left; }
