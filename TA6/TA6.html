@@ -96,7 +96,7 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="TA6_files/libs/revealjs/dist/theme/quarto-7f3deb6ae4601429a8f92596a36d44fa.css">
+  <link rel="stylesheet" href="TA6_files/libs/revealjs/dist/theme/quarto-9d3559057496520389431e0c6f50d80f.css">
   <link rel="stylesheet" href="ta6-rct.css">
   <link href="TA6_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="TA6_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
@@ -429,9 +429,9 @@ Y_i(0) &amp; &amp; \text{potential outcome } \textbf{without} \text{ treatment} 
 </ul>
 </div>
 <div style="font-size:0.95em; margin-top:0.6em">
-<div id="8cf063be" class="cell" data-execution_count="6">
+<div id="c6a5a4cb" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href=""></a>app[[<span class="st">"user_id"</span>, <span class="st">"city"</span>, <span class="st">"age"</span>, <span class="st">"tenure"</span>, <span class="st">"rides_pre"</span>, <span class="st">"revenue_pre"</span>, <span class="st">"treat"</span>, <span class="st">"revenue_post"</span>]].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="6">
+<div class="cell-output cell-output-display" data-execution_count="23">
 <div>
 <style scoped="">
     .dataframe tbody tr th:only-of-type {
@@ -540,7 +540,7 @@ t = \frac{\bar Y_1 - \bar Y_0}{\sqrt{s_1^2/n_1 + s_0^2/n_0}} \;\overset{H_0}{\ap
 <p>Welch two-sample <span class="math inline">\(t\)</span>-test (unequal variances): reject <span class="math inline">\(H_0\)</span> at 5% if <span class="math inline">\(|t| &gt; 1.96\)</span>.</p>
 </div>
 <div style="font-size:0.85em">
-<div id="45fa3f64" class="cell" data-execution_count="7">
+<div id="a45f32e0" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href=""></a>y1 <span class="op">=</span> app.loc[app.treat <span class="op">==</span> <span class="dv">1</span>, <span class="st">"revenue_post"</span>]          <span class="co"># D = 1 (app B)</span></span>
 <span id="cb2-2"><a href=""></a>y0 <span class="op">=</span> app.loc[app.treat <span class="op">==</span> <span class="dv">0</span>, <span class="st">"revenue_post"</span>]          <span class="co"># D = 0 (app A)</span></span>
 <span id="cb2-3"><a href=""></a><span class="bu">print</span>(<span class="ss">f"mean(D=1) = </span><span class="sc">{</span>y1<span class="sc">.</span>mean()<span class="sc">:.2f}</span><span class="ss">   mean(D=0) = </span><span class="sc">{</span>y0<span class="sc">.</span>mean()<span class="sc">:.2f}</span><span class="ss">   difference = </span><span class="sc">{</span>y1<span class="sc">.</span>mean() <span class="op">-</span> y0<span class="sc">.</span>mean()<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
@@ -589,7 +589,7 @@ t = 1.612   p-value = 0.1070   df = 3996.9</code></pre>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">Time:</td>
-<td>20:21:43</td>
+<td>21:08:30</td>
 <td data-quarto-table-cell-role="th">Log-Likelihood:</td>
 <td>-22276.</td>
 </tr>
@@ -807,7 +807,7 @@ t = 1.612   p-value = 0.1070   df = 3996.9</code></pre>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">Time:</td>
-<td>20:21:43</td>
+<td>21:08:30</td>
 <td data-quarto-table-cell-role="th">Log-Likelihood:</td>
 <td>-19242.</td>
 </tr>
@@ -1020,7 +1020,7 @@ t = 1.612   p-value = 0.1070   df = 3996.9</code></pre>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">Time:</td>
-<td>20:21:43</td>
+<td>21:08:31</td>
 <td data-quarto-table-cell-role="th">Log-Likelihood:</td>
 <td>-21889.</td>
 </tr>
