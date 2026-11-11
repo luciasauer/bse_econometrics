@@ -1,0 +1,59 @@
+/* Stata "Results" window for regression output (same look as TA4's
+   ta4-stata.css, shared so every deck draws Stata output the same way).
+
+   Usage, inside a ```{=html} block:
+     <div class="app-window stata-results">
+       <div class="stata-pane-head">Results</div>
+       <div class="stata-pane-body">... plain-text Stata output ...</div>
+     </div>
+   Add "small" next to stata-results for long outputs. */
+
+.reveal .app-window {
+  position: relative;
+  background: #fff;
+  border: 1px solid #cfd2d3;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  color: #1d1d1f;
+  text-align: left;
+}
+
+.reveal .stata-results { margin: 0.3em 0; }
+
+.reveal .stata-results .stata-pane-head {
+  display: flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  background: #f3f3f3;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #555;
+}
+
+.reveal .stata-results .stata-pane-body {
+  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+  font-size: 15.5px;
+  line-height: 1.35;
+  color: #111;
+  white-space: pre;
+  padding: 10px 14px;
+  overflow-x: auto;
+}
+.reveal .stata-results.small .stata-pane-body { font-size: 13px; }
+.reveal .stata-results.xsmall .stata-pane-body { font-size: 11.5px; }
+
+/* highlight one line of the output */
+.reveal .stata-results .hl-line {
+  background: rgba(242, 134, 39, 0.16);
+  box-shadow: inset 3px 0 0 #F28627;
+  display: block;
+  margin: 0 -14px;
+  padding: 0 14px;
+}
+
+/* Stata code blocks a bit tighter, as in TA4 */
+.reveal pre.sourceCode.stata { font-size: 0.8em; }

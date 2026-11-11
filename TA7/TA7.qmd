@@ -1,575 +1,1167 @@
 ---
 title: "Econometrics"
-subtitle: "<span class='subtitle-text'>TA Session 7</span>"
+subtitle: |
+  <span class="subtitle-text">TA Session 7</span>
 author: "Lucia Sauer"
-institute: "<em>Barcelona School of Economics</em>"
-date: "2025-11-14"
+institute: |
+  <p class="cover-affiliation"><em>Barcelona School of Economics</em></p>
+  <p class="cover-contact"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/></svg> <a href="mailto:lucia.sauer@bse.eu">lucia.sauer@bse.eu</a></p>
+date: "2026-11-18"
 format:
   revealjs:
-    chalkboard: true
+    html-math-method:
+      method: mathjax
+      url: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js"
+    theme: [default, ../theme/bse-theme.scss]
+    css: [../theme/stata-results.css, ta7-matching.css]
+    width: 1280
+    height: 720
     transition: fade
     slide-number: true
     progress: true
+    controls: true
+    menu: true
+    navigation-mode: linear
+    preview-links: auto
     title-slide-attributes:
-      data-background-position: "95% 90%"
-      data-background-size: "100px"
+      data-background-color: "#0396A6"
+      data-background-image: "../theme/assets/cover-graphic.svg"
+      data-background-size: "34%"
+      data-background-position: "92% 50%"
+      data-background-repeat: "no-repeat"
+    include-in-header:
+      text: |
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap">
+    include-after-body:
+      text: |
+        <script src="../theme/print-lazyload-fix.js"></script>
+execute:
+  echo: false
+  warning: false
 editor:
   render-on-save: true
-
 ---
 
-
-## Overview
-
-- Instrumental Variables (IV)
-- Two-Stage Least Squares (2SLS)
-- Probit (IV-Probit)
-- Marginal Effects
-- Local Average Treatment Effect (LATE)
-
-
----
-
-## Motivation
-
-- Previously we have seen that RCT is the gold standard to identify causal effects. 
-
-::: {.center}
-
-![](rct.png){width=60%}
-:::
-
---- 
-
-## Ways to address endogeneity
-
-However, in many situations, RCTs are not feasible or ethical and the presence of **confounders** can bias our estimates.
-
-
-::: {.center}
-![](observable_confounders.png){width=60% .center}
-:::
-
-
-
-1. **Matching**: we try to control for all confounders, but this only works when the confounders are **observable**.  
-<!-- 
-   - If unobserved factors also affect treatment and outcome, bias remains.  
-   - *(Example: Samu’s case — if we only observe neighborhood, matching won’t remove bias from unobserved confounders like motivation or income.)* -->
-
----
-
-## Ways to address endogeneity
-
-However, in many situations, RCTs are not feasible or ethical and the presence of **confounders** can bias our estimates.
-
-::: {.center}
-
-![](unobservable_confounders.png){width=60%}
-:::
-
-
-2. **Instrumental Variables (IV)**: use an external variable (instrument) that affects the treatment but is not directly related to the outcome, removing the bias from unobserved confounders.
-
-
----
-
-## Instrumental Variables (IV)
-
-
-- Assumptions for a valid instrument:
-  1. Relevance: $Cov(Z, X) \neq 0$
-  2. Exogeneity: $Cov(Z, u) = 0$
-
-::: {.center}
-
-![](instrumental_variables.png){width=60%}
-:::
-
-So when we critize IV, we usually focus on these two assumptions.
-
----
-
-
-## Two-Stage Least Squares (2SLS)
-
-
-1. First Stage: regress the endogenous variable X on the instrument Z and other exogenous variables to obtain the predicted values of X
-   $$X = \delta_0 + \delta_1Z + v$$
-   
-2. Second Stage: regress the dependent variable Y on the predicted values $\hat{X}$ and other exogenous variables.
-    $$Y = \beta_0 + \beta_1\hat{X} + \varepsilon$$
-
-
-- Statistical software that supports 2SLS estimation directly (e.g., `ivreg` in R, `ivregress` in Stata, in python `linearmodels.iv`).
-
----
-
-### Returns of Education 
-
-We want to estimate the effect of education on wages. 
-
-$$\text{lwage}_i = \beta_1 + \beta_2\text{exper}_i + \beta_3\text{expersq}_i + \beta_4\text{educ}_i + \varepsilon_i$$
-
-
-However, $\texttt{educ}$ may be endogenous due to omitted ability bias.
-
-::: {.center}
-![](educ_endogenous.png){width=60%}
-:::
-
-
-
----
-
-
-### Returns of Education - IV
-
-We want to estimate the effect of education on wages. 
-
-
-$$\text{lwage}_i = \beta_1 + \beta_2\text{exper}_i + \beta_3\text{expersq}_i + \beta_4\text{educ}_i + \varepsilon_i$$
-
-
-- We can use `fatheduc` and `motheduc` as instruments for `educ`:
-  - Relevance: Parents' education likely affects child's education.
-  - Exogeneity: Parents' education likely does not directly affect child's wage, except through child's education.
-
-::: {.center}
-![](educ.png){width=60%}
-:::
-
-<!-- education is really a choice, you can force kids to stay in schol and you cant force parents not to send kids to school, this is closely linked to th epersonality and you choice, so you cant randomize you get 3 years, you get 4 of education-->
-
-
----
-
-### Implementation of 2SLS in Stata
-
-1. First Stage
-
-```stata
-use http://fmwww.bc.edu/ec-p/data/wooldridge/mroz, clear
-regress educ fatheduc motheduc exper expersq if !missing(lwage)
-```
-```{=html}
-<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
-
-      Source |       SS           df       MS      Number of obs   =       428
--------------+----------------------------------   F(4, 423)       =     28.36
-       Model |  471.620998         4   117.90525   Prob > F        =    0.0000
-    Residual |  1758.57526       423  4.15738833   R-squared       =    0.2115
--------------+----------------------------------   Adj R-squared   =    0.2040
-       Total |  2230.19626       427  5.22294206   Root MSE        =     2.039
-
-------------------------------------------------------------------------------
-        educ | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-    fatheduc |   .1895484   .0337565     5.62   0.000     .1231971    .2558997
-    motheduc |    .157597   .0358941     4.39   0.000      .087044    .2281501
-       exper |   .0452254   .0402507     1.12   0.262    -.0338909    .1243417
-     expersq |  -.0010091   .0012033    -0.84   0.402    -.0033744    .0013562
-       _cons |    9.10264   .4265614    21.34   0.000     8.264196    9.941084
-------------------------------------------------------------------------------
-
-</pre>
+```{python}
+#| output: false
+import sys
+sys.path.insert(0, "../theme")
+import bse_style, bse_anim
+_ = bse_style.apply()
+
+import html as _html
+import warnings
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.patches import Circle, Ellipse, FancyArrowPatch, Rectangle
+from scipy import stats
+from scipy.spatial.distance import cdist
+import statsmodels.formula.api as smf
+warnings.filterwarnings("ignore")
+
+T_COL, C_COL = bse_style.ORANGE, bse_style.TEAL   # treated = orange, control = teal
+PURPLE, GRAY, FADE = bse_style.PURPLE, "#9A9A9A", "#D9D9D9"
+FENCE = "`" * 3   # a literal fence at line start would end a Quarto cell
+
+def md_table(rows, header, align=None):
+    align = align or ["l"] + ["r"] * (len(header) - 1)
+    sep = {"l": ":---", "r": "---:", "c": ":---:"}
+    out = ["| " + " | ".join(header) + " |", "|" + "|".join(sep[a] for a in align) + "|"]
+    out += ["| " + " | ".join(r) + " |" for r in rows]
+    print("\n" + "\n".join(out) + "\n")
+
+def html_out(s):
+    print(f"\n{FENCE}{{=html}}\n{s}\n{FENCE}\n")
+
+def stata_win(txt, hl=(), bad=(), good=(), size="small", head="Results"):
+    """Plain-text Stata output inside the Stata 'Results' window (theme/stata-results.css)."""
+    body = ""
+    for line in txt.strip("\n").split("\n"):
+        e = _html.escape(line)
+        for s_ in bad:
+            e = e.replace(_html.escape(s_), f'<span class="bad">{_html.escape(s_)}</span>')
+        for s_ in good:
+            e = e.replace(_html.escape(s_), f'<span class="good">{_html.escape(s_)}</span>')
+        if any(h in line for h in hl):
+            body += f'<span class="hl-line">{e}</span>'      # block span: no newline after it
+        else:
+            body += e + "\n"
+    return (f'<div class="app-window stata-results {size}"><div class="stata-pane-head">{head}</div>'
+            f'<div class="stata-pane-body">{body.rstrip()}</div></div>')
+
+def dots(ax, x, y, col, s=110, z=3, **kw):
+    return ax.scatter(x, y, s=s, color=col, edgecolor="white", linewidth=1.3, zorder=z, **kw)
+
+def caption(ax, txt, loc="right"):
+    x, ha = (0.99, "right") if loc == "right" else (0.01, "left")
+    return ax.text(x, 0.97, txt, transform=ax.transAxes, ha=ha, va="top", fontsize=12.5, color=PURPLE,
+                   zorder=10, bbox=dict(boxstyle="round,pad=0.35", fc="white", ec=FADE, lw=0.8))
+
+def beeswarm(v, base, step, width=0.012, sign=1):
+    """y positions that stack points with close values (a simple 1-D beeswarm)."""
+    order = np.argsort(v); y = np.empty(len(v)); placed = []
+    for i in order:
+        k = sum(1 for p in placed if abs(p - v[i]) < width)
+        placed.append(v[i]); y[i] = base + sign * step * k
+    return y
+
+def logit_odds(p):
+    return np.log(p / (1 - p))
+
+SYM = dict(fontfamily="DejaVu Sans")   # ✓ ✗ ⇒ are missing from the slide serif font
+PHAT = r"$\hat{p}$"                     # p-hat for matplotlib text (combining ̂ renders badly)
+def anim_steps(s, items, height=470, fig_w=64, box=None):
+    """Animated figure on the left + a numbered list of steps on the right.
+    items = [(frame, html)]: the step appears together with that frame (frame 0 = visible from the start)."""
+    w_in, h_in = s.fig.get_size_inches()
+    height = int(min(height, 1180 * fig_w / 100 * h_in / w_in))   # keep the figure inside its column
+    fig_html = s.html(height, first_index=0); plt.close(s.fig)
+    lis = "".join(f'<li class="fragment" data-fragment-index="{fr - 1}">{txt}</li>' if fr else f"<li>{txt}</li>"
+                  for fr, txt in items)
+    steps = f'<ol class="anim-steps">{lis}</ol>'
+    if box:                                               # orange "algorithm" box
+        steps = f'<div class="algo-box"><div class="algo-title">{box}</div>{steps}</div>'
+    html_out(f'<div class="anim-row"><div class="anim-fig" style="flex:0 0 {fig_w}%">{fig_html}</div>{steps}</div>')
 ```
 
 ---
 
-### Implementation of 2SLS in Stata
-
-2. Second Stage
-
-```stata
-predict educhat
-regress lwage educhat exper expersq
-```
-```{=html}
-<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
-
-      Source |       SS           df       MS      Number of obs   =       428
--------------+----------------------------------   F(3, 424)       =      7.40
-       Model |  11.1178292         3  3.70594308   Prob > F        =    0.0001
-    Residual |  212.209622       424  .500494392   R-squared       =    0.0498
--------------+----------------------------------   Adj R-squared   =    0.0431
-       Total |  223.327451       427  .523015108   Root MSE        =    .70746
-
-------------------------------------------------------------------------------
-       lwage | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-     educhat |   .0613966   .0329624     1.86   0.063    -.0033933    .1261866
-       exper |   .0441704   .0140844     3.14   0.002     .0164865    .0718543
-     expersq |   -.000899   .0004212    -2.13   0.033    -.0017268   -.0000711
-       _cons |   .0481003   .4197565     0.11   0.909    -.7769624     .873163
-------------------------------------------------------------------------------
-</pre>
-```
-
-
-
 ---
 
-### Implementation of 2SLS in Stata
-
-Or we can use the built-in command for 2SLS:
-
-```stata
-ivregress 2sls lwage exper expersq (educ= fatheduc motheduc)
-```
-
-```{=html}
-<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
-
-Instrumental-variables 2SLS regression            Number of obs   =        428
-                                                  Wald chi2(3)    =      24.65
-                                                  Prob > chi2     =     0.0000
-                                                  R-squared       =     0.1357
-                                                  Root MSE        =     .67155
-
-------------------------------------------------------------------------------
-       lwage | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        educ |   .0613966   .0312895     1.96   0.050     .0000704    .1227228
-       exper |   .0441704   .0133696     3.30   0.001     .0179665    .0703742
-     expersq |   -.000899   .0003998    -2.25   0.025    -.0016826   -.0001154
-       _cons |   .0481003    .398453     0.12   0.904    -.7328532    .8290538
-------------------------------------------------------------------------------
-Endogenous: educ
-Exogenous:  exper expersq fatheduc motheduc
-
-</pre>
-```
-
-
----
-
-## Probit (IV-Probit)
-
-
-We are interested in estimating the effect of household income on female labor force participation.
-
-$$\text{fem\_work}_i = \beta_1 + \beta_2\text{other\_inc}_i + \beta_3\text{fem\_educ}_i + \beta_4\text{kids}_i + \varepsilon_i$$
-
-where:
-
-- $\text{fem\_work}$: Female labor force participation
-- $\text{other\_inc}$: Other family income (endogenous)
-- $\text{fem\_educ}$: Female education level
-- $\text{kids}$: Number of kids
-
-But $\text{other\_inc}$ is likely endogenous due to omitted variable bias (e.g., family preferences)
-
-
----
-
-### Endogeneity & Instrument
-
-- `other_inc` correlated with unobserved family attitudes that also affect female labor participation.  
-
-::: {.center}
-![](fem_work.png){width=70%}
-:::
-
-
-- Use `male_educ` as instrument:
-  - $\uparrow$ Education $\rightarrow$ $\uparrow$ Income (**relevance**)
-  - No direct effect on `fem_work` (**exogeneity**)
-- Controls: `fem_educ`, `kids`
-
-
-
-
----
-
-### Non-Linear Model: Probit
-
-- $\text{fem\_work}$ is a binary outcome (1 if working, 0 otherwise).
-
-- OLS is not suitable for binary outcomes $\rightarrow$ may predict probabilities outside [0,1].
-
-- Probit models the probability that $Y=1$ using a normal CDF:
-
-$$P(Y=1|X) = \Phi(Xβ)$$
-
-- Captures the **nonlinear** link between covariates and probability of working.
-
-
---- 
-
-## Stata code for IV-Probit
-```stata
-clear all 
-webuse laborsup, clear
-ivprobit fem_work fem_educ kids (other_inc = male_educ)
-```
-
-```{=html}
-<pre style="background-color:#f7f7f7; color:#111; font-family:Courier New, monospace; font-size:0.5em; padding:1em; border-radius:6px;">
-
-Probit model with endogenous regressors                 Number of obs =    500
-                                                        Wald chi2(3)  = 163.88
-Log likelihood = -2368.2062                             Prob > chi2   = 0.0000
-
-----------------------------------------------------------------------------------------------
-                             | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
------------------------------+----------------------------------------------------------------
-                   other_inc |  -.0542756   .0060854    -8.92   0.000    -.0662028   -.0423485
-                    fem_educ |    .211111   .0268648     7.86   0.000     .1584569    .2637651
-                        kids |  -.1820929   .0478267    -3.81   0.000    -.2758315   -.0883542
-                       _cons |   .3672086   .4480724     0.82   0.412    -.5109971    1.245414
------------------------------+----------------------------------------------------------------
- corr(e.other_inc,e.fem_work)|   .3720375   .1300518                      .0946562    .5958136
-              sd(e.other_inc)|   16.66621   .5270318                      15.66461    17.73186
-----------------------------------------------------------------------------------------------
-Wald test of exogeneity (corr = 0): chi2(1) = 6.70        Prob > chi2 = 0.0096
-Endogenous: other_inc
-Exogenous:  fem_educ kids male_educ
-
-</pre>
-```
-
----
-
-### Interpretation of `kids = -0.18`
-
-- A one-child increase reduces the **latent propensity** to work by **0.18 SD**, holding other factors constant.  
-- This is **not yet** a change in probability because the Probit model is **nonlinear**.
-
-$$P(\text{fem\_work}=1|X) = \Phi(X\beta)$$
-
-The **marginal effect** of one more child on that probability is:
-
-$$\frac{\partial P(\text{fem\_work}=1|X)}{\partial \text{kids}} 
-= \phi(X\beta) \cdot \beta_{\text{kids}}$$
-
-where $\Phi(\cdot)$ and $\phi(\cdot)$ are the CDF and PDF of the standard normal.  
-
-<!-- At the mean, $X\beta \approx 0 \Rightarrow \phi(0)=0.3989\approx0.4$.
-
-$$
-\Delta P \approx 0.4 \times (-0.182) = -0.073
-$$
-
- **Each additional child lowers the probability of working by about 7 pp**, on average. -->
-
-
-<!-- 
-- The coefficients in a Probit model represent the change in the z-score (the standard normal deviate) for a one-unit change in the predictor variable. To interpret these coefficients in terms of probabilities, we can compute the marginal effects.
-
-To compute the marginal effects:
-$$\frac{∂P(Y=1|X)}{∂X_j} = φ(Xβ) * β_j$$
- where $φ$ is the probability density function of the standard normal distribution. -->
-
-
----
-
-## Marginal Effects
-
-- **Treatment variable continuous**, we can compute the marginal effects to understand the impact of a one-unit increase in the treatment on the probability of the outcome.
-
-
-```stata
-margins, at(kids=(1(1)4)) predict(pr)
-marginsplot
-```
-::: {.center}
-![](marginal_effects.png){width=80%}
-:::
-
-
---- 
-
-
-## Local Average Treatment Effect (LATE)
-
-:auto-animate:
-
-::: {.callout-note title="LATE" icon="false"}
-The IV estimate identifies the causal effect for compliers, i.e., those whose treatment decision responds to the instrument.
-:::
-
-<!-- Paso 1 -->
-<div>
-
-|                | **Z = 0**                      | **Z = 1**                      |
-|----------------|--------------------------------|--------------------------------|
-| **D(0)**       | complier o never-taker         | defier o never-taker           |
-| **D(1)**       | defier o always-taker          | complier o always-taker        |
+## Planification — 2° Part
+
+<div style="font-size:0.95em; margin-top:0.5em;">
+
+<div style="border-left:4px solid #BDBDBD; padding-left:1em; margin-bottom:0.7em; color:#999;">
+  <strong>TA6 — RCTs</strong> ✓
+</div>
+
+<div style="border-left:6px solid #0396A6; padding-left:1em; margin-bottom:0.7em; background:#E3F2F4; padding-top:0.15em; padding-bottom:0.15em;">
+  <strong>TA7 — Matching</strong> &nbsp;<span style="color:#0396A6; font-size:0.8em;">← today</span>
+</div>
+
+<div style="border-left:4px solid #79BAC8; padding-left:1em; margin-bottom:0.7em;">
+  <strong>TA8 — Instrumental Variables</strong><br>
+  <span style="color:#777;">📆 Hand in Assignment 6 by <strong style="color:#0396A6;">18th Nov</strong></span>
+</div>
+
+<div style="border-left:4px solid #79BAC8; padding-left:1em; margin-bottom:0.7em;">
+  <strong>TA9 — Regression Discontinuity</strong><br>
+  <span style="color:#777;">📆 Hand in Assignment 7 by <strong style="color:#79BAC8;">27th Nov</strong></span>
+</div>
+
+<div style="border-left:4px solid #3E2259; padding-left:1em;">
+  <strong>TA10 — Difference-in-Differences</strong><br>
+  <span style="color:#777;">📆 Hand in Assignment 8 by <strong style="color:#3E2259;">2nd Dec</strong></span>
+</div>
 
 </div>
 
 ---
 
-## Local Average Treatment Effect (LATE)
-:auto-animate:
+## Today {background-color="#0396A6"}
 
-::: {.callout-note title="LATE" icon="false"}
-The IV estimate identifies the causal effect for compliers, i.e., those whose treatment decision responds to the instrument.
+1. **Observational data** — was the treatment randomly assigned?
+2. **Matching on covariates** — nearest neighbour, exact matching
+3. **The propensity score** — common support, balancing property, NN / radius / kernel
+4. **Back to job training** — which matching method wins, and did it recover the experiment?
+
+::: {style="font-size:0.7em; margin-top:1em"}
+💻 Stata: **TA7.do** (data `nsw_cps.dta`) · 📓 Python version: **TA7.ipynb**
 :::
 
-<!-- Paso 2 -->
-<div>
+# 1 · Observational data {background-color="#0396A6" .section-divider-centered}
 
-|                | **Z = 0**                              | **Z = 1**                              |
-|----------------|----------------------------------------|----------------------------------------|
-| **D(0)**       | complier o never-taker                 | ~~defier~~ o never-taker               |
-| **D(1)**       | ~~defier~~ o always-taker              | complier o always-taker                |
+---
 
+## Did a job-training program raise earnings?
+
+::: {style="font-size:0.8em"}
+**National Supported Work (NSW):** a 1970s US program that gave disadvantaged workers (ex-offenders, ex-addicts, long-term unemployed) 9–18 months of subsidized work experience. We want its effect on **earnings in 1978**.
+:::
+
+```{python}
+#| output: asis
+nsw = pd.read_stata("nsw_cps.dta")
+nsw[["age", "educ"]] = nsw[["age", "educ"]].astype(float)        # stored as int16: age**3 would overflow
+obs0 = nsw[nsw["sample"] != 2].copy()                             # participants + CPS (no experimental controls)
+obs0["u74"] = (obs0.re74 == 0).astype(int); obs0["u75"] = (obs0.re75 == 0).astype(int)
+m1, m0 = obs0.re78[obs0.treat == 1].mean(), obs0.re78[obs0.treat == 0].mean()
+tex = lambda x: f"{x:,.0f}".replace(",", "{,}")          # thousands comma without extra space in LaTeX
+html_out(f"""
+<div class="groups">
+  <div class="grp t"><div class="n">185</div><div class="lab">Participants</div><div class="sub">D = 1 · mean 1978 earnings ${m1:,.0f}</div></div>
+  <div class="grp cps"><div class="n">15,992</div><div class="lab">Non-participants</div><div class="sub">US adults from a survey (CPS) · ${m0:,.0f}</div></div>
 </div>
+""")
+print(f"""
+::: {{.fragment style="font-size:0.8em"}}
+Naive comparison: $\\bar Y_1 - \\bar Y_0 = {tex(m1)} - {tex(m0)} = -{tex(m0 - m1)}$ dollars.
+Did training really **cut** earnings by \\${m0 - m1:,.0f}? Or are participants and non-participants simply **different people**?
+:::
+""")
+```
+
+::: {.fragment .hyp-box}
+This is **observational data**: nobody flipped a coin. People ended up in the program (or not) for reasons we don't control. First question, as in TA6: **do the two groups look alike before treatment?**
+:::
 
 ---
 
-## Local Average Treatment Effect (LATE)
-:auto-animate:
+## Was the treatment randomly assigned? A balance check
 
-::: {.callout-note title="LATE" icon="false"}
-The IV estimate identifies the causal effect for compliers, i.e., those whose treatment decision responds to the instrument.
-
+::: {style="font-size:0.75em"}
+For each pre-treatment covariate $X_k$: $\;H_0: E[X_k \mid D = 1] = E[X_k \mid D = 0]$, Welch $t$-test (as in TA6). If $D$ were random, we would reject only ~5% of the time.
 :::
 
-<!-- Paso 3 -->
-<div>
 
-|                | **Z = 0**                                     | **Z = 1**                                     |
-|----------------|-----------------------------------------------|-----------------------------------------------|
-| **D(0)**       | **complier** o never-taker                    | ~~defier~~ o never-taker                      |
-| **D(1)**       | ~~defier~~ o always-taker                     | **complier** o always-taker                   |
+```{python}
+#| output: asis
+BAL0 = [("age", "Age"), ("educ", "Years of education"), ("black", "Black"), ("hisp", "Hispanic"),
+        ("married", "Married"), ("nodegree", "No high-school degree"), ("re74", "Earnings 1974 ($)"),
+        ("re75", "Earnings 1975 ($)"), ("u74", "Unemployed 1974"), ("u75", "Unemployed 1975")]
+rows = ""; n_rej = 0
+for v, lab in BAL0:
+    a, b = obs0[v][obs0.treat == 1], obs0[v][obs0.treat == 0]
+    pv = stats.ttest_ind(a, b, equal_var=False).pvalue
+    n_rej += pv < 0.05
+    fmt = (lambda x: f"{x:,.0f}") if v.startswith("re") else (lambda x: f"{x:.2f}")
+    pcell = f'<td class="{"p-bad" if pv < 0.05 else "p-ok"}">{"< 0.001" if pv < 0.001 else f"{pv:.3f}"}</td>'
+    rows += f"<tr><td>{lab}</td><td>{fmt(a.mean())}</td><td>{fmt(b.mean())}</td><td>{fmt(a.mean() - b.mean())}</td>{pcell}</tr>"
+html_out(f"""
+<table class="baltab">
+<thead><tr><th>Covariate</th><th>Participants</th><th>Non-participants</th><th>Difference</th><th>p-value</th></tr></thead>
+<tbody>{rows}</tbody></table>
+""")
+print(f"""
+::: {{.fragment style="font-size:0.72em"}}
+**{n_rej} of {len(BAL0)}** p-values are below 0.05 ⇒ the groups are **not** comparable: clear signs of **non-random** assignment.
+Participants are younger, less educated, mostly Black, rarely married, and earned about 1/7 of what non-participants earned in 1974–75.
+And these same variables also determine 1978 earnings ⇒ they are **confounders**.
+:::
+""")
+```
 
+---
+
+## Without a coin flip, who gets treated is not random
+
+::: {style="font-size:0.85em"}
+In TA6 randomization made $\;E[Y \mid D = 1] - E[Y \mid D = 0] = \text{ATT}$. Without it:
+:::
+
+::: {.eq-box-wrap style="font-size:0.85em; margin:0.2em 0"}
+::: {.eq-box}
+$$\underbrace{E[Y \mid D = 1] - E[Y \mid D = 0]}_{\text{naive comparison}} \;=\; \underbrace{E[Y(1) - Y(0) \mid D = 1]}_{\text{ATT}} \;+\; \underbrace{E[Y(0) \mid D = 1] - E[Y(0) \mid D = 0]}_{\text{selection bias}}$$
+:::
+:::
+
+```{python}
+#| output: asis
+def node(ax, x, y, lab, col, fill=False, dashed=False, r=0.075, fs=21):
+    ax.add_patch(Circle((x, y), r, facecolor=col if fill else "white", edgecolor=col, lw=2.6,
+                        ls=(0, (4, 3)) if dashed else "-", zorder=3))
+    ax.text(x, y, lab, ha="center", va="center", fontsize=fs, fontstyle="italic", fontweight="bold",
+            color="white" if fill else col, zorder=4)
+
+def edge(ax, p, q, col, rad=0.0, dashed=False, lw=2.4, alpha=1.0, r=0.075, label=None, lpos=None):
+    # shrink the arrow by the node radius, converted from data units to points
+    fig = ax.figure; bb = ax.get_position()
+    pts = fig.get_figwidth() * 72 * bb.width / np.diff(ax.get_xlim())[0]
+    a = FancyArrowPatch(p, q, arrowstyle="-|>", mutation_scale=20, color=col, lw=lw, alpha=alpha,
+                        ls=(0, (5, 3)) if dashed else "-", connectionstyle=f"arc3,rad={rad}",
+                        shrinkA=r * pts + 3, shrinkB=r * pts + 3, zorder=2)
+    ax.add_patch(a)
+    if label:
+        ax.text(*lpos, label, ha="center", va="center", fontsize=15, color=col, fontstyle="italic")
+    return a
+
+s = bse_anim.Steps("dag", figsize=(10.5, 3.1), margins=dict(left=0.01, right=0.99, top=0.99, bottom=0.01))
+ax = s.ax; ax.set_xlim(0, 1.75); ax.set_ylim(0, 0.47); ax.set_aspect("equal"); ax.axis("off")
+X_, D_, Y_ = (0.25, 0.17), (0.75, 0.17), (1.25, 0.17)
+eXD = edge(ax, X_, D_, C_COL); eDY = edge(ax, D_, Y_, PURPLE, label="τ", lpos=(1.0, 0.21))
+eXY = edge(ax, X_, Y_, C_COL, rad=-0.32)
+node(ax, *X_, "X", C_COL); node(ax, *D_, "D", T_COL); node(ax, *Y_, "Y", PURPLE)
+ax.text(X_[0], 0.04, "age, education,\npast earnings", ha="center", va="center", fontsize=11.5, color="#555")
+ax.text(D_[0], 0.04, "training", ha="center", va="center", fontsize=11.5, color="#555")
+ax.text(Y_[0], 0.04, "earnings", ha="center", va="center", fontsize=11.5, color="#555")
+cap = ax.text(1.42, 0.24, "X drives both\nwho is treated\nand the outcome", ha="left", va="center",
+              fontsize=12.5, color=C_COL)
+s.snap()
+eXD.set_alpha(0.15); eXY.set_alpha(0.15)
+node(ax, *X_, "X", C_COL, fill=True)
+cap.set_text("compare units\nwith the SAME X:\nthe back door\nis closed"); cap.set_color(PURPLE)
+s.snap()
+s.show(height=225)
+```
+
+::: {.fragment style="font-size:0.78em"}
+**Idea of matching:** compare treated and untreated units **that look the same in $X$**. Within such a group, who got treated is "as good as random".
+:::
+
+---
+
+## Two assumptions
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.callout-note title="1 · Conditional independence (CIA)" icon=false}
+$$\big(Y(1), Y(0)\big) \perp\!\!\!\perp D \mid X$$
+
+::: {style="font-size:0.75em"}
+Once we compare units with the same $X$, treatment is as good as random. **Untestable**: we must observe **every** confounder ("selection on observables").
+:::
+:::
+:::
+::: {.column width="50%"}
+::: {.callout-note title="2 · Overlap (common support)" icon=false}
+$$0 < P(D = 1 \mid X) < 1$$
+
+::: {style="font-size:0.75em"}
+For every $X$ there are both treated **and** untreated units: someone to compare with. **Testable**: we look at the data.
+:::
+:::
+:::
+:::
+
+::: {.fragment}
+For the ATT we only need to impute $E[Y(0) \mid D = 1]$:
+
+::: {.eq-box-wrap style="font-size:0.85em; margin:0.2em 0"}
+::: {.eq-box}
+$$\text{ATT} \;=\; E[Y \mid D = 1] \;-\; E\big[\,\underbrace{E[Y \mid X, D = 0]}_{\text{untreated with the same } X} \;\big|\; D = 1\big]$$
+:::
+:::
+:::
+
+::: {.fragment style="font-size:0.75em"}
+❗ Matching is **not** a design like an RCT: it is only as good as the $X$'s you observe. It cannot fix confounding by **unobserved** variables.
+:::
+
+# 2 · Matching {background-color="#0396A6" .section-divider-centered}
+
+---
+
+## Matching = imputing the missing counterfactual
+
+::: {style="font-size:0.78em"}
+A toy version of our question ($Y$ = earnings, thousand \$). For each **treated** unit, find the **untreated** unit with the most similar $X$ and use its $Y$ as the missing $Y_i(0)$.
+:::
+
+```{python}
+#| output: asis
+T_rows = [("A", 24, 10, 9.8, "1", 8.0), ("B", 31, 9, 7.1, "3", 6.0), ("C", 22, 12, 11.5, "4", 9.9), ("D", 28, 11, 8.4, "6", 7.0)]
+C_rows = [("1", 25, 10, 8.0), ("2", 45, 16, 21.3), ("3", 30, 9, 6.0), ("4", 23, 12, 9.9), ("5", 52, 13, 17.5), ("6", 29, 11, 7.0)]
+def swap(before, after, f):
+    """'before' is shown until fragment f, then replaced by 'after' in the same spot."""
+    return (f'<span class="stack"><span class="fragment fade-out" data-fragment-index="{f}">{before}</span>'
+            f'<span class="fragment" data-fragment-index="{f}">{after}</span></span>')
+def show(x, f):
+    return f'<span class="fragment" data-fragment-index="{f}">{x}</span>'
+rows = ""
+for u, a, e, y, m, y0 in T_rows:
+    rows += (f'<tr><td class="unit-t">{u}</td><td>1</td><td>{a}</td><td>{e}</td><td><b>{y:.1f}</b></td>'
+             f'<td>{swap("<span class=miss>?</span>", f"<span class=fill>{y0:.1f}</span>", 1)}</td>'
+             f'<td>{show(f"<span class=fill>#{m}</span>", 1)}</td>'
+             f'<td>{show(f"<span class=tau>{y - y0:+.1f}</span>", 2)}</td></tr>')
+for k, (u, a, e, y) in enumerate(C_rows):
+    sep = ' class="sep"' if k == 0 else ""
+    rows += (f'<tr{sep}><td class="unit-c">#{u}</td><td>0</td><td>{a}</td><td>{e}</td>'
+             f'<td><span class=miss>?</span></td><td><b>{y:.1f}</b></td><td></td><td></td></tr>')
+att = np.mean([y - y0 for *_, y, m, y0 in T_rows])
+naive = np.mean([r[3] for r in T_rows]) - np.mean([r[3] for r in C_rows])
+html_out(f"""
+<table class="impute">
+<thead><tr><th>Unit</th><th>D</th><th>Age</th><th>Educ.</th><th>Y(1)</th><th>Y(0)</th><th>Matched to</th><th>τ̂ᵢ = Y(1) − Y(0)</th></tr></thead>
+<tbody>{rows}</tbody></table>
+""")
+print(f"""
+
+::: {{.fragment fragment-index=3}}
+$$\\widehat{{\\text{{ATT}}}} = \\frac{{1}}{{N_1}}\\sum_{{i:\\,D_i = 1}} \\big(Y_i - Y_{{j(i)}}\\big) = \\mathbf{{{att:+.2f}}}$$
+:::
+
+::: {{.fragment fragment-index=4}}
+Naive: $\\bar Y_1 - \\bar Y_0 = {np.mean([r[3] for r in T_rows]):.2f} - {np.mean([r[3] for r in C_rows]):.2f} = \\mathbf{{{naive:+.2f}}}$, because the untreated #2 and #5 are older and more educated: not comparable.
+:::
+
+""")
+```
+
+---
+
+
+## Building intuition: two covariates
+
+```{python}
+#| output: asis
+rngA = np.random.default_rng(12)
+nT, nC = 12, 45
+toyA = pd.DataFrame({
+    "educ": np.r_[rngA.normal(10.5, 1.5, nT), rngA.normal(13.2, 2.4, nC)].clip(7.6, 19.4),
+    "age":  np.r_[rngA.normal(29, 5.5, nT), rngA.normal(41, 10, nC)].clip(19, 64),
+    "D":    np.r_[np.ones(nT, int), np.zeros(nC, int)]})
+XA = toyA[["educ", "age"]].values
+covA = np.cov(XA.T); VI = np.linalg.inv(covA)
+tA, cA = np.where(toyA.D == 1)[0], np.where(toyA.D == 0)[0]
+DA = cdist(XA[tA], XA[cA], "mahalanobis", VI=VI)
+pairsA, usedA, doneA = [], set(), set()
+for flat in np.argsort(DA, axis=None):                     # greedy: closest available pair first, no replacement
+    i, j = np.unravel_index(flat, DA.shape)
+    if i in doneA or j in usedA: continue
+    doneA.add(i); usedA.add(j); pairsA.append((tA[i], cA[j]))
+pairsA.sort(key=lambda pr: pr[0])
+matchedC = np.array([c for _, c in pairsA])
+
+XL, YL = (7, 20), (17, 66)
+xs, ys = np.linspace(*XL, 200), np.linspace(*YL, 200)
+
+def setup_nn(name):
+    s = bse_anim.Steps(name, figsize=(8.6, 5.2), margins=dict(left=0.1, right=0.80, top=0.80, bottom=0.12))
+    ax = s.ax
+    axT = s.fig.add_axes([0.1, 0.81, 0.70, 0.14]); axR = s.fig.add_axes([0.805, 0.12, 0.13, 0.68])
+    for a in (axT, axR): a.axis("off")
+    axT.set_xlim(*XL); axR.set_ylim(*YL)
+    ax.set_xlim(*XL); ax.set_ylim(*YL); ax.set_xlabel("Education (years)"); ax.set_ylabel("Age")
+    return s, ax, axT, axR
+
+def draw_marg(axT, axR, idxT, idxC):
+    arts = []; mx = my = 0
+    for idx, col in ((idxT, T_COL), (idxC, C_COL)):
+        kx = stats.gaussian_kde(toyA.educ.values[idx])(xs); ky = stats.gaussian_kde(toyA.age.values[idx])(ys)
+        arts += [axT.fill_between(xs, kx, color=col, alpha=0.3, lw=0)] + axT.plot(xs, kx, color=col, lw=1.8)
+        arts += [axR.fill_betweenx(ys, ky, color=col, alpha=0.3, lw=0)] + axR.plot(ky, ys, color=col, lw=1.8)
+        mx, my = max(mx, kx.max()), max(my, ky.max())
+    axT.set_ylim(0, mx * 1.05); axR.set_xlim(0, my * 1.05)
+    return arts
+
+s, ax, axT, axR = setup_nn("twocov")
+dots(ax, toyA.educ[cA], toyA.age[cA], C_COL, label="Untreated (D = 0)")
+dots(ax, toyA.educ[tA], toyA.age[tA], T_COL, label="Treated (D = 1)")
+ax.legend(loc="upper right", fontsize=11.5, frameon=True, framealpha=0.95, edgecolor=FADE)
+s.snap()
+draw_marg(axT, axR, tA, cA)
+s.snap()
+ax.axvline(toyA.educ[tA].mean(), color=T_COL, ls=":", lw=1.6); ax.axvline(toyA.educ[cA].mean(), color=C_COL, ls=":", lw=1.6)
+ax.axhline(toyA.age[tA].mean(), color=T_COL, ls=":", lw=1.6); ax.axhline(toyA.age[cA].mean(), color=C_COL, ls=":", lw=1.6)
+s.snap()
+anim_steps(s, [
+    (0, "Two covariates, education and age: each dot is one person."),
+    (1, "Their distributions (top: education, right: age) <b>differ</b>: treated are younger and less educated."),
+    (2, "So do the means (dotted lines). Comparing all of them is comparing apples and oranges."),
+], height=520, fig_w=64)
+```
+
+---
+
+## Nearest-neighbour matching
+
+::: {style="font-size:0.75em"}
+Distance between treated $i$ and untreated $j$ (Mahalanobis, scale-free): $\;d(i,j) = \sqrt{(X_i - X_j)'\,S^{-1}\,(X_i - X_j)}$, with $S$ the covariance matrix of $X$.
+:::
+
+```{python}
+#| output: asis
+s, ax, axT, axR = setup_nn("nn")
+scC = dots(ax, toyA.educ[cA], toyA.age[cA], C_COL)
+dots(ax, toyA.educ[tA], toyA.age[tA], T_COL)
+marg = draw_marg(axT, axR, tA, cA)
+s.snap()
+# 2) one treated unit: distance contours are ellipses
+i0, j0 = pairsA[0]
+ev, evec = np.linalg.eigh(covA); ang = np.degrees(np.arctan2(evec[1, 1], evec[0, 1]))
+ells = []
+for r_, a_ in ((0.5, 0.9), (1.0, 0.6), (1.5, 0.35)):
+    e = Ellipse(XA[i0], 2 * r_ * np.sqrt(ev[1]), 2 * r_ * np.sqrt(ev[0]), angle=ang, fill=False,
+                ec=PURPLE, lw=1.5, ls="--", alpha=a_, zorder=2)
+    ax.add_patch(e); ells.append(e)
+hl = ax.scatter(*XA[i0], s=320, facecolor="none", edgecolor=PURPLE, lw=2.4, zorder=4)
+arr = ax.annotate("", xy=XA[j0], xytext=XA[i0], arrowprops=dict(arrowstyle="-|>", color=PURPLE, lw=2.2, mutation_scale=16), zorder=5)
+s.snap()
+# 3) all matches
+for e in ells: e.remove()
+hl.remove(); arr.remove()
+for i, j in pairsA:
+    ax.plot(*zip(XA[i], XA[j]), color=PURPLE, lw=1.6, alpha=0.75, zorder=2)
+s.snap()
+# 4) drop unmatched controls, re-draw the marginals
+cols = np.array([C_COL if j in set(matchedC) else FADE for j in cA])
+scC.set_facecolor(cols); scC.set_edgecolor(["white" if c == C_COL else FADE for c in cols])
+for a in marg: a.remove()
+draw_marg(axT, axR, tA, matchedC)
+s.snap()
+anim_steps(s, [
+    (0, "Start from all treated and untreated units."),
+    (1, "Take one treated unit and find its <b>nearest</b> untreated neighbour (dashed ellipses: points at the same distance)."),
+    (2, "Repeat for every treated unit: closest pairs first, each untreated used once (no replacement)."),
+    (3, "Drop the untreated units that were not used: the matched groups now <b>look alike</b> (top and right)."),
+], height=520, fig_w=62, box="Nearest-neighbour matching")
+```
+
+---
+
+## Choices you have to make
+
+```{python}
+#| output: asis
+s = bse_anim.Steps("choices", figsize=(11.4, 3.5), ncols=3,
+                   margins=dict(left=0.01, right=0.99, top=0.86, bottom=0.03, wspace=0.08))
+for a in s.ax:
+    a.set_xlim(0, 1); a.set_ylim(0, 1); a.set_aspect("equal"); a.set_xticks([]); a.set_yticks([])
+    for sp in a.spines.values(): sp.set_visible(True); sp.set_color(FADE)
+    a.grid(False)
+a1, a2, a3 = s.ax
+def link(a, p, q, **kw):
+    a.plot(*zip(p, q), color=kw.pop("color", PURPLE), lw=kw.pop("lw", 2), zorder=2, **kw)
+# (a) caliper
+a1.set_title("Caliper: a maximum distance", fontsize=14)
+t1, c1, t2, c2 = (0.28, 0.62), (0.40, 0.52), (0.70, 0.30), (0.90, 0.80)
+for t in (t1, t2): a1.add_patch(Circle(t, 0.17, fc=PURPLE, alpha=0.07, ec=PURPLE, ls="--", lw=1.4))
+link(a1, t1, c1); link(a1, t2, c2, ls=":", color=GRAY)
+a1.scatter([0.80], [0.55], marker="x", s=160, color="#C0392B", lw=3, zorder=4)
+a1.text(0.5, 0.04, "no control within the caliper\n→ treated unit dropped", ha="center", fontsize=11, color="#C0392B")
+dots(a1, *zip(c1, c2), C_COL, s=150); dots(a1, *zip(t1, t2), T_COL, s=150)
+# (b) replacement
+a2.set_title("With replacement", fontsize=14)
+ts, c_ = [(0.30, 0.68), (0.66, 0.70)], (0.48, 0.45)
+for t in ts: link(a2, t, c_)
+dots(a2, [0.15, 0.85], [0.15, 0.2], C_COL, s=150); dots(a2, [c_[0]], [c_[1]], C_COL, s=150)
+dots(a2, *zip(*ts), T_COL, s=150)
+a2.text(0.5, 0.08, "the best control is used twice", ha="center", fontsize=11, color=PURPLE)
+# (c) k neighbours
+a3.set_title("k = 3 neighbours", fontsize=14)
+t_, cs = (0.5, 0.58), [(0.30, 0.40), (0.55, 0.30), (0.75, 0.50)]
+for c in cs:
+    link(a3, t_, c); a3.text((t_[0] + c[0]) / 2 + 0.04, (t_[1] + c[1]) / 2, "⅓", fontsize=13, color=PURPLE)
+dots(a3, *zip(*cs), C_COL, s=150); dots(a3, [t_[0]], [t_[1]], T_COL, s=150)
+a3.text(0.5, 0.08, r"$\hat{Y}_i(0)$ = average of 3 controls", ha="center", fontsize=11, color=PURPLE)
+a2.set_visible(False); a3.set_visible(False); s.snap()
+a2.set_visible(True); s.snap()
+a3.set_visible(True); s.snap()
+s.show(height=300)
+```
+
+::: {.fragment .tight style="font-size:0.7em"}
+| Choice | Bias | Variance |
+|:---|:---:|:---:|
+| Tighter caliper | ↓ (closer matches) | ↑ (fewer treated kept) — and the estimand changes! |
+| With replacement | ↓ (always the closest control) | ↑ (few controls used many times) |
+| More neighbours $k$ | ↑ (the 3rd closest is worse) | ↓ (average of more controls) |
+:::
+
+---
+
+## Exact matching
+
+```{python}
+#| output: asis
+rngB = np.random.default_rng(5)
+nB = 160
+toyB = pd.DataFrame({"educ": rngB.normal(13, 2.6, nB).clip(7.5, 19.5), "age": rngB.normal(40, 11, nB).clip(18, 66)})
+toyB["D"] = rngB.binomial(1, 1 / (1 + np.exp(-(-0.8 - 0.55 * (toyB.educ - 13) - 0.07 * (toyB.age - 40)))))
+ex, ey = np.linspace(7.5, 19.5, 7), np.linspace(18, 66, 7)
+toyB["cell"] = list(zip(np.clip(np.digitize(toyB.educ, ex) - 1, 0, 5), np.clip(np.digitize(toyB.age, ey) - 1, 0, 5)))
+cell_has = toyB.groupby("cell").D.agg(["min", "max"])
+both = set(cell_has.index[(cell_has["min"] == 0) & (cell_has["max"] == 1)])
+onlyT = set(cell_has.index[(cell_has["min"] == 1)])
+nT_un = int(((toyB.D == 1) & toyB.cell.isin(onlyT)).sum()); nT_all = int(toyB.D.sum())
+
+s = bse_anim.Steps("exact", figsize=(8.2, 5.0), margins=dict(left=0.1, right=0.97, top=0.96, bottom=0.12))
+ax = s.ax
+ax.set_xlim(7.5, 19.5); ax.set_ylim(18, 66); ax.set_xlabel("Education (years)"); ax.set_ylabel("Age")
+dots(ax, toyB.educ[toyB.D == 0], toyB.age[toyB.D == 0], C_COL, s=60, label="Untreated")
+dots(ax, toyB.educ[toyB.D == 1], toyB.age[toyB.D == 1], T_COL, s=60, label="Treated")
+ax.legend(loc="upper right", fontsize=11, frameon=True, framealpha=0.95, edgecolor=FADE)
+s.snap()
+ax.grid(False)
+for v in ex: ax.axvline(v, color="#888", lw=1)
+for v in ey: ax.axhline(v, color="#888", lw=1)
+s.snap()
+for (i, j) in both | onlyT:
+    fc = "#CDEBEE" if (i, j) in both else "#FBD9B8"
+    ax.add_patch(Rectangle((ex[i], ey[j]), ex[1] - ex[0], ey[1] - ey[0], fc=fc, ec="none", zorder=0))
+s.snap()
+anim_steps(s, [
+    (0, "Compare a treated unit only with untreated units that have <b>exactly the same X</b>."),
+    (1, "With continuous X, first make groups: 6 education × 6 age groups = <b>36 cells</b>. Same cell = same X."),
+    (2, f'<span class="cellbox teal"></span> treated <b>and</b> untreated in the cell: exact matches exist.<br>'
+        f'<span class="cellbox orange"></span> treated but <b>no</b> untreated: {nT_un} of {nT_all} treated have no match and are dropped.'),
+], height=500, fig_w=60, box="Exact matching")
+```
+
+---
+
+## Exact matching and the curse of dimensionality
+
+```{python}
+#| output: asis
+rngK = np.random.default_rng(1)
+def share_matched(k, n, cats=6, reps=10):
+    """Share of treated units with at least one untreated unit in the same cell (k covariates, `cats` groups each)."""
+    out = []
+    for _ in range(reps):
+        Xk = rngK.integers(0, cats, (n, k)); D = rngK.binomial(1, 0.2, n)
+        cell = pd.Series([tuple(r) for r in Xk])
+        has_c = set(cell[D == 0]); out.append(np.mean([c in has_c for c in cell[D == 1]]))
+    return np.mean(out)
+KS = np.arange(1, 9)
+curve = {n: np.array([share_matched(k, n) for k in KS]) * 100 for n in (1000, 10000)}
+
+s = bse_anim.Steps("curse", figsize=(8.4, 5.0), margins=dict(left=0.12, right=0.97, top=0.95, bottom=0.2))
+ax = s.ax
+ax.set_xlim(0.6, 8.4); ax.set_ylim(-3, 105)
+ax.set_xticks(KS); ax.set_xticklabels([f"{k}\n({6 ** k:,})" for k in KS], fontsize=9.5)
+ax.set_xlabel(r"Number of covariates $k$   (number of cells $6^k$)")
+ax.set_ylabel("% of treated with an exact match")
+s.snap()
+for n, col, ypos in ((1000, PURPLE, 0), (10000, T_COL, 1)):
+    ax.plot(KS, curve[n], "-o", color=col, lw=2.6, ms=7)
+    ax.text(*((2.0, 35) if n == 1000 else (5.6, 80)), f"N = {n:,}", color=col, fontsize=14, fontweight="bold")
+    s.snap()
+anim_steps(s, [
+    (0, "Each covariate is cut into <b>6 groups</b>, as on the previous slide. A cell is one combination of groups, so with k covariates there are 6 × 6 × … × 6 = <b>6<sup>k</sup> cells</b> (in brackets under the axis)."),
+    (1, f"Simulation with <b>N = 1,000</b> people (20% treated): with 3 covariates {curve[1000][2]:.0f}% of the treated find an exact match; with 5 only {curve[1000][4]:.0f}%; with 8, {curve[1000][7]:.0f}%."),
+    (2, f"<b>N = 10,000</b>: ten times more data only delays the problem ({curve[10000][4]:.0f}% with 5 covariates, {curve[10000][7]:.0f}% with 8). Cells grow ×6 with each covariate, the data do not: the <b>curse of dimensionality</b>."),
+], height=500, fig_w=58)
+```
+
+::: {.fragment fragment-index=2 style="font-size:0.75em"}
+⇒ We need to summarize all of $X$ in **one number**: the propensity score.
+:::
+
+# 3 · The propensity score {background-color="#0396A6" .section-divider-centered}
+
+---
+
+## The propensity score
+
+::: {.eq-box-wrap}
+::: {.eq-box}
+$$p(X) = P(D = 1 \mid X)$$
+:::
+:::
+
+::: {style="font-size:0.85em"}
+**Rosenbaum & Rubin (1983).** If the CIA holds given $X$, it also holds given the scalar $p(X)$:
+:::
+
+$$\big(Y(1), Y(0)\big) \perp\!\!\!\perp D \mid X \quad\Longrightarrow\quad \big(Y(1), Y(0)\big) \perp\!\!\!\perp D \mid p(X)$$
+
+::: {.fragment style="font-size:0.82em"}
+- Why? $p(X)$ is a **balancing score**: among units with the same $p(X)$, the distribution of $X$ is the same for treated and untreated, $\;D \perp\!\!\!\perp X \mid p(X)$.
+- So instead of matching on $k$ covariates, we match on **one** number.
+- $p(X)$ is unknown: we **estimate** it, usually with a logit or probit $\;\hat p(X_i) = \Lambda(X_i'\hat\beta)$.
+:::
+
+---
+
+## Matching on the propensity score: 2D → 1D → 2D
+
+```{python}
+#| output: asis
+from matplotlib.patches import ConnectionPatch
+rngP2 = np.random.default_rng(57)
+nP = 80
+toyP = pd.DataFrame({"educ": rngP2.normal(13, 2.4, nP).clip(8, 19), "age": rngP2.normal(40, 10, nP).clip(20, 64)})
+toyP["D"] = rngP2.binomial(1, 1 / (1 + np.exp(-(-1.0 - 0.45 * (toyP.educ - 13) - 0.06 * (toyP.age - 40)))))
+toyP = pd.concat([toyP, pd.DataFrame({"educ": [7.9, 8.4], "age": [21.5, 25.0], "D": [1, 1]})], ignore_index=True)  # 2 extreme treated
+nP = len(toyP)
+toyP["p"] = smf.logit("D ~ educ + age", toyP).fit(disp=0).predict(toyP)
+iT, iC = np.where(toyP.D == 1)[0], np.where(toyP.D == 0)[0]
+CAL2 = 0.07
+pairsP, droppedP = [], []
+for i in iT:                                             # nearest untreated on p-hat, WITH replacement
+    j = iC[np.abs(toyP.p.values[iC] - toyP.p[i]).argmin()]
+    (pairsP.append((i, j)) if abs(toyP.p[j] - toyP.p[i]) <= CAL2 else droppedP.append(i))
+mT = np.array([i for i, _ in pairsP]); mC = np.array([j for _, j in pairsP]); usedP = set(mC)
+
+s = bse_anim.Steps("ps2d", figsize=(8.8, 5.0))
+fig = s.fig; s.ax.remove()
+ax = fig.add_axes([0.09, 0.12, 0.60, 0.80])
+axP = fig.add_axes([0.80, 0.12, 0.09, 0.80])
+ax.set_xlim(7.5, 19.5); ax.set_ylim(17, 67); ax.set_xlabel("Education (years)"); ax.set_ylabel("Age")
+axP.set_xlim(-1, 1); axP.set_ylim(-0.02, 1.02); axP.grid(False); axP.set_xticks([])
+for sp in ("left", "bottom", "top", "right"): axP.spines[sp].set_visible(False)
+axP.yaxis.tick_right(); axP.set_yticks([0, 0.25, 0.5, 0.75, 1]); axP.tick_params(axis="y", length=0)
+axP.axvline(0, color="black", lw=1.4)
+axP.set_title(PHAT + "(X)", fontsize=15, color=PURPLE)
+XT, XC = -0.42, 0.42                                     # treated left of the axis, untreated right
+axP.text(XT, -0.06, "T", ha="center", color=T_COL, fontsize=13, fontweight="bold", clip_on=False)
+axP.text(XC, -0.06, "C", ha="center", color=C_COL, fontsize=13, fontweight="bold", clip_on=False)
+axP.set_visible(False)
+scC2 = dots(ax, toyP.educ[iC], toyP.age[iC], C_COL, s=85, label="Untreated")
+scT2 = dots(ax, toyP.educ[iT], toyP.age[iT], T_COL, s=85, label="Treated")
+ax.legend(loc="upper right", fontsize=11, frameon=True, framealpha=0.95, edgecolor=FADE)
+s.snap()
+
+def proj(idx, alpha=0.4):
+    out = []
+    for k in idx:
+        xb = XT if toyP.D[k] == 1 else XC
+        cp = ConnectionPatch(xyA=(toyP.educ[k], toyP.age[k]), coordsA=ax.transData, xyB=(xb, toyP.p[k]), coordsB=axP.transData,
+                             color=T_COL if toyP.D[k] == 1 else C_COL, lw=1.0, alpha=alpha, zorder=1)
+        fig.add_artist(cp); out.append(cp)
+    return out
+# 2-4) project onto the p-hat axis in three batches
+axP.set_visible(True)
+batches = np.array_split(np.random.default_rng(0).permutation(nP), 3)
+pl = []
+for b in batches:                                        # cumulative: earlier lines stay
+    pl += proj(b, alpha=0.3)
+    bT = [k for k in b if toyP.D[k] == 1]; bC = [k for k in b if toyP.D[k] == 0]
+    axP.scatter(np.full(len(bT), XT), toyP.p[bT], s=60, color=T_COL, edgecolor="white", lw=1, zorder=3)
+    axP.scatter(np.full(len(bC), XC), toyP.p[bC], s=60, color=C_COL, edgecolor="white", lw=1, zorder=3)
+    s.snap()
+for c_ in pl: c_.remove()
+# 5) match on the axis
+scC2.set_alpha(0.2); scT2.set_alpha(0.2)
+for i, j in pairsP:
+    axP.plot([XT, XC], [toyP.p[i], toyP.p[j]], color=PURPLE, lw=1.4, alpha=0.8, zorder=2)
+s.snap()
+# 6) unused untreated and unmatched treated drop out
+axP.scatter(np.full(len(iC), XC), toyP.p[iC], s=60, color=[C_COL if j in usedP else FADE for j in iC],
+            edgecolor=["white" if j in usedP else FADE for j in iC], lw=1, zorder=4)
+for i in droppedP:
+    axP.scatter([XT], [toyP.p[i]], s=120, marker="x", color="#C0392B", lw=2.6, zorder=5)
+s.snap()
+# 7) back to 2D: only the matched sample
+keep = set(mT) | usedP
+for sc, idx, col in ((scC2, iC, C_COL), (scT2, iT, T_COL)):
+    sc.set_alpha(1); sc.set_facecolor([col if k in keep else FADE for k in idx])
+    sc.set_edgecolor(["white" if k in keep else FADE for k in idx])
+for i in droppedP:
+    ax.scatter(toyP.educ[i], toyP.age[i], s=120, marker="x", color="#C0392B", lw=2.6, zorder=5)
+pl = proj(sorted(keep), alpha=0.4)
+s.snap()
+# 8) matched pairs in 2D
+for c_ in pl: c_.remove()
+for i, j in pairsP:
+    ax.plot([toyP.educ[i], toyP.educ[j]], [toyP.age[i], toyP.age[j]], color=PURPLE, lw=1.1, alpha=0.55, zorder=2)
+s.snap()
+mean_ = lambda v, idx: toyP[v].values[idx].mean()
+anim_steps(s, [
+    (0, "Two covariates: treated and untreated differ in X."),
+    (1, r"Estimate \(\hat p(X)\) with a logit and send every unit to its \(\hat p\): <b>one number</b> per unit (3 clicks)."),
+    (4, rf"Match each treated unit to the untreated unit with the closest \(\hat p\) (with replacement, caliper = {CAL2})."),
+    (5, f"Unused untreated drop out. The {len(droppedP)} treated with \\(\\hat p\\) far above every untreated have no match within the caliper (×): dropped."),
+    (6, "Send the matched units back to the 2D space."),
+    (7, f"Pairs share \\(\\hat p\\), <b>not X</b>. But as groups they now look alike: education {mean_('educ', mT):.1f} vs {mean_('educ', mC):.1f} "
+        f"(before {mean_('educ', iT):.1f} vs {mean_('educ', iC):.1f}), age {mean_('age', mT):.1f} vs {mean_('age', mC):.1f} "
+        f"(before {mean_('age', iT):.1f} vs {mean_('age', iC):.1f})."),
+], height=520, fig_w=62, box="Propensity-score matching")
+```
+
+::: {.fragment fragment-index=7 style="font-size:0.75em"}
+Then estimate the ATT on the matched sample exactly as before: $\;\widehat{\text{ATT}} = \frac{1}{N_1}\sum_{i:\,D_i=1}\big(Y_i - Y_{j(i)}\big)$.
+:::
+
+---
+
+## Common support
+
+```{python}
+#| output: asis
+rngC = np.random.default_rng(8)
+nCm = 2500
+toyC = pd.DataFrame({"educ": rngC.normal(13, 2.6, nCm).clip(6, 21), "age": rngC.normal(40, 11, nCm).clip(18, 66)})
+toyC["D"] = rngC.binomial(1, 1 / (1 + np.exp(-(-1.6 - 0.75 * (toyC.educ - 13) - 0.09 * (toyC.age - 40)))))
+toyC["p"] = smf.logit("D ~ educ + age", toyC).fit(disp=0).predict(toyC)
+rngP = np.random.default_rng(4)
+pTc = 0.12 + 0.88 * rngP.beta(2.6, 1.5, 700)            # treated: high scores, none below 0.12
+pCc = 0.80 * rngP.beta(1.3, 3.8, 2500)                  # untreated: low scores, none above 0.80
+lo_, hi_ = pTc.min(), pCc.max()
+bins = np.linspace(0, 1, 41)
+hT, _ = np.histogram(pTc, bins); hC, _ = np.histogram(pCc, bins)
+s = bse_anim.Steps("support", figsize=(11, 4.2), margins=dict(left=0.08, right=0.98, top=0.93, bottom=0.14))
+ax = s.ax
+w = bins[1] - bins[0]
+ax.bar(bins[:-1], hT / hT.sum(), width=w, align="edge", color=T_COL, alpha=0.85, edgecolor="white", label="Treated")
+ax.bar(bins[:-1], -hC / hC.sum(), width=w, align="edge", color=C_COL, alpha=0.85, edgecolor="white", label="Untreated")
+ax.axhline(0, color="black", lw=1)
+yl = max(hT.max() / hT.sum(), hC.max() / hC.sum()) * 1.15
+ax.set_ylim(-yl, yl); ax.set_xlim(0, 1)
+tk = np.arange(-0.08, 0.081, 0.04); ax.set_yticks(tk); ax.set_yticklabels([f"{abs(v):.0%}" for v in tk])
+ax.set_xlabel(r"$\hat p(X)$"); ax.set_ylabel("Share of the group")
+ax.legend(loc="upper left")
+s.snap()
+ax.axvspan(0, lo_, color=GRAY, alpha=0.2, lw=0); ax.axvspan(hi_, 1, color=GRAY, alpha=0.2, lw=0)
+ax.axvline(lo_, color=PURPLE, ls="--", lw=1.6); ax.axvline(hi_, color=PURPLE, ls="--", lw=1.6)
+ax.annotate(f"untreated with {PHAT} below\nevery treated: dropped ({(pCc < lo_).sum():,})", xy=(lo_ / 2, -yl * 0.55),
+            xytext=(0.2, -yl * 0.8), fontsize=11.5, color=PURPLE, va="center",
+            arrowprops=dict(arrowstyle="-|>", color=PURPLE, lw=1.2))
+ax.text((hi_ + 1) / 2, -yl * 0.45, f"treated with {PHAT}\nabove every\nuntreated: no\ncomparable unit,\ndropped ({(pTc > hi_).sum()})",
+        ha="center", va="center", fontsize=11, color=PURPLE)
+ax.text((lo_ + hi_) / 2, yl * 0.88, "common support", ha="center", fontsize=13, color=PURPLE, fontweight="bold")
+s.snap()
+s.show(height=380)
+```
+
+::: {.fragment style="font-size:0.75em"}
+Stata's `comsup` option keeps only units with $\hat p$ in $[\min \hat p_{D=1},\, \max \hat p_{D=1}]$. Dropping treated units changes **who** the ATT is about: always report how many you lose.
+:::
+
+---
+
+## Checking the balancing property: stratify on $\hat p(X)$
+
+::: {style="font-size:0.75em"}
+`pscore` (Becker & Ichino, 2002) splits $\hat p$ into **blocks** and tests, inside each block, that treated and untreated have the same mean of every $X$: $\;D \perp\!\!\!\perp X \mid p(X)$.
+:::
+
+```{python}
+#| output: asis
+loC = toyC.p[toyC.D == 1].min()                       # common support: p above the lowest treated
+edges = np.array([loC, 0.05, 0.1, 0.2, 0.4, 0.6, 1.0])
+cs = toyC[toyC.p >= loC].copy()
+cs["block"] = np.digitize(cs.p, edges[1:-1])
+s = bse_anim.Steps("blocks", figsize=(11.2, 4.3), nrows=2, margins=dict(left=0.08, right=0.98, top=0.96, bottom=0.1, hspace=0.45))
+a1, a2 = s.ax
+fcs = ["#F4F4F4", "#FFFFFF"]
+for k in range(len(edges) - 1):
+    a1.axvspan(edges[k], edges[k + 1], color=fcs[k % 2], zorder=0)
+    a1.axvline(edges[k], color=PURPLE, lw=1, alpha=0.6)
+    a1.text((edges[k] + edges[k + 1]) / 2, 0.9, f"B{k + 1}", ha="center", fontsize=11.5, color=PURPLE, fontweight="bold",
+            transform=a1.get_xaxis_transform())
+jit = np.random.default_rng(0)
+cT, cC = cs[cs.D == 1], cs[cs.D == 0]
+a1.scatter(cT.p, 0.35 + jit.uniform(-0.12, 0.12, len(cT)), s=12, color=T_COL, alpha=0.7, lw=0)
+a1.scatter(cC.p, -0.35 + jit.uniform(-0.12, 0.12, len(cC)), s=12, color=C_COL, alpha=0.7, lw=0)
+a1.set_xlim(0, 1); a1.set_ylim(-0.6, 0.75); a1.set_yticks([0.35, -0.35]); a1.set_yticklabels(["Treated", "Untreated"])
+a1.grid(False); a1.set_xlabel(r"$\hat p(X)$", labelpad=1)
+a2.set_visible(False); s.snap()
+a2.set_visible(True)
+labs = ["All"] + [f"B{k + 1}" for k in range(len(edges) - 1)]
+a2.set_xticks(range(len(labs))); a2.set_xticklabels(labs); a2.set_xlim(-0.5, len(labs) - 0.5)
+a2.set_ylabel("Mean education")
+def mpair(ax, x, g, alpha=1.0):
+    mt, mc = g.educ[g.D == 1].mean(), g.educ[g.D == 0].mean()
+    ax.plot([x, x], [mt, mc], color=GRAY, lw=1.5, zorder=1, alpha=alpha)
+    ax.scatter([x], [mt], s=90, color=T_COL, edgecolor="white", zorder=3, alpha=alpha)
+    ax.scatter([x], [mc], s=90, color=C_COL, edgecolor="white", zorder=3, alpha=alpha)
+    return stats.ttest_ind(g.educ[g.D == 1], g.educ[g.D == 0], equal_var=False).pvalue
+p_all = mpair(a2, 0, toyC)
+a2.text(0.25, toyC.educ.mean(), f"p = {p_all:.3f} ✗", fontsize=11, color="#C0392B", va="center", **SYM)
+a2.set_ylim(toyC.educ.min() + 3, toyC.educ.max() - 3)
+s.snap()
+for k in range(len(edges) - 1):
+    g = cs[cs.block == k]
+    pv = mpair(a2, k + 1, g)
+    a2.text(k + 1.12, g.educ.mean(), "✓" if pv > 0.01 else "✗", fontsize=13,
+            color="#1E8449" if pv > 0.01 else "#C0392B", va="center", fontweight="bold", **SYM)
+s.snap()
+s.show(height=385)
+```
+
+::: {.fragment style="font-size:0.72em"}
+If some $X$ fails in some block, Stata says *"The balancing property is not satisfied — try a different specification"*: add **interactions** or **higher powers** to the logit and run again.
+:::
+
+---
+
+## From $\hat p$ to $\hat Y_i(0)$: nearest neighbour, radius or kernel
+
+::: {.fs72}
+Once every unit has its $\hat p$, we still have to decide **which controls** stand in for each treated unit, and with **which weights**: $\;\hat Y_i(0) = \sum_j w_{ij}\, Y_j$.
+:::
+
+```{python}
+#| output: asis
+p0, y0_t = 0.42, 7.0
+pc = np.array([0.08, 0.20, 0.30, 0.365, 0.405, 0.475, 0.53, 0.60, 0.72, 0.86])
+yc = np.array([12.1, 9.4, 7.8, 6.2, 5.6, 4.8, 6.8, 4.1, 3.6, 2.9])           # earnings of each control (thousand $)
+w_nn = (np.abs(pc - p0) == np.abs(pc - p0).min()).astype(float)
+r_ = 0.065; w_r = (np.abs(pc - p0) <= r_).astype(float); w_r /= w_r.sum()
+h_ = 0.15; u_ = (pc - p0) / h_; w_k = np.where(np.abs(u_) < 1, 0.75 * (1 - u_ ** 2), 0); w_k /= w_k.sum()
+s = bse_anim.Steps("nnrk", figsize=(8.6, 5.4), nrows=4, sharex=True,
+                   margins=dict(left=0.03, right=0.8, top=0.97, bottom=0.1, hspace=0.35))
+labels = ["Data", "Nearest neighbour", f"Radius (r = {r_})", f"Kernel (h = {h_})"]
+for k, (ax, lab) in enumerate(zip(s.ax, labels)):
+    ax.set_xlim(0, 1); ax.set_ylim(-0.55, 1.15); ax.set_yticks([]); ax.grid(False)
+    ax.spines["left"].set_visible(False); ax.axhline(0, color="black", lw=1)
+    ax.text(0.0, 1.0, lab, transform=ax.transAxes, fontsize=12, fontweight="bold", color=PURPLE, va="bottom")
+    ax.scatter([p0], [0.62], s=150, marker="v", color=T_COL, edgecolor="white", zorder=4)
+    ax.plot([p0, p0], [0.5, 0], color=T_COL, lw=1.1, ls=":")
+a0 = s.ax[0]
+a0.scatter(pc, np.zeros_like(pc), s=90, color=C_COL, edgecolor="white", zorder=3)
+for x, y in zip(pc, yc):
+    a0.text(x, -0.42, f"{y:.1f}", ha="center", va="center", fontsize=10, color=C_COL)
+a0.text(p0 + 0.02, 0.75, f"treated i: Y = {y0_t:.1f}", fontsize=10.5, color=T_COL)
+a0.text(1.02, 0.25, "numbers: Y of\neach control", transform=a0.get_yaxis_transform(), fontsize=10, color=C_COL, va="center")
+s.ax[3].set_xlabel(r"$\hat p(X)$  (dot size and small numbers = weight $w_{ij}$)")
+for ax in s.ax[1:]: ax.set_visible(False)
+s.snap()
+for ax, w in zip(s.ax[1:], (w_nn, w_r, w_k)):
+    ax.set_visible(True)
+    ax.scatter(pc, np.zeros_like(pc), s=30 + 700 * w, color=[C_COL if wi > 0 else FADE for wi in w], edgecolor="white", lw=1.2, zorder=3)
+    for j, (x, wi) in enumerate([(x, wi) for x, wi in zip(pc, w) if wi > 0]):
+        ax.text(x, -0.32 - 0.22 * (j % 2), f"{wi:.2f}", ha="center", va="center", fontsize=9.5, color=C_COL)
+    yhat = (w * yc).sum()
+    ax.text(1.02, 0.3, rf"$\hat Y_i(0)$ = {yhat:.2f}" + "\n" + rf"$\hat\tau_i$ = {y0_t - yhat:+.2f}",
+            transform=ax.get_yaxis_transform(), fontsize=11, color=PURPLE, va="center")
+    if ax is s.ax[2]: ax.axvspan(p0 - r_, p0 + r_, ymin=0.2, ymax=0.5, color=PURPLE, alpha=0.12, lw=0)
+    if ax is s.ax[3]:
+        xx = np.linspace(p0 - h_, p0 + h_, 100)
+        ax.fill_between(xx, 0, 0.75 * (1 - ((xx - p0) / h_) ** 2) * 1.1, color=PURPLE, alpha=0.13, lw=0)
+    s.snap()
+anim_steps(s, [
+    (0, r"One treated unit \(i\) (▼, \(\hat p = 0.42\)) and ten controls, each with its \(\hat p\) and its \(Y\)."),
+    (1, "<b>Nearest neighbour</b>: only the closest control, weight 1 (with k neighbours, 1/k each). What we did so far."),
+    (2, "<b>Radius</b>: every control within a distance r of \\(\\hat p_i\\), equal weights. More controls, but you have to choose r."),
+    (3, "<b>Kernel</b>: every control, weights falling with the distance (bandwidth h). Uses almost all the data → less variance; no analytical SE ⇒ <b>bootstrap</b>."),
+], height=500, fig_w=60, box="Three ways to build Ŷᵢ(0)")
+```
+
+# 4 · Back to job training: which matching method wins? {background-color="#0396A6" .section-divider-centered}
+
+---
+
+## Common support in the NSW data
+
+```{python}
+#| output: asis
+nsw_o = nsw[nsw["sample"] != 2].copy()
+nsw_o[["age", "educ"]] = nsw_o[["age", "educ"]].astype(float)   # int16 would overflow in age**3
+nsw_o["agesq"] = nsw_o.age ** 2; nsw_o["agecu"] = nsw_o.age ** 3; nsw_o["educsq"] = nsw_o.educ ** 2
+nsw_o["u74"] = (nsw_o.re74 == 0).astype(int); nsw_o["u75"] = (nsw_o.re75 == 0).astype(int)
+nsw_o["educ_re74"] = nsw_o.educ * nsw_o.re74
+X2 = "age + agesq + agecu + educ + educsq + married + nodegree + black + hisp + re74 + re75 + u74 + u75 + educ_re74"
+ps_nsw = smf.logit("treat ~ " + X2, nsw_o).fit(disp=0, method="newton", maxiter=200)
+nsw_o["ps"] = ps_nsw.predict(nsw_o).clip(1e-12, 1 - 1e-12)
+nsw_o["lo"] = logit_odds(nsw_o.ps)
+pmin, pmax = nsw_o.ps[nsw_o.treat == 1].min(), nsw_o.ps[nsw_o.treat == 1].max()
+n_off = ((nsw_o.treat == 0) & (nsw_o.ps < pmin)).sum(); n_on = ((nsw_o.treat == 0) & (nsw_o.ps >= pmin)).sum()
+bins = np.linspace(-20, 4, 49)
+hT, _ = np.histogram(nsw_o.lo[nsw_o.treat == 1], bins); hC, _ = np.histogram(nsw_o.lo[nsw_o.treat == 0], bins)
+s = bse_anim.Steps("nsw_support", figsize=(11, 4.1), margins=dict(left=0.08, right=0.98, top=0.93, bottom=0.17))
+ax = s.ax; w = bins[1] - bins[0]
+ax.bar(bins[:-1], hT / hT.sum(), width=w, align="edge", color=T_COL, alpha=0.85, edgecolor="white", label="NSW trainees (185)")
+ax.bar(bins[:-1], -hC / hC.sum(), width=w, align="edge", color=C_COL, alpha=0.85, edgecolor="white", label="CPS adults (15,992)")
+ax.axhline(0, color="black", lw=1)
+ticks = [1e-8, 1e-6, 1e-4, 1e-3, 0.01, 0.1, 0.5, 0.9]
+ax.set_xticks(logit_odds(np.array(ticks))); ax.set_xticklabels(["1e-8", "1e-6", "0.0001", "0.001", "0.01", "0.1", "0.5", "0.9"])
+ax.set_xlim(-20, 4); ax.set_xlabel(r"$\hat p(X)$  (log-odds scale)")
+yl = 0.3; ax.set_ylim(-yl, yl); ax.set_yticks([-0.2, -0.1, 0, 0.1, 0.2]); ax.set_yticklabels(["20%", "10%", "0", "10%", "20%"])
+ax.set_ylabel("Share of the group"); ax.legend(loc="upper left")
+s.snap()
+ax.axvspan(-20, logit_odds(pmin), color=GRAY, alpha=0.18, lw=0); ax.axvline(logit_odds(pmin), color=PURPLE, ls="--", lw=1.8)
+ax.text(logit_odds(pmin) - 0.3, -0.25, f"{n_off:,} CPS adults with {PHAT} below\nthe lowest trainee ({PHAT} = {pmin:.4f}): dropped", ha="right", fontsize=12, color=PURPLE)
+ax.text(logit_odds(pmin) + 0.3, 0.24, f"common support:\n185 trainees, {n_on:,} CPS", ha="left", fontsize=12, color=PURPLE, fontweight="bold")
+s.snap()
+s.show(height=370)
+```
+
+::: {.fragment style="font-size:0.75em"}
+Most CPS adults have $\hat p \approx 0$: nobody like them enrolls in the program. They are **useless** as counterfactuals, and matching ignores them.
+:::
+
+---
+
+## Results: the effect of training with five matching methods
+
+```{python}
+#| output: asis
+mres = pd.read_csv("matching_results.csv")          # exported by TA7.do (psmatch2)
+mbal = pd.read_csv("matching_balance.csv")
+bias_before = mbal[mbal.method == "Before matching"].bias.abs().mean()
+winner = mres.loc[mres.mean_bias.idxmin(), "method"]
+rows = [("Naive difference in means", -8498, 582, "185", "15,992", f"{bias_before:.1f}", False),
+        ("OLS + X", 1184, 628, "185", "15,992", "–", False)]
+rows += [(r.method.replace("pscore", "p̂"), r.att, r.se, f"{r.n_treated:.0f}", f"{r.n_controls:,.0f}", f"{r.mean_bias:.1f}", r.method == winner)
+         for r in mres.itertuples()]
+body = ""
+for k, (m, b, se, nt, nc, mb, win) in enumerate(rows):
+    cls = ' class="hl"' if win else (' class="sep"' if k == 2 else "")
+    body += (f"<tr{cls}><td>{m}{' 🏆' if win else ''}</td><td>{b:,.0f}</td><td>({se:,.0f})</td>"
+             f"<td>{nt}</td><td>{nc}</td><td>{mb}</td></tr>")
+html_out(f"""
+<table class="baltab restab">
+<thead><tr><th>Estimator</th><th>ATT (US$)</th><th>SE</th><th>Participants matched</th><th>Controls used</th><th>Mean |bias| (%)</th></tr></thead>
+<tbody>{body}</tbody></table>
+""")
+```
+
+::: {style="font-size:0.55em; color:#777"}
+Outcome: earnings in 1978. All methods on the **common support** (185 participants, 3,856 CPS adults). *Participants matched*: those with a comparable control. *Controls used*: CPS adults with positive weight. *Mean |bias|*: average standardized bias of the 12 covariates after matching. SEs from psmatch2 (they ignore that $\hat p$ is estimated); kernel SE bootstrapped (50 replications).
+:::
+
+```{python}
+#| output: asis
+nn = mres[mres.method.str.startswith("NN")]
+print(f"""
+::: {{.fragment .fs72}}
+- Every matching method turns −\\$8,498 into a **positive** effect, between \\${mres.att.min():,.0f} and \\${mres.att.max():,.0f}: the sign flip is robust, the size depends on the method.
+- NN uses few controls ({nn.n_controls.min():.0f}–{nn.n_controls.max():.0f}) → larger SEs. Radius and kernel use (almost) all CPS adults on the common support → smaller SEs.
+- Which number do we trust? Not the one we like: the one with the **best balance** (next slide).
+:::
+""")
+```
+
+---
+
+## Which method balances the covariates best?
+
+```{python}
+#| output: asis
+VARS = ["age", "agesq", "educ", "educsq", "married", "nodegree", "black", "hisp", "re74", "re75", "u74", "u75"]
+LABS = ["Age", "Age²", "Education", "Education²", "Married", "No degree", "Black", "Hispanic",
+        "Earnings 74", "Earnings 75", "Unemployed 74", "Unemployed 75"]
+piv = mbal.assign(ab=mbal.bias.abs()).pivot(index="variable", columns="method", values="ab").reindex(VARS)
+order = piv["Before matching"].sort_values().index
+yy = np.arange(len(order)); lab = [LABS[VARS.index(v)] for v in order]
+MCOL = {"NN on X (Mahalanobis)": PURPLE, "NN on pscore, k = 1": T_COL, "NN on pscore, k = 5": "#E9B44C",
+        "Radius (r = 0.01)": C_COL, "Kernel": "#7A9E7E"}
+MMK = {"NN on X (Mahalanobis)": "D", "NN on pscore, k = 1": "o", "NN on pscore, k = 5": "o", "Radius (r = 0.01)": "s", "Kernel": "^"}
+win_key = winner.replace(" (bootstrap SE)", "")
+s = bse_anim.Steps("love", figsize=(9.0, 5.6), ncols=2, sharey=True,
+                   margins=dict(left=0.15, right=0.98, top=0.93, bottom=0.24, wspace=0.08))
+a1, a2 = s.ax
+a1.scatter(piv.loc[order, "Before matching"], yy, marker="^", s=90, color=GRAY, edgecolor="white", zorder=3)
+a1.set_yticks(yy); a1.set_yticklabels(lab, fontsize=11); a1.set_xlim(0, 260)
+for a_ in (a1, a2):
+    a_.grid(False)
+    for y_ in yy: a_.axhline(y_, color='#E3E3E3', lw=0.9, zorder=0)
+a1.set_title("Before matching", fontsize=13); a1.set_xlabel("|standardized bias| (%)")
+a2.set_xlim(0, 32); a2.axvspan(0, 10, color=PURPLE, alpha=0.07, lw=0); a2.axvline(10, color=PURPLE, ls="--", lw=1.2)
+a2.set_title("After matching", fontsize=13); a2.set_xlabel("|standardized bias| (%)")
+a2.set_visible(False); s.snap()
+a2.set_visible(True)
+arts = {}
+for k, (m, col) in enumerate(MCOL.items()):
+    arts[m] = a2.scatter(piv.loc[order, m], yy, marker=MMK[m], s=70, color=col, edgecolor="white", lw=0.8, zorder=3,
+                         label=m.replace("pscore", PHAT))
+s.fig.legend(handles=list(arts.values()), loc="lower center", ncol=3, fontsize=10, frameon=False, bbox_to_anchor=(0.56, 0.0))
+s.snap()
+for m, a in arts.items():
+    if m != win_key: a.set_alpha(0.18)
+    else: a.set_sizes([110]); a.set_zorder(5)
+s.snap()
+mb = mres.set_index("method").mean_bias
+anim_steps(s, [
+    (0, f"<b>Before matching</b>: participants and CPS adults differ by up to {piv['Before matching'].max():.0f}% of a standard deviation (mean {bias_before:.0f}%)."),
+    (1, "<b>After matching</b>, every method removes most of the imbalance (note the different scale)."),
+    (2, f"🏆 <b>{win_key}</b>: mean |bias| {mb[winner]:.1f}%, largest {piv[win_key].max():.1f}%. "
+        f"Worst: {mb.idxmax().replace(' (bootstrap SE)', '').replace('pscore', 'p̂')} ({mb.max():.1f}%)."),
+], height=500, fig_w=62, box="Love plot: balance by method")
+print(f"""
+::: {{.fragment fragment-index=2 .fs72}}
+Choose the method by **balance**, decided *before* looking at the ATT, never by the ATT you prefer. Here the winner gives **\\${mres.set_index('method').att[winner]:,.0f}**.
+:::
+""")
+```
+
+---
+
+## The propensity score before and after matching
+
+```{python}
+#| output: asis
+mw = pd.read_csv("matching_weights.csv")          # exported by TA7.do: p-hat and matching weights (common support)
+T1, C0 = mw.treat == 1, mw.treat == 0
+bins = np.linspace(0, 1, 21)
+def share(x, w=None):
+    h, _ = np.histogram(x, bins, weights=w)
+    return h / h.sum()
+panels = [("Before matching", None), ("NN on X (Mahalanobis)", "w_mahal"), ("NN on p̂, k = 1", "w_nn1"),
+          ("NN on p̂, k = 5", "w_nn5"), ("Radius (r = 0.01)", "w_radius"), ("Kernel", "w_kernel")]
+s = bse_anim.Steps("psdist", figsize=(9.6, 5.4), nrows=2, ncols=3, sharex=True, sharey=True,
+                   margins=dict(left=0.08, right=0.98, top=0.92, bottom=0.11, wspace=0.08, hspace=0.32))
+w_ = bins[1] - bins[0]
+for ax, (ttl, wcol) in zip(s.ax.ravel(), panels):
+    if wcol is None:
+        ht, hc = share(mw.myscore[T1]), share(mw.myscore[C0])
+    else:
+        mt, mc = T1 & (mw[wcol] > 0), C0 & (mw[wcol] > 0)
+        ht, hc = share(mw.myscore[mt], mw[wcol][mt]), share(mw.myscore[mc], mw[wcol][mc])
+    ax.bar(bins[:-1], ht, width=w_, align="edge", color=T_COL, alpha=0.85, edgecolor="white", lw=0.5)
+    ax.bar(bins[:-1], -hc, width=w_, align="edge", color=C_COL, alpha=0.85, edgecolor="white", lw=0.5)
+    ax.axhline(0, color="black", lw=0.8); ax.set_xlim(0, 1); ax.set_ylim(-0.42, 0.42)
+    if hc.max() > 0.42:                                   # clipped bar: write its value
+        ax.text(bins[1] + 0.02, -0.38, f"{hc.max():.0%} ↓", fontsize=9.5, color=C_COL, va="center")
+    ax.set_title(ttl.replace("p̂", PHAT), fontsize=11.5, color=PURPLE if ttl.startswith("NN on X") else "black")
+    ax.set_yticks([-0.4, -0.2, 0, 0.2, 0.4]); ax.set_yticklabels(["40%", "20%", "0", "20%", "40%"], fontsize=9)
+    ax.tick_params(axis="x", labelsize=9)
+    if ttl != "Before matching": ax.set_visible(False)
+s.ax[0, 0].text(0.97, 0.3, "participants", ha="right", fontsize=10, color=T_COL, transform=s.ax[0, 0].get_yaxis_transform())
+s.ax[0, 0].text(0.97, -0.3, "CPS adults", ha="right", fontsize=10, color=C_COL, transform=s.ax[0, 0].get_yaxis_transform())
+for a in s.ax[1]: a.set_xlabel(r"$\hat p(X)$", fontsize=11)
+s.snap()
+for ax in s.ax.ravel()[1:]: ax.set_visible(True)
+s.snap()
+anim_steps(s, [
+    (0, r"<b>Before matching</b>: \(\hat p\) of the participants (up) and of the CPS adults on the common support (down). Almost all CPS adults sit at \(\hat p < 0.05\)."),
+    (1, r"<b>After matching</b>: each CPS adult weighted by how much it is used. The matched CPS distribution now <b>mirrors</b> the participants': the groups are comparable in \(\hat p\)."),
+], height=520, fig_w=64, box="How to read it")
+```
+
+::: {.fragment fragment-index=1 .fs72}
+Same check as the love plot, but for $\hat p$. Even matching on $X$ (Mahalanobis), which never uses $\hat p$, balances it. How: each CPS adult enters the histogram with its **matching weight** (how many times, or how much, it is used).
+:::
+
+---
+
+## Plot twist: the NSW was an experiment
+
+::: {style="font-size:0.78em"}
+The NSW participants were **randomly drawn** from the applicants; the 260 applicants randomized out form an **experimental control group**. So for this program we *know* the answer.
+:::
+
+```{python}
+#| output: asis
+html_out("""
+<div class="groups">
+  <div class="grp t"><div class="n">185</div><div class="lab">NSW participants</div><div class="sub">D = 1</div></div>
+  <div class="grp ce"><div class="n">260</div><div class="lab">NSW randomized controls</div><div class="sub">the experimental D = 0</div></div>
+  <div class="grp cps"><div class="n">15,992</div><div class="lab">CPS adults</div><div class="sub">a survey: non-experimental D = 0</div></div>
 </div>
+""")
+```
 
-
-<!-- - **Compliers**: Individuals whose treatment status is influenced by the instrument.
-- **Always-Takers**: Individuals who take the treatment regardless of the instrument.
-- **Never-Takers**: Individuals who never take the treatment regardless of the instrument.
-- **Defiers**: Individuals who do the opposite of what the instrument suggests (usually ruled out by monotonicity assumption). -->
-
-
-
----
-
-### The Ghana Experiment
-
-*“The Impact of Free Secondary Education: Experimental Evidence from Ghana”*, Duflo, Dupas & Kremer (2021), *QJE*  
-
-- Many students **qualify** for secondary school but **cannot afford to enroll**.
-- Researchers implemented a **scholarship lottery**:
-  - Surveyed students *who qualified for secondary school* but had not yet enrolled.
-  - Randomly offered scholarships that covered school fees.
-
-
-So instead of assigning education randomly, they conducted a randomized controlled trial (RCT) where they assigned scholarships to some students to attend secondary school.
-
----
-
-### Variables
-
-$$Y_i = \beta_0 + \beta_1 D_i + \varepsilon_i$$
-
-- **Outcome**: 
-
-  $$Y_i = \text{post-intervention cognitive test score}$$
-
-- **Treatment**:  
-
-$$D_i = 1 \text{ if the student actually attended secondary school}$$
-
-- **Instrument**:  
-  
-$$Z_i = 1 \text{ if student was randomly offered a scholarship}$$
-
-
---- 
-
-### Imperfect Compliance
-
-Getting a scholarship does not translate into **1 to 1** relationship with going to school:
-
-::: {.callout-warning title="Defiers" icon="false"}
-1. Some scholarship winners $(Z=1)$ **still do not enroll** $(D = 0)$
-2. Some students without scholarships $(Z=0)$ **manage to enroll anyway** $(D = 1)$
+::: {.fragment .tight style="font-size:0.66em"}
+| Comparison | Effect on 1978 earnings (US$) | SE |
+|:---|---:|---:|
+| **Experiment**: participants vs randomized controls | **1,794** | (671) |
+| Naive: participants vs CPS adults | −8,498 | (582) |
+| OLS + X: participants vs CPS adults | 1,184 | (628) |
 :::
 
-
-<!-- , lack of interest, family issues, or other barriers beyond financial constraints.
-, they find alternative funding sources, receive support from family. -->
- <!-- because most students who receive the scholarship still do not attend (not interested anymore), and on the other side some students that do not get the scholarship manage to find the money to attend secondary school. -->
-<!-- 
-
-- Is very common in Ghana that people who qualify for secondary school do not attend because of financial constraints.
- -->
-
-Therefore, the instrument $Z_i$ affects schooling  $D_i$ **but imperfectly**, creating the classic compliance groups.
-
-
+::: {.fragment .fs75}
+**LaLonde (1986)** did exactly what we did today: throw away the experimental controls, use the CPS, and check whether non-experimental methods recover 1,794. Dehejia & Wahba (1999) showed that **matching** gets close.
+:::
 
 ---
 
-### Compliance Types
+## Did matching recover the experiment?
 
-- **Always Takers** enroll **with or without** scholarship.
-$$D(1) = 1,\quad D(0) = 1$$
-- **Never Takers** do **not** enroll even if they receive a scholarship.
-$$D(1) = 0,\quad D(0) = 0$$
-- **Compliers (the key group)** enroll **only if** they receive the scholarship, these are the students **whose decisions change because of the instrument**.
-$$D(1) = 1,\quad D(0) = 0$$
-- **Defiers (usually ruled out)** do the **opposite** of the instrument assignment.
-$$D(1) = 0,\quad D(0) = 1$$
-Assumption: **Monotonicity** → no defiers.
+```{python}
+#| output: asis
+est = [("Experiment (RCT)", 1794, 671, PURPLE), ("Naive: NSW vs CPS", -8498, 582, GRAY), ("OLS + X", 1184, 628, GRAY)]
+est += [((r.method.replace("pscore", PHAT).replace(" (bootstrap SE)", "")) + ("  (best balance)" if r.method == winner else ""), r.att, r.se,
+         PURPLE if r.method == winner else T_COL) for r in mres.itertuples()]
+s = bse_anim.Steps("summary", figsize=(10.4, 4.4), margins=dict(left=0.33, right=0.97, top=0.95, bottom=0.14))
+ax = s.ax
+ax.set_ylim(-0.6, len(est) - 0.4); ax.invert_yaxis()
+ax.set_yticks(range(len(est))); ax.set_yticklabels([e[0] for e in est], fontsize=12)
+ax.set_xlim(-10500, 5200); ax.axvline(0, color="black", lw=1)
+ax.set_xlabel("Effect of training on 1978 earnings (US$), 95% CI")
+ax.axvspan(1794 - 1.96 * 671, 1794 + 1.96 * 671, color=PURPLE, alpha=0.08, lw=0)
+ax.axvline(1794, color=PURPLE, ls="--", lw=1.4)
+def row(k):
+    lab, b, se, col = est[k]
+    ax.plot([b - 1.96 * se, b + 1.96 * se], [k, k], color=col, lw=5, solid_capstyle="round", alpha=0.8)
+    ax.scatter([b], [k], s=120, color=col, edgecolor="black", zorder=3)
+    ax.text(b + 1.96 * se + 200, k, f"{b:,.0f}", va="center", fontsize=12, color=col)
+for k in (0, 1, 2): row(k)
+for k in range(3, len(est)): ax.get_yticklabels()[k].set_alpha(0.0)
+s.snap()
+for k in range(3, len(est)): row(k); ax.get_yticklabels()[k].set_alpha(1)
+s.snap()
+s.show(height=400)
+```
 
----
+::: {.fragment .fs75}
+Once participants are compared with **comparable** CPS adults, every matching estimate lands inside the experimental 95% CI (shaded), the best-balanced one included. **But** we were lucky to observe the right $X$ (past earnings!): without them the CIA fails and no matching method can help (Smith & Todd, 2005).
+:::
 
-
-**1. Effect of scholarship offer on enrollment**
-
-$$E[D_i \mid Z_i=1] - E[D_i \mid Z_i=0]$$
-
-- Scholarship increases enrollment  
-- Many students enroll when offered  
-- Few enroll without scholarship
-
-**2. Effect of scholarship offer on cognitive scores.**
-
-$$E[Y_i \mid Z_i=1] - E[Y_i \mid Z_i=0]$$
-
-Using expression for the outcome variable:
-
-$$E[Y_i \mid Z_i=1] - E[Y_i \mid Z_i=0] = \beta_1 (E[D_i \mid Z_i=1] - E[D_i \mid Z_i=0])$$
-
-**Wald Estimator**
-
-$$\hat{\beta}_{IV}= \frac{E[Y_i \mid Z_i = 1] - E[Y_i \mid Z_i = 0]}{E[D_i \mid Z_i = 1] - E[D_i \mid Z_i = 0]}$$
-
-Causal effect of schooling.
-
-
-
----
-
-## What Does IV Identify?
-
-IV does **not** estimate the average effect for all students.
-
-- Always Takers: scholarship does not change their attendance.  
-- Never Takers: scholarship does not change their attendance.  
-- Defiers: assumed not to exist.  
-- **Compliers**: the only group whose behavior is affected by the instrument → the only source of identifying variation.
-
-Thus IV identifies a **Local** Average Treatment Effect.
-
-$$\text{LATE} =E[Y(1) - Y(0) \mid \text{Compliers}]$$
-
-### Interpretation:
-
-> The causal effect of secondary schooling **for students whose attendance decisions are actually changed by the scholarship offer**.
-
-
----
-
-## Connection to Duflo-Dupas-Kremer (2021)
-
-They write:
-
-> “Our estimates capture the causal impact of secondary schooling for students whose enrollment decisions are affected by the scholarship offer.”
-
-This is **exactly** the definition of LATE.
+# Thanks! {background-color="#0396A6"}

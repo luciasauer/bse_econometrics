@@ -43,12 +43,16 @@ class Steps:
         self.fig.savefig(buf, format="png", dpi=self.dpi, facecolor="white")
         self.frames.append(base64.b64encode(buf.getvalue()).decode("ascii"))
 
-    def html(self, height=420):
+    def html(self, height=420, first_index=None):
+        """``first_index``: if given, frame k (k >= 1) gets
+        data-fragment-index = first_index + k - 1, so other fragments on the
+        slide (e.g. a list of steps) can be synchronised with the frames."""
         if not self.frames:
             self.snap()
         imgs = []
         for k, b64 in enumerate(self.frames):
-            cls = ' class="fragment bse-anim-frame"' if k else ' class="bse-anim-frame"'
+            idx = f' data-fragment-index="{first_index + k - 1}"' if (k and first_index is not None) else ""
+            cls = f' class="fragment bse-anim-frame"{idx}' if k else ' class="bse-anim-frame"'
             imgs.append(
                 f'<img{cls} src="data:image/png;base64,{b64}" '
                 f'alt="{self.name} step {k + 1}" '

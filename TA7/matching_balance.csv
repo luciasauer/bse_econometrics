@@ -1,0 +1,73 @@
+method,variable,bias
+Before matching,age,-79.618332
+Before matching,agesq,-80.312737
+Before matching,educ,-67.850212
+Before matching,educsq,-76.039543
+Before matching,married,-123.26476
+Before matching,nodegree,90.381104
+Before matching,black,242.77469
+Before matching,hisp,-5.0697303
+Before matching,re74,-156.89896
+Before matching,re75,-174.64281
+Before matching,u74,148.72571
+Before matching,u75,119.24499
+NN on X (Mahalanobis),age,-4.1822791
+NN on X (Mahalanobis),agesq,-4.6885967
+NN on X (Mahalanobis),educ,-2.399152
+NN on X (Mahalanobis),educsq,-1.4832805
+NN on X (Mahalanobis),married,-6.3755298
+NN on X (Mahalanobis),nodegree,0
+NN on X (Mahalanobis),black,0
+NN on X (Mahalanobis),hisp,0
+NN on X (Mahalanobis),re74,.5595755
+NN on X (Mahalanobis),re75,-1.6298283
+NN on X (Mahalanobis),u74,1.366087
+NN on X (Mahalanobis),u75,0
+"NN on pscore, k = 1",age,1.5696599
+"NN on pscore, k = 1",agesq,2.4063222
+"NN on pscore, k = 1",educ,-16.77446
+"NN on pscore, k = 1",educsq,-15.661142
+"NN on pscore, k = 1",married,1.3252505
+"NN on pscore, k = 1",nodegree,25.863802
+"NN on pscore, k = 1",black,-10.631866
+"NN on pscore, k = 1",hisp,13.587961
+"NN on pscore, k = 1",re74,3.4836769
+"NN on pscore, k = 1",re75,.71609604
+"NN on pscore, k = 1",u74,-15.617904
+"NN on pscore, k = 1",u75,0
+"NN on pscore, k = 5",age,-2.8133135
+"NN on pscore, k = 5",agesq,-2.8157165
+"NN on pscore, k = 5",educ,1.0427366
+"NN on pscore, k = 5",educsq,1.0719817
+"NN on pscore, k = 5",married,4.5058517
+"NN on pscore, k = 5",nodegree,5.1727605
+"NN on pscore, k = 5",black,-4.607142
+"NN on pscore, k = 5",hisp,2.2646604
+"NN on pscore, k = 5",re74,-.93879551
+"NN on pscore, k = 5",re75,-.54454941
+"NN on pscore, k = 5",u74,3.6915047
+"NN on pscore, k = 5",u75,13.379327
+Radius (r = 0.01),age,.30570164
+Radius (r = 0.01),agesq,.76760501
+Radius (r = 0.01),educ,-4.8118792
+Radius (r = 0.01),educsq,-3.8669186
+Radius (r = 0.01),married,2.0085695
+Radius (r = 0.01),nodegree,9.1197472
+Radius (r = 0.01),black,-4.676836
+Radius (r = 0.01),hisp,5.2987614
+Radius (r = 0.01),re74,-1.0273702
+Radius (r = 0.01),re75,-.12839583
+Radius (r = 0.01),u74,3.6648431
+Radius (r = 0.01),u75,13.149211
+Kernel,age,-4.3744874
+Kernel,agesq,-3.6211743
+Kernel,educ,-3.3812428
+Kernel,educsq,-2.8619976
+Kernel,married,.88804483
+Kernel,nodegree,10.16311
+Kernel,black,3.6256802
+Kernel,hisp,5.4766927
+Kernel,re74,-2.3005641
+Kernel,re75,-1.0111074
+Kernel,u74,6.8222232
+Kernel,u75,11.588913
